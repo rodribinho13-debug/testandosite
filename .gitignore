@@ -41,6 +41,7 @@ build/
 out/
 .next/
 .vercel/
+.vercel
 .netlify/
 
 # ====== Logs ======
@@ -85,3 +86,5 @@ cypress/downloads/
 __pycache__/
 *.pyc
 *.pyo
+
+.vercel

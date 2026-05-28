@@ -23,26 +23,31 @@ Trate cada bug como bloqueador — este sistema cobra mensalidade.
 Edite as linhas abaixo antes de iniciar (substitua `<...>`):
 
 ```yaml
-DEPLOY_URL:        "<https://...vercel.app>"      # URL pública após deploy
-LANDING_URL:       "<DEPLOY_URL>/index.html"      # landing comercial
-APP_URL:           "<DEPLOY_URL>/hydrostec_v9.html"  # app principal
+DEPLOY_URL:        "https://testandosite-nu.vercel.app"
+   SUPABASE_PROJECT_REF: "toapdhfouuedaexgqlsv"
 
-# Org A (auditoria principal — cria registros marcados)
-ORG_A_EMAIL:       "<audit-a@empresa.com>"
-ORG_A_PASSWORD:    "<senha-A>"
-ORG_A_NAME:        "<Org A — esperada>"
+# Contas de teste — O AGENTE CRIA NA FASE 0.5 (não preencha!)
+# Apenas defina o padrão:
+EMAIL_BASE:        "audit_${TIMESTAMP}"            # ex: audit_20260528_2030_a@projectia.test
+EMAIL_DOMAIN:      "projectia.test"                # .test é reservado RFC 6761 (não vaza pra ngm)
+PASSWORD:          "AuditPass#2026!Random"         # mesma senha pra ambas contas (gera nova a cada run)
 
-# Org B (validação de isolamento multi-tenant — NUNCA deve ver dados da A)
-ORG_B_EMAIL:       "<audit-b@empresa.com>"
-ORG_B_PASSWORD:    "<senha-B>"
-ORG_B_NAME:        "<Org B — esperada>"
+# Supabase Admin (necessário pra cleanup deletar users via Admin API)
+SUPABASE_PROJECT_REF: "toapdhfouuedaexgqlsv"       # auto-detectado do código
 
-AUDIT_TAG:         "__AUDIT_$(date +%Y%m%d_%H%M)__"   # marcador único de cleanup
-TEST_ASSETS_DIR:   "_docs/_test_assets/"               # PDFs/Excel sintéticos
-REPORT_OUT:        "_docs/AUDITORIA_$(date +%Y%m%d_%H%M).md"
+AUDIT_TAG:         "__AUDIT_${TIMESTAMP}__"        # marcador único de cleanup
+TIMESTAMP:         "$(date +%Y%m%d_%H%M)"          # gerado uma vez no início
+TEST_ASSETS_DIR:   "_docs/_test_assets/"           # PDFs/Excel sintéticos
+REPORT_OUT:        "_docs/AUDITORIA_${TIMESTAMP}.md"
 ```
 
-Se algum parâmetro acima não foi preenchido, **PARE e pergunte ao usuário**.
+**Variáveis derivadas (calcule no início):**
+- `ORG_A_EMAIL = "${EMAIL_BASE}_a@${EMAIL_DOMAIN}"` (ex: `audit_20260528_2030_a@projectia.test`)
+- `ORG_B_EMAIL = "${EMAIL_BASE}_b@${EMAIL_DOMAIN}"`
+- `ORG_A_NAME  = "Auditoria A ${TIMESTAMP}"`
+- `ORG_B_NAME  = "Auditoria B ${TIMESTAMP}"`
+
+Se `DEPLOY_URL` ou `SUPABASE_PROJECT_REF` não foi preenchido, **PARE e pergunte ao usuário**.
 
 ---
 
@@ -115,23 +120,110 @@ Use `Object.keys(window).filter(k => k.startsWith('PIA') || /Excel/.test(k))` no
 
 ## 4. CHECKLIST DE FASES — execute na ordem
 
-Crie no início **uma task POR fase** (Fase 0 a Fase 9). Marque `in_progress` ao começar, `completed` ao terminar.
+Crie no início **uma task POR fase** (Fase 0, 0.5, 1 a 9, + Cleanup). Marque `in_progress` ao começar, `completed` ao terminar.
+
+| Fase | Nome | Tempo | Bloqueia próximas? |
+|---|---|---|---|
+| **0** | Smoke test (site sobe) | 3 min | Sim |
+| **0.5** | **Setup contas de teste (signup A + B)** | 5 min | Sim — sem isso Fase 6 falha |
+| **1** | Performance & boot | 10 min | Não |
+| **2** | Cadastro manual nas 17 views | 20 min | Não |
+| **3** | Import Excel (21 viewkeys) | 15 min | Não |
+| **4** | IAs por disciplina + IA conversacional + RDO foto | 25 min | Não |
+| **5** | Export Excel + validação XLSX | 10 min | Não (precisa Fase 2/3/4 pra ter dados) |
+| **6** | Multi-tenant Org A vs Org B (CRÍTICO) | 15 min | Não (precisa Fase 0.5 + 2) |
+| **7** | Padronização de botões | 10 min | Não |
+| **8** | Console errors + network | 10 min | Não (rodar em paralelo) |
+| **9** | Segurança + advisors Supabase + headers | 10 min | Não |
+| **Cleanup** | Delete dados + delete users/orgs | 5 min | Obrigatório no fim |
 
 ---
 
-### FASE 0 — SMOKE TEST (5 min)
-**Objetivo**: confirmar que o site sobe.
+### FASE 0 — SMOKE TEST (3 min)
+**Objetivo**: confirmar que o site sobe (sem login ainda).
 
 1. Navegue `LANDING_URL`. Validar:
    - Status 200, HTML não-vazio.
    - Sem erro vermelho no console.
    - Botão "Entrar / Login" visível.
-2. Navegue `APP_URL`. Sem login deve mostrar tela de auth.
-3. Faça login com `ORG_A_EMAIL`/`ORG_A_PASSWORD`.
-4. Sidebar carregou? `_user` e `_org` populados? (`window._user.email === ORG_A_EMAIL`).
-5. Screenshot da tela inicial.
+2. Navegue `APP_URL`. Sem login deve mostrar tela de auth (login form ou signup link).
+3. Screenshot da tela inicial.
 
-**Critérios de aceite**: ✅ login funcionou, ✅ sidebar visível, ✅ 0 erros vermelhos no console.
+**Critérios de aceite**: ✅ site abre, ✅ tela de auth aparece, ✅ 0 erros vermelhos no console.
+
+---
+
+### FASE 0.5 — SETUP DE CONTAS DE TESTE (5 min)
+**Objetivo**: criar 2 contas isoladas (Org A e Org B) via signup UI do próprio site.
+**Sem isso a Fase 6 (multi-tenant) não funciona.**
+
+Variáveis (gere uma vez no início, salve em memória):
+```js
+const TIMESTAMP = new Date().toISOString().replace(/[-:T]/g,'').slice(0,12);  // ex: 202605282030
+const PASSWORD  = "AuditPass" + TIMESTAMP + "!";                              // forte, único
+const ORG_A_EMAIL = `audit_${TIMESTAMP}_a@projectia.test`;
+const ORG_B_EMAIL = `audit_${TIMESTAMP}_b@projectia.test`;
+const ORG_A_NAME  = `Auditoria A ${TIMESTAMP}`;
+const ORG_B_NAME  = `Auditoria B ${TIMESTAMP}`;
+const AUDIT_TAG   = `__AUDIT_${TIMESTAMP}__`;
+```
+
+**ATENÇÃO**: salve essas variáveis num arquivo temporário em `_docs/_audit_state.json` pra resgatar se o agente reiniciar.
+
+**Passos por conta (executar 2 vezes — primeiro Org A, depois Org B):**
+
+1. Navegue `APP_URL`. Se já estiver logado de teste anterior, faça logout primeiro.
+2. Clique em "Criar conta" / "Cadastre-se" / "Signup" (procure o link).
+3. Preencher form:
+   - Email: `ORG_A_EMAIL` (ou B)
+   - Senha: `PASSWORD`
+   - Nome da org / empresa: `ORG_A_NAME` (ou B)
+   - Outros campos obrigatórios (nome, telefone) — usar dados fictícios marcados com `AUDIT_TAG`
+4. Submit. Validar:
+   - Status 200/201 da chamada `auth.signUp`.
+   - Toast de sucesso ou redirect para login.
+   - **Se exigir email confirmation**: ver "Tratamento de email confirmation" abaixo.
+5. Logar com a conta recém-criada.
+6. Validar que `window._user.email === ORG_A_EMAIL` e `window._org.name === ORG_A_NAME`.
+7. Anotar `_user.id` e `_org.id` (precisa pra cleanup).
+
+**Tratamento de email confirmation (se o Supabase exigir):**
+
+Se aparecer "Confirme seu email" sem mandar link:
+- Via Supabase MCP, executar:
+  ```sql
+  -- Confirma manualmente o email da conta de teste (auditor sabe que é teste)
+  UPDATE auth.users
+  SET email_confirmed_at = now(), confirmation_sent_at = now()
+  WHERE email = '<ORG_A_EMAIL>';
+  ```
+- Re-tentar login.
+
+**Fallback (se signup UI falhar totalmente):**
+
+Use Supabase Admin API via MCP:
+```sql
+-- 1) Cria user via função auth (se houver) OU peça pro usuário rodar:
+--    supabase auth signup (CLI) ou criar manualmente no dashboard Auth.
+-- 2) Por enquanto, ABORTE a Fase 0.5 e peça ao usuário pra criar as 2 contas.
+```
+
+**Critérios de aceite**:
+- ✅ 2 contas criadas com sucesso
+- ✅ 2 orgs criadas (uma por user, isoladas)
+- ✅ Login funciona em ambas
+- ✅ `_user.id` e `_org.id` registrados no `_audit_state.json`
+
+**Salvar em `_docs/_audit_state.json`:**
+```json
+{
+  "timestamp": "<TIMESTAMP>",
+  "audit_tag": "<AUDIT_TAG>",
+  "password": "<PASSWORD>",
+  "org_a": { "email": "...", "user_id": "...", "org_id": "...", "name": "..." },
+  "org_b": { "email": "...", "user_id": "...", "org_id": "...", "name": "..." }
+}
+```
 
 ---
 
@@ -313,8 +405,10 @@ Se PIAExcel não estiver carregado, validar mensagem amigável "Módulo Excel ai
 
 Este é o teste mais importante pra um SaaS comercial.
 
+Use as contas criadas na **Fase 0.5** (carregue de `_docs/_audit_state.json`).
+
 1. Logout da Org A.
-2. Login com `ORG_B_EMAIL`/`ORG_B_PASSWORD`.
+2. Login com `ORG_B_EMAIL`/`PASSWORD` (do `_audit_state.json`).
 3. Em cada uma das 17 views do mapa, contar registros. **Nenhum deve ter `AUDIT_TAG` da Org A**.
 4. Via Supabase MCP, executar:
    ```sql
@@ -421,22 +515,77 @@ Outros checks:
 
 ---
 
-## 5. CLEANUP FINAL (obrigatório)
+## 5. CLEANUP FINAL (obrigatório — em 3 etapas)
 
-Antes de fechar a auditoria, rode via Supabase MCP:
+### Etapa 1: Listar e DELETAR registros marcados AUDIT_TAG
+
+Via Supabase MCP:
 
 ```sql
--- Listar TODOS os registros marcados AUDIT_TAG da Org A
+-- Listar contagens por tabela antes de deletar
 WITH alvos AS (
-  SELECT 'isometrics' t, id, number col FROM isometrics WHERE org_id='<ORG_A_ID>' AND number ILIKE '%__AUDIT_%'
-  UNION ALL SELECT 'materials_catalog', id, description FROM materials_catalog WHERE org_id='<ORG_A_ID>' AND description ILIKE '%__AUDIT_%'
-  UNION ALL SELECT 'joints', id, joint_number FROM joints WHERE org_id='<ORG_A_ID>' AND joint_number ILIKE '%__AUDIT_%'
-  -- ... continuar pra todas as 17 tabelas
+  SELECT 'isometrics' t, count(*) c FROM isometrics WHERE number ILIKE '%' || $1 || '%'
+  UNION ALL SELECT 'materials_catalog', count(*) FROM materials_catalog WHERE description ILIKE '%' || $1 || '%'
+  UNION ALL SELECT 'joints', count(*) FROM joints WHERE joint_number ILIKE '%' || $1 || '%'
+  UNION ALL SELECT 'civil_concrete_pours', count(*) FROM civil_concrete_pours WHERE notes ILIKE '%' || $1 || '%'
+  UNION ALL SELECT 'civil_concrete_elements', count(*) FROM civil_concrete_elements WHERE identification ILIKE '%' || $1 || '%'
+  UNION ALL SELECT 'civil_insumos_catalog', count(*) FROM civil_insumos_catalog WHERE code ILIKE '%' || $1 || '%'
+  UNION ALL SELECT 'electrical_panels', count(*) FROM electrical_panels WHERE tag ILIKE '%' || $1 || '%'
+  UNION ALL SELECT 'electrical_grounding', count(*) FROM electrical_grounding WHERE identification ILIKE '%' || $1 || '%'
+  UNION ALL SELECT 'cable_specs_catalog', count(*) FROM cable_specs_catalog WHERE cable_type ILIKE '%' || $1 || '%'
+  UNION ALL SELECT 'hydraulic_systems', count(*) FROM hydraulic_systems WHERE notes ILIKE '%' || $1 || '%'
+  UNION ALL SELECT 'painting_inspections', count(*) FROM painting_inspections WHERE area ILIKE '%' || $1 || '%'
+  UNION ALL SELECT 'scaffolds', count(*) FROM scaffolds WHERE local ILIKE '%' || $1 || '%'
+  UNION ALL SELECT 'welders', count(*) FROM welders WHERE name ILIKE '%' || $1 || '%'
+  UNION ALL SELECT 'instruments', count(*) FROM instruments WHERE tag ILIKE '%' || $1 || '%'
+  UNION ALL SELECT 'pendings', count(*) FROM pendings WHERE title ILIKE '%' || $1 || '%'
+  UNION ALL SELECT 'test_systems', count(*) FROM test_systems WHERE system_name ILIKE '%' || $1 || '%'
+  UNION ALL SELECT 'equipments', count(*) FROM equipments WHERE tag ILIKE '%' || $1 || '%'
+  UNION ALL SELECT 'maint_work_orders', count(*) FROM maint_work_orders WHERE os_number ILIKE '%' || $1 || '%'
+  UNION ALL SELECT 'daily_reports', count(*) FROM daily_reports WHERE notes ILIKE '%' || $1 || '%'
 )
-SELECT t, count(*) FROM alvos GROUP BY t;
+SELECT t, c FROM alvos WHERE c > 0;
+-- Use $1 = '__AUDIT_<TIMESTAMP>__'
 ```
 
-Após confirmar contagem ≥ esperado, executar `DELETE` correspondentes. Confirmar zero pendente.
+Após confirmar, executar `DELETE FROM <tabela> WHERE ... ILIKE '%AUDIT_TAG%'` em cada uma.
+
+### Etapa 2: DELETAR as 2 orgs de teste e usuários
+
+```sql
+-- 1) Deletar registros filhos das orgs primeiro (cascata pode não cobrir tudo)
+DELETE FROM projects WHERE org_id IN ('<ORG_A_ID>', '<ORG_B_ID>');
+DELETE FROM org_members WHERE org_id IN ('<ORG_A_ID>', '<ORG_B_ID>');
+DELETE FROM custom_fields WHERE org_id IN ('<ORG_A_ID>', '<ORG_B_ID>');
+DELETE FROM custom_views WHERE org_id IN ('<ORG_A_ID>', '<ORG_B_ID>');
+
+-- 2) Deletar as 2 orgs
+DELETE FROM orgs WHERE id IN ('<ORG_A_ID>', '<ORG_B_ID>');
+
+-- 3) Deletar os 2 users do auth schema (precisa Admin API)
+DELETE FROM auth.users WHERE email IN ('<ORG_A_EMAIL>', '<ORG_B_EMAIL>');
+```
+
+### Etapa 3: Verificar limpeza
+
+```sql
+-- DEVE retornar zero registros
+SELECT 'orgs' t, count(*) FROM orgs WHERE name LIKE 'Auditoria%'
+UNION ALL SELECT 'users', count(*) FROM auth.users WHERE email LIKE 'audit_%@projectia.test';
+-- Esperado: 0 / 0
+```
+
+### Etapa 4: Limpar arquivo de estado
+
+```bash
+rm _docs/_audit_state.json
+```
+
+**Se qualquer DELETE falhar por FK constraint**, registre no relatório e tente DELETE em cascata via:
+```sql
+DELETE FROM <tabela> WHERE org_id IN (...) CASCADE;
+```
+Reporte tabelas com FK não-cascade como recomendação de melhoria.
 
 ---
 
@@ -521,5 +670,5 @@ Apresente o `REPORT_OUT` ao usuário com `mcp__cowork__present_files`.
 
 ---
 
-*Última atualização: 2026-05-28*
+*Última atualização: 2026-05-28 (v2 — agora com signup automático na Fase 0.5)*
 *Versão do app no momento da escrita: projectia-v9.2.6*

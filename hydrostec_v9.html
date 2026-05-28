@@ -820,11 +820,7 @@ function exportViewToExcel(viewKey){
   if(!view){ if(typeof toast==='function') toast('View não encontrada: '+cfg.viewId,'warn'); return; }
   const table = view.querySelector('table');
   if(!table){ if(typeof toast==='function') toast('Nenhuma tabela nesta view pra exportar','warn'); return; }
-  window.PIAExcel.exportTable(table, {
-    filename: cfg.filename,
-    title:    cfg.title,
-    sheetName: cfg.title.slice(0,31)
-  });
+  window.PIAExcel.exportTable(table, {filename: cfg.filename, title: cfg.title, sheetName: cfg.title.slice(0,31)});
 }
 window.exportViewToExcel = exportViewToExcel;
 
@@ -1401,30 +1397,68 @@ function cm(id){document.getElementById(id).classList.remove('open')}
 // ═══════════════════════════════════════════════════
 function aTab(t){
   if(typeof closeAllDynamicOverlays==='function')closeAllDynamicOverlays();document.getElementById('tab-si').classList.toggle('active',t==='si');document.getElementById('tab-su').classList.toggle('active',t==='su');document.getElementById('f-si').style.display=t==='si'?'flex':'none';document.getElementById('f-su').style.display=t==='su'?'flex':'none';}
+// helpers auth (BUG #1, #2, #4)
+function _authRace(promise, timeoutMs, label){
+  return Promise.race([promise, new Promise((_,rej)=>setTimeout(()=>rej(new Error('Timeout: o servidor demorou para responder ('+label+'). Verifique sua internet e tente de novo.')), timeoutMs))]);
+}
+function _authMsg(error){
+  if(!error) return 'Erro desconhecido.';
+  const code = error.code || error.error_code || '';
+  const map = {
+    'invalid_credentials':           'Email ou senha incorretos. Verifique e tente de novo.',
+    'email_not_confirmed':           'Você precisa confirmar seu email antes de entrar. Verifique sua caixa de entrada.',
+    'email_address_invalid':         'Esse email não é válido. Use um email real (gmail, outlook, empresa.com.br…).',
+    'over_email_send_rate_limit':    'Muitas tentativas em pouco tempo. Aguarde alguns minutos e tente de novo.',
+    'over_request_rate_limit':       'Muitas requisições. Aguarde alguns segundos e tente de novo.',
+    'user_already_exists':           'Esse email já está cadastrado. Tente fazer login ou recuperar a senha.',
+    'weak_password':                 'Senha muito fraca. Use ao menos 8 caracteres com letra, número e símbolo.',
+    'signup_disabled':               'Cadastros estão temporariamente desabilitados.',
+    'email_provider_disabled':       'Cadastros por email estão desabilitados.',
+    'validation_failed':             'Dados inválidos. Confira os campos.',
+    'unexpected_failure':            'Erro inesperado no servidor. Tente de novo em alguns segundos.'
+  };
+  return map[code] || ('Falha: ' + (error.message || code || 'erro desconhecido'));
+}
+function _emailValid(email){
+  if(!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return false;
+  const tld = email.split('@')[1].split('.').pop().toLowerCase();
+  const valid = ['com','org','net','br','io','co','app','gov','edu','ai','dev','tech','tv','xyz','me','us','uk','pt','eu'];
+  return valid.includes(tld);
+}
+function _showAuthMsg(msg, kind){
+  if(typeof PIAToast === 'function') PIAToast(msg, kind || 'error');
+  else if(typeof toast === 'function') toast(msg, kind === 'success' ? 'ok' : 'err');
+  else alert(msg);
+}
 async function doSI(){
   const btn=document.getElementById('btn-si');
-  btn.disabled=true;btn.textContent='Entrando…';
   const em=document.getElementById('si-em').value.trim();
   const pw=document.getElementById('si-pw').value;
-  // Login
+  if(!em || !pw){ _showAuthMsg('Preencha email e senha.','error'); return; }
+  btn.disabled=true;btn.textContent='Entrando…';
   let result;
-  try { result = await sb.auth.signInWithPassword({email:em,password:pw}); }
-  catch(e){ alert('Erro de rede: '+(e.message||e)); btn.disabled=false; btn.textContent='Entrar'; return; }
-  if(result.error){ alert('Falha no login: '+result.error.message); btn.disabled=false; btn.textContent='Entrar'; return; }
-  // Login OK - tenta carregar app
-  try { await initApp(); }
-  catch(e){
-    alert('Login feito, mas tela falhou: '+(e.message||e)+'\n\nO usuario foi autenticado mas algo na inicializacao quebrou. Veja console (F12) para detalhes.');
-    console.error('[initApp] falhou:', e);
-  }
+  try { result = await _authRace(sb.auth.signInWithPassword({email:em,password:pw}), 15000, 'login'); }
+  catch(e){ _showAuthMsg(e.message || 'Erro de rede ao entrar.','error'); btn.disabled=false; btn.textContent='Entrar'; return; }
+  if(result.error){ _showAuthMsg(_authMsg(result.error),'error'); btn.disabled=false; btn.textContent='Entrar'; return; }
+  try { await _authRace(initApp(), 20000, 'inicialização do app'); }
+  catch(e){ _showAuthMsg('Login feito, mas a inicialização demorou demais. Recarregue a página (F5).','error'); console.error('[initApp] falhou:', e); }
   btn.disabled=false;btn.textContent='Entrar';
 }
 async function doSU(){
-  const btn=document.getElementById('btn-su');btn.disabled=true;btn.textContent='Criando…';
+  const btn=document.getElementById('btn-su');
   const email=document.getElementById('su-em').value.trim();
   const orgName=document.getElementById('su-org').value.trim();
-  const {error}=await sb.auth.signUp({email:email,password:document.getElementById('su-pw').value,options:{data:{org_name:orgName}}});
+  const password=document.getElementById('su-pw').value;
+  if(!orgName){ _showAuthMsg('Informe o nome da empresa.','error'); return; }
+  if(!_emailValid(email)){ _showAuthMsg('Email inválido. Use um endereço real (ex: você@empresa.com).','error'); return; }
+  if(!password || password.length < 8){ _showAuthMsg('Senha precisa ter ao menos 8 caracteres.','error'); return; }
+  btn.disabled=true;btn.textContent='Criando…';
+  let result;
+  try { result = await _authRace(sb.auth.signUp({email,password,options:{data:{org_name:orgName}}}), 15000, 'cadastro'); }
+  catch(e){ _showAuthMsg(e.message || 'Erro de rede ao criar conta.','error'); btn.disabled=false; btn.textContent='Criar conta'; return; }
   btn.disabled=false;btn.textContent='Criar conta';
+  if(result.error){ _showAuthMsg(_authMsg(result.error),'error'); return; }
+  const error = null;
   if(error){toast('Falha: '+error.message,'err');return;}
   // Enfileira email de boas-vindas (RPC publica)
   try{
