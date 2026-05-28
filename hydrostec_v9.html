@@ -486,7 +486,17 @@
 // ═══════════════════════════════════════════════════
 const SUPABASE_URL='https://toapdhfouuedaexgqlsv.supabase.co';
 const SUPABASE_KEY='sb_publishable_qVVBatpB_ppDLR6QcG8QgQ_hVYW0h8Q';
-const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+// SINGLETON: impede 2a instancia do GoTrueClient compartilhando o mesmo storageKey
+// (ex: testes via console, HUB Planejador injetado, extensoes). Resolve race condition
+// "Multiple GoTrueClient instances detected in the same browser context".
+const sb = window.__pia_sb || (window.__pia_sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+  auth: {
+    storageKey: 'sb-toapdhfouuedaexgqlsv-auth-token',
+    persistSession: true,
+    autoRefreshToken: true,
+    detectSessionInUrl: true
+  }
+}));
 
 // ═══════════════════════════════════════════════════
 // CAPTURA GLOBAL DE ERROS (debug)
