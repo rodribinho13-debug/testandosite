@@ -1,0 +1,23 @@
+{
+  "name": "projectia-tests",
+  "version": "1.0.0",
+  "description": "Suite de testes E2E + acessibilidade do PROJECT.IA",
+  "private": true,
+  "scripts": {
+    "serve": "http-server .. -p 8765 -c-1 --silent",
+    "cy:open": "cypress open",
+    "cy:run": "cypress run",
+    "test": "start-server-and-test serve http://127.0.0.1:8765/hydrostec_v9.html cy:run",
+    "test:open": "start-server-and-test serve http://127.0.0.1:8765/hydrostec_v9.html cy:open"
+  },
+  "engines": {
+    "node": ">=18 <=24"
+  },
+  "devDependencies": {
+    "cypress": "^14.5.0",
+    "cypress-axe": "^1.6.0",
+    "axe-core": "^4.10.2",
+    "http-server": "^14.1.1",
+    "start-server-and-test": "^2.0.10"
+  }
+}

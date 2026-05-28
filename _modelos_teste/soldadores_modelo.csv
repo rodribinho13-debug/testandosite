@@ -1,0 +1,8 @@
+code,name,sinete,cpf,document,specialty,process,position,qualifications,status,hire_date
+SOL-001,João da Silva Santos,JS,12345678901,RG-12345,Tubulação,GTAW+SMAW,1G;2G;5G;6G,"ASME IX P1-P1;P1-P3;P5-P5","ativo",2024-03-15
+SOL-002,Pedro Henrique Oliveira,PHO,23456789012,RG-23456,Caldeiraria,SMAW,1G;2G;3G;4G,"ASME IX P1-P1","ativo",2024-08-22
+SOL-003,Carlos Alberto Pereira,CAP,34567890123,RG-34567,Tubulação,FCAW+GTAW,3G;4G;6G,"ASME IX P1-P1;P5-P5","ativo",2025-01-10
+SOL-004,Marcos Antonio Souza,MAS,45678901234,RG-45678,Estruturas,SMAW+FCAW,1F;2F;3F;4F,"AWS D1.1 SMAW;FCAW","ativo",2025-02-18
+SOL-005,Roberto Carlos Mendes,RCM,56789012345,RG-56789,Tubulação,GTAW,1G;2G;5G;6G,"ASME IX P1-P1;P1-P3;P5-P5;P8-P8","inativo",2023-11-05
+SOL-006,Antônio Marcos Lima,AML,67890123456,RG-67890,Tubulação Inox,GTAW,5G;6G,"ASME IX P8-P8","ativo",2025-04-12
+SOL-007,Francisco Alves dos Santos,FAS,78901234567,RG-78901,Caldeiraria + Tubulação,SMAW+GTAW,1G;2G;3G;4G;5G;6G,"ASME IX P1-P1;P5-P5;AWS D1.1","ativo",2024-06-30

@@ -1,0 +1,11 @@
+pour_code,pour_date,element_name,element_type,volume_m3,fck_mpa,slump_mm,concrete_truck_id,supplier,cp_count,start_time,end_time,responsible_eng,notes
+CONC-001,2026-05-15,Sapata S-01,Fundação,12.5,30,80,BC-2456,Concreplan,4,07:30,09:15,Eng. Roberto Lima,Concreto bombeado - lançamento normal
+CONC-002,2026-05-15,Sapata S-02,Fundação,11.8,30,80,BC-2456,Concreplan,4,09:45,11:20,Eng. Roberto Lima,Sequência da sapata S-01
+CONC-003,2026-05-16,Bloco coroamento estacas BC-01,Fundação,28.5,35,100,BC-2457,Concreplan,6,06:30,11:00,Eng. Roberto Lima,Bloco grande - 2 caminhões
+CONC-004,2026-05-18,Pilar P-101 (1º trecho),Estrutura,2.3,40,120,BC-2461,Concreplan,3,14:00,15:30,Eng. Marcos Pereira,Pilar de canto - vibração intensa
+CONC-005,2026-05-18,Pilar P-102 (1º trecho),Estrutura,2.3,40,120,BC-2461,Concreplan,3,15:45,17:00,Eng. Marcos Pereira,
+CONC-006,2026-05-20,Laje L-1 (térreo),Laje,45.8,30,100,BC-2470,Concreplan,8,06:00,12:30,Eng. Roberto Lima,"Laje grande, 4 caminhões. Cura úmida com manta geotêxtil"
+CONC-007,2026-05-22,Viga V-201,Estrutura,3.8,40,100,BC-2475,Concreplan,3,08:00,09:30,Eng. Marcos Pereira,
+CONC-008,2026-05-23,Sapata S-15 + S-16,Fundação,18.2,30,80,BC-2478,Concreplan,5,07:00,10:00,Eng. Roberto Lima,2 sapatas seguidas
+CONC-009,2026-05-26,Pilar P-201,Estrutura,2.1,40,120,BC-2485,Concreplan,3,09:00,10:30,Eng. Marcos Pereira,
+CONC-010,2026-05-27,Laje L-2 (1º piso),Laje,52.0,30,100,BC-2491,Concreplan,9,06:00,13:30,Eng. Roberto Lima,Laje do 1º piso - bombeada por 5 caminhões

@@ -1,0 +1,11 @@
+instrument_tag,instrument_type,manufacturer,model,serial_number,range,unit,last_cal_date,next_cal_date,cal_certificate,laboratory,result,notes
+INST-001,Manômetro,WIKA,232.50.100,WK-2024-1001,0-25,bar,2026-04-10,2027-04-10,CERT-2024-0451,LabCal Industrial,Aprovado,Calibração anual NBR
+INST-002,Manômetro,WIKA,232.50.100,WK-2024-1002,0-25,bar,2026-04-10,2027-04-10,CERT-2024-0452,LabCal Industrial,Aprovado,
+INST-003,Manômetro,WIKA,232.50.160,WK-2024-1003,0-100,bar,2026-04-15,2027-04-15,CERT-2024-0467,LabCal Industrial,Aprovado,
+INST-004,Termômetro digital,Fluke,52-II,FK-2023-5567,-200 a 1372,°C,2026-03-22,2027-03-22,CERT-2024-0312,LabCal Industrial,Aprovado,Termopar tipo K
+INST-005,Multímetro,Fluke,87-V,FK-2022-8847,0-1000,V/A,2026-02-18,2027-02-18,CERT-2024-0198,LabCal Industrial,Aprovado,True RMS
+INST-006,Megôhmetro,Megabras,MD-5070,MB-2024-3389,0-5000,V,2026-05-05,2027-05-05,CERT-2024-0598,LabCal Industrial,Aprovado,Tensão máx 5kV
+INST-007,Manômetro,WIKA,232.50.063,WK-2025-2201,0-10,bar,2026-05-15,2027-05-15,CERT-2024-0612,LabCal Industrial,Aprovado,Para testes hidrostáticos
+INST-008,Torquímetro,Tramontina,44523/450,TR-2024-8821,40-450,Nm,2026-04-28,2027-04-28,CERT-2024-0571,LabCal Industrial,Aprovado,Estalo - faixa média
+INST-009,Torquímetro,Gedore,8559-1A,GE-2023-7782,20-100,Nm,2025-12-10,2026-12-10,CERT-2023-1188,LabCal Industrial,Vencendo,Reagendar até 30/11
+INST-010,Detector de gases,Honeywell,BW Max XT-II,HW-2024-4421,0-100,LEL%,2026-05-20,2026-08-20,CERT-2024-0644,LabCal Industrial,Aprovado,Calibração trimestral

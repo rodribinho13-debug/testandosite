@@ -1,0 +1,16 @@
+code,description,category,material_type,diameter_in,pressure_class,schedule,unit,quantity,weight_per_unit,unit_price,supplier
+TUB-001,"Tubo aço carbono ASTM A106 Gr.B, 6"" SCH 40, NBR 5590",Tubulação,Tubo,6,150#,40,m,120,28.5,185.00,Vallourec
+TUB-002,"Tubo aço inox ASTM A312 TP304L, 4"" SCH 10S, costurado",Tubulação,Tubo,4,150#,10S,m,80,9.2,420.00,Aperam
+FLA-001,"Flange RF 150# ASTM A105, face plana, 6""",Flange,Flange,6,150#,STD,pç,24,18.0,145.00,Forjas BH
+FLA-002,"Flange RF 300# ASTM A182 F316, face plana, 4""",Flange,Flange,4,300#,STD,pç,18,11.5,580.00,Forjas BH
+COT-001,"Cotovelo 90° LR ASTM A234 WPB, 6"" SCH 40, BW",Acessório,Cotovelo,6,150#,40,pç,32,9.5,95.00,Tupy
+COT-002,"Cotovelo 45° LR ASTM A234 WPB, 4"" SCH 40, BW",Acessório,Cotovelo,4,150#,40,pç,16,4.2,68.00,Tupy
+TEE-001,"Tê reto ASTM A234 WPB, 6"" x 4"" SCH 40, BW",Acessório,Tê,6,150#,40,pç,12,12.8,135.00,Tupy
+RED-001,"Redução concêntrica ASTM A234 WPB, 6"" x 4"" SCH 40",Acessório,Redução,6,150#,40,pç,8,7.5,82.00,Tupy
+PAR-001,"Parafuso M16x80 zincado classe 8.8 + porca + arruela",Fixação,Parafuso,,,,kit,240,0.18,5.20,Ciser
+JUN-001,"Junta espirometálica 6"" 150# graphlam + AISI 304",Junta,Junta,6,150#,,pç,24,0.6,68.00,Klingerflex
+JUN-002,"Junta papelão hidráulico 6"" 150# Klingrit 700",Junta,Junta,6,150#,,pç,48,0.15,8.50,Klinger
+VAL-001,"Válvula gaveta 6"" 150# ASTM A216 WCB, classe API 600",Válvula,Válvula,6,150#,,pç,4,82.5,3450.00,Forjas BH
+VAL-002,"Válvula globo 4"" 150# ASTM A216 WCB",Válvula,Válvula,4,150#,,pç,2,38.0,1840.00,Forjas BH
+ELE-7018,"Eletrodo revestido E7018 Φ3.25mm caixa 5kg AWS A5.1",Consumível,Eletrodo,,,,cx,40,5.0,82.00,Esab
+GAS-AR,"Argônio puro 99.999% cilindro 10m³",Consumível,Gás,,,,cil,8,12.0,180.00,White Martins

@@ -1,0 +1,54 @@
+{
+  "name": "PROJECT.IA — Engenharia Multi-Disciplinar",
+  "short_name": "PROJECT.IA",
+  "description": "Plataforma de engenharia com IA especializada. Civil, elétrica, mecânica, pintura, segurança, qualidade — tudo num lugar só.",
+  "start_url": "./hydrostec_v9.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#ffffff",
+  "theme_color": "#0A1628",
+  "lang": "pt-BR",
+  "categories": ["business", "productivity", "engineering"],
+  "icons": [
+    {
+      "src": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><defs><linearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' stop-color='%2306B6D4'/><stop offset='100%25' stop-color='%237C3AED'/></linearGradient></defs><rect width='192' height='192' rx='40' fill='%230A1628'/><path d='M96 32 L160 70 L96 108 L32 70 Z' fill='%23fff'/><path d='M32 70 L96 108 L96 172 L32 134 Z' fill='%23ffffff88'/><path d='M160 70 L96 108 L96 172 L160 134 Z' fill='%23ffffff55'/><circle cx='96' cy='108' r='14' fill='url(%23g)'/></svg>",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><defs><linearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' stop-color='%2306B6D4'/><stop offset='100%25' stop-color='%237C3AED'/></linearGradient></defs><rect width='512' height='512' rx='112' fill='%230A1628'/><path d='M256 84 L432 188 L256 292 L80 188 Z' fill='%23fff'/><path d='M80 188 L256 292 L256 460 L80 356 Z' fill='%23ffffff88'/><path d='M432 188 L256 292 L256 460 L432 356 Z' fill='%23ffffff55'/><circle cx='256' cy='292' r='38' fill='url(%23g)'/></svg>",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "HUB Planejador",
+      "short_name": "Planejador",
+      "url": "./hydrostec_planejador.html",
+      "icons": [{"src": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'><rect width='96' height='96' rx='16' fill='%2306B6D4'/><text x='50%25' y='62%25' font-size='52' text-anchor='middle'>📋</text></svg>", "sizes": "96x96", "type": "image/svg+xml"}]
+    },
+    {
+      "name": "Nova Folha",
+      "short_name": "+ Folha",
+      "url": "./hydrostec_v9.html#isos",
+      "icons": [{"src": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'><rect width='96' height='96' rx='16' fill='%231E40AF'/><text x='50%25' y='62%25' font-size='52' text-anchor='middle'>📄</text></svg>", "sizes": "96x96", "type": "image/svg+xml"}]
+    },
+    {
+      "name": "Caixa de Ferramentas",
+      "short_name": "🧮 Tools",
+      "url": "./hydrostec_engenharia.html",
+      "icons": [{"src": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'><rect width='96' height='96' rx='16' fill='%237C3AED'/><text x='50%25' y='62%25' font-size='52' text-anchor='middle'>🧮</text></svg>", "sizes": "96x96", "type": "image/svg+xml"}]
+    },
+    {
+      "name": "Manutenção",
+      "short_name": "OS",
+      "url": "./hydrostec_v9.html#maint",
+      "icons": [{"src": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'><rect width='96' height='96' rx='16' fill='%23F59E0B'/><text x='50%25' y='62%25' font-size='52' text-anchor='middle'>🛠️</text></svg>", "sizes": "96x96", "type": "image/svg+xml"}]
+    }
+  ],
+  "prefer_related_applications": false
+}

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Isométrico de teste — CSC-PD-1500-IS-01-00010 R.B</title>
+<style>
+  @page { size: A3 landscape; margin: 10mm; }
+  body { font-family: Arial, sans-serif; font-size: 11px; color: #000; margin: 0; padding: 12mm; background: #fff; }
+  h1 { font-size: 16px; margin: 0 0 4px; }
+  .grid-2 { display: grid; grid-template-columns: 1.4fr 1fr; gap: 12px; }
+  table { width: 100%; border-collapse: collapse; font-size: 10.5px; }
+  th, td { border: 1px solid #444; padding: 4px 7px; text-align: left; }
+  th { background: #E5E5E5; font-weight: 700; }
+  .selo { border: 2px solid #000; padding: 8px 12px; margin-top: 12px; background: #FAFAFA; }
+  .header-blocks { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 0; border: 1.5px solid #000; }
+  .header-blocks > div { padding: 6px 9px; border-right: 1px solid #999; }
+  .header-blocks > div:last-child { border-right: none; }
+  .header-blocks .lbl { font-size: 8.5px; color: #555; text-transform: uppercase; font-weight: 700; letter-spacing: .5px; }
+  .header-blocks .val { font-size: 13px; font-weight: 700; color: #000; margin-top: 2px; font-family: 'Courier New', monospace; }
+  .iso-render { border: 1.5px dashed #888; padding: 30px; text-align: center; background: #F8F8F8; color: #666; font-style: italic; min-height: 200px; display: flex; align-items: center; justify-content: center; }
+  .small { font-size: 9.5px; color: #555; }
+</style>
+</head>
+<body>
+  <div style="text-align: center; border-bottom: 2px solid #000; padding-bottom: 6px; margin-bottom: 10px">
+    <h1>CSC — PETROBRAS · UN-BC · Projeto Detalhamento de Tubulação</h1>
+    <div class="small">Isométrico modelo de teste para PROJECT.IA — A IA deve extrair: número, folha, linha, área, classe fluido, NR-13, isolamento, T.Op, P.Op, materiais</div>
+  </div>
+
+  <div class="header-blocks">
+    <div>
+      <div class="lbl">Número do Isométrico</div>
+      <div class="val">CSC-PD-1500-IS-01-00010</div>
+    </div>
+    <div>
+      <div class="lbl">Folha</div>
+      <div class="val">00001 de 00003</div>
+    </div>
+    <div>
+      <div class="lbl">Revisão</div>
+      <div class="val">B</div>
+    </div>
+  </div>
+
+  <div class="grid-2" style="margin-top: 10px">
+    <div>
+      <table>
+        <tr><th colspan="2" style="background:#1E40AF;color:#fff">DADOS GERAIS</th></tr>
+        <tr><th>Linha (Tag completa)</th><td><strong>6"-P-1500-1010-A1A-NR</strong></td></tr>
+        <tr><th>Área</th><td>1500</td></tr>
+        <tr><th>Sistema</th><td>SISTEMA TH-04 (Sucção Bomba P-1501)</td></tr>
+        <tr><th>Fluido</th><td>Óleo cru / Produto bruto (Classe A — Inflamável)</td></tr>
+        <tr><th>Classe do Fluido</th><td><strong>A</strong></td></tr>
+        <tr><th>NR-13</th><td><strong>SIM</strong> (Categoria III - Manifold sucção)</td></tr>
+        <tr><th>Isolamento Térmico</th><td><strong>C2</strong> (Conservação calor)</td></tr>
+        <tr><th>Temperatura Operação</th><td><strong>85 °C</strong></td></tr>
+        <tr><th>Pressão Operação</th><td><strong>22 bar</strong></td></tr>
+        <tr><th>Temperatura Projeto</th><td>120 °C</td></tr>
+        <tr><th>Pressão Projeto</th><td>32 bar</td></tr>
+        <tr><th>Classe Inspeção</th><td>2 (Inspeção média)</td></tr>
+        <tr><th>Especificação Material</th><td>A1A — Aço carbono 150# ASTM A106 Gr.B</td></tr>
+        <tr><th>Sobrespessura corrosão</th><td>3.0 mm</td></tr>
+      </table>
+    </div>
+
+    <div>
+      <table>
+        <tr><th colspan="3" style="background:#1E40AF;color:#fff">LISTA DE MATERIAIS (BM)</th></tr>
+        <tr><th>Item</th><th>Qtd</th><th>Descrição</th></tr>
+        <tr><td>1</td><td>12 m</td><td>Tubo Ø 6" SCH 40 ASTM A106 Gr.B</td></tr>
+        <tr><td>2</td><td>2 pç</td><td>Cotovelo 90° LR Ø 6" SCH 40 BW WPB</td></tr>
+        <tr><td>3</td><td>1 pç</td><td>Cotovelo 45° LR Ø 6" SCH 40 BW WPB</td></tr>
+        <tr><td>4</td><td>1 pç</td><td>Tê reto Ø 6" x 6" SCH 40 BW WPB</td></tr>
+        <tr><td>5</td><td>2 pç</td><td>Redução concêntrica Ø 6" x 4" SCH 40 WPB</td></tr>
+        <tr><td>6</td><td>4 pç</td><td>Flange RF 150# Ø 6" ASTM A105</td></tr>
+        <tr><td>7</td><td>2 pç</td><td>Flange RF 150# Ø 4" ASTM A105</td></tr>
+        <tr><td>8</td><td>1 pç</td><td>Válvula gaveta Ø 6" 150# A216 WCB API 600</td></tr>
+        <tr><td>9</td><td>6 pç</td><td>Junta espirometálica Ø 6" 150# graphlam + AISI 304</td></tr>
+        <tr><td>10</td><td>32 kit</td><td>Parafuso M16x80 zincado classe 8.8 + porca + arruela</td></tr>
+        <tr><td>11</td><td>3 pç</td><td>Suporte tipo SUL-03 (rígido)</td></tr>
+      </table>
+
+      <div class="selo">
+        <div class="lbl">JUNTAS DESTE ISO (15)</div>
+        <div class="val" style="font-size:11px">J-101, J-102, J-103, J-104, J-105, J-106, J-107, J-108, J-109, J-110, J-111, J-112, J-113, J-114, J-115</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top: 10px">
+    <div class="iso-render">
+      [Desenho isométrico 3D iria aqui — para teste real, use um PDF de isométrico real]<br>
+      Este modelo HTML serve para testar a IA na extração de campos textuais (cabeçalho + lista de materiais).
+    </div>
+  </div>
+
+  <div style="margin-top: 14px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; font-size: 10px">
+    <div style="border:1px solid #888; padding:5px 8px">
+      <div class="lbl">PROJETISTA</div>
+      <div><strong>Eng. Roberto Lima</strong></div>
+    </div>
+    <div style="border:1px solid #888; padding:5px 8px">
+      <div class="lbl">VERIFICADOR</div>
+      <div><strong>Eng. Marcos Pereira</strong></div>
+    </div>
+    <div style="border:1px solid #888; padding:5px 8px">
+      <div class="lbl">DATA EMISSÃO</div>
+      <div><strong>15/05/2026</strong></div>
+    </div>
+    <div style="border:1px solid #888; padding:5px 8px">
+      <div class="lbl">ESCALA</div>
+      <div><strong>NTS (Sem escala)</strong></div>
+    </div>
+  </div>
+
+  <div style="margin-top: 14px; text-align: center; font-size: 9px; color: #666">
+    PROJECT.IA — Modelo de teste · Use Ctrl+P → "Salvar como PDF" para gerar o arquivo de teste da IA Isométrico em Folhas / Isos
+  </div>
+</body>
+</html>

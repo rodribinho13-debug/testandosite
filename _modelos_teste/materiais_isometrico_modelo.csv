@@ -1,0 +1,12 @@
+item,quantity,unit,code,description,category,material_type,diameter_in,schedule,pressure_class,iso_reference
+1,12,m,TUB-001,"Tubo aço carbono ASTM A106 Gr.B Ø 6"" SCH 40",Tubulação,Tubo,6,40,150#,CSC-PD-1500-IS-01-00010
+2,2,pç,COT-001,"Cotovelo 90° LR Ø 6"" SCH 40 BW WPB",Acessório,Cotovelo,6,40,150#,CSC-PD-1500-IS-01-00010
+3,1,pç,COT-002,"Cotovelo 45° LR Ø 6"" SCH 40 BW WPB",Acessório,Cotovelo,6,40,150#,CSC-PD-1500-IS-01-00010
+4,1,pç,TEE-001,"Tê reto Ø 6"" x 6"" SCH 40 BW WPB",Acessório,Tê,6,40,150#,CSC-PD-1500-IS-01-00010
+5,2,pç,RED-001,"Redução concêntrica Ø 6"" x 4"" SCH 40 WPB",Acessório,Redução,6,40,150#,CSC-PD-1500-IS-01-00010
+6,4,pç,FLA-001,"Flange RF 150# Ø 6"" ASTM A105",Flange,Flange,6,STD,150#,CSC-PD-1500-IS-01-00010
+7,2,pç,FLA-003,"Flange RF 150# Ø 4"" ASTM A105",Flange,Flange,4,STD,150#,CSC-PD-1500-IS-01-00010
+8,1,pç,VAL-001,"Válvula gaveta Ø 6"" 150# A216 WCB API 600",Válvula,Válvula,6,,150#,CSC-PD-1500-IS-01-00010
+9,6,pç,JUN-001,"Junta espirometálica Ø 6"" 150# graphlam+AISI 304",Junta,Junta,6,,150#,CSC-PD-1500-IS-01-00010
+10,32,kit,PAR-001,"Parafuso M16x80 + porca + arruela zincado classe 8.8",Fixação,Parafuso,,,,CSC-PD-1500-IS-01-00010
+11,3,pç,SUP-SUL03,"Suporte tipo SUL-03 (rígido)",Suporte,Suporte,,,,CSC-PD-1500-IS-01-00010

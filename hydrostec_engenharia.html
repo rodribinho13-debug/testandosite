@@ -1,0 +1,1485 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>PROJECT.IA · Caixa de Ferramentas de Engenharia</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest"></script>
+<script>
+(function(){
+  const t = localStorage.getItem('projectia-theme') || 'light';
+  document.documentElement.setAttribute('data-theme', t);
+})();
+</script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#0A0F1E;
+  --primary:#3B82F6;--primary-h:#2563EB;--primary-l:#EFF6FF;
+  --accent:#06B6D4;--accent-l:#ECFEFF;
+  --violet:#8B5CF6;--violet-l:#F5F3FF;
+  --t0:#FFFFFF;--t1:#FBFCFD;--t2:#F4F6F8;--t3:#E5E9EF;--t4:#CBD3DE;
+  --t5:#94A3B8;--t6:#64748B;--t7:#334155;--t8:#1E293B;--t9:#0F172A;
+  --success:#10B981;--success-l:#ECFDF5;
+  --warning:#F59E0B;--warning-l:#FFFBEB;
+  --danger:#EF4444;--danger-l:#FEF2F2;
+  --hb:var(--primary);--hbm:var(--primary-h);--hbl:var(--primary-l);
+  --hc:var(--accent);--hcl:var(--accent-l);--hv:var(--violet);--hvl:var(--violet-l);
+  --hg:var(--t1);--hbr:var(--t3);--ht:var(--t8);--hmu:var(--t6);
+  --hs:var(--success);--hsl:var(--success-l);--hd:var(--danger);--hw:var(--warning);--hwl:var(--warning-l);
+  --bg:var(--t0);--bg2:var(--t1);
+  --grad-deep:linear-gradient(135deg,#0A0F1E 0%,#1E293B 100%);
+  --grad-ia:linear-gradient(135deg,#06B6D4 0%,#8B5CF6 100%);
+  --sh-1:0 1px 2px rgba(15,23,42,.04);
+  --sh-2:0 4px 8px rgba(15,23,42,.06),0 1px 2px rgba(15,23,42,.04);
+}
+html[data-theme="dark"]{
+  --t0:#0F172A;--t1:#0A1224;--t2:#111B33;--t3:#1E293B;--t4:#334155;
+  --t5:#64748B;--t6:#94A3B8;--t7:#CBD5E1;--t8:#E2E8F0;--t9:#F8FAFC;
+  --primary-l:#172554;--accent-l:#083344;--violet-l:#2E1065;
+  --success-l:#022C22;--warning-l:#451A03;--danger-l:#450A0A;
+  --bg:#0A1224;--bg2:#0F172A;
+}
+html,body{height:100%}
+body{font-family:'Inter',-apple-system,'Segoe UI',system-ui,sans-serif;color:var(--t8);font-size:13px;background:var(--t1);min-height:100vh;-webkit-font-smoothing:antialiased;letter-spacing:-.005em}
+.app{border:0.5px solid var(--hbr);border-radius:12px;overflow:hidden;background:var(--bg);margin:14px;min-height:calc(100vh - 28px);display:flex;flex-direction:column}
+.app-body{display:flex;flex:1;min-height:0;overflow:hidden}
+
+.hdr{display:flex;align-items:center;justify-content:space-between;background:var(--t0);color:var(--t8);padding:12px 22px;border-bottom:1px solid var(--t3);min-height:58px}
+html[data-theme="dark"] .hdr{background:var(--t1)}
+.hdr-logo{width:34px;height:34px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.hdr-brand{display:flex;align-items:center;gap:12px}
+.hdr-name{font-size:14.5px;font-weight:700;letter-spacing:-.3px;color:var(--t9)}
+.hdr-sub{font-size:11px;color:var(--t6);margin-top:1px;font-weight:500}
+.hdr-back{background:var(--t2);border:1px solid var(--t3);color:var(--t7);padding:7px 14px;border-radius:8px;font-size:12.5px;cursor:pointer;font-family:inherit;text-decoration:none;display:inline-flex;align-items:center;gap:6px;font-weight:600;transition:all .12s}
+.hdr-back:hover{background:var(--t3);color:var(--t9)}
+.theme-toggle{background:var(--t2);border:1px solid var(--t3);color:var(--t7);width:34px;height:34px;border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:all .12s;margin-right:8px}
+.theme-toggle:hover{background:var(--t3);color:var(--t9)}
+
+.sidebar{width:256px;background:var(--t1);border-right:1px solid var(--t3);overflow-y:auto;padding:14px 0;flex-shrink:0}
+.sidebar::-webkit-scrollbar{width:6px}
+.sidebar::-webkit-scrollbar-thumb{background:var(--t4);border-radius:3px}
+.side-sec{padding:14px 18px 6px;font-size:10.5px;color:var(--t5);text-transform:uppercase;letter-spacing:.8px;font-weight:600;margin-top:4px}
+.side-sec:first-child{margin-top:0;padding-top:6px}
+.side-item{display:flex;align-items:center;gap:11px;padding:8px 18px;margin:0 8px;color:var(--t7);font-size:13px;cursor:pointer;border:none;background:none;width:calc(100% - 16px);text-align:left;border-radius:7px;font-family:inherit;font-weight:500;transition:all .12s}
+.side-item:hover{background:var(--t2);color:var(--t9)}
+.side-item.active{background:var(--primary-l);color:var(--primary-h);font-weight:600}
+html[data-theme="dark"] .side-item.active{background:rgba(59,130,246,.18);color:#93C5FD}
+.side-item .ico{width:18px;height:18px;flex-shrink:0;stroke-width:2}
+
+.content{flex:1;overflow-y:auto;background:var(--t0);padding:24px 28px}
+.page-title{font-size:22px;color:var(--t9);font-weight:700;margin-bottom:6px;display:flex;align-items:center;gap:10px;letter-spacing:-.5px}
+.page-sub{font-size:13px;color:var(--t6);margin-bottom:22px;max-width:780px;line-height:1.65}
+
+.card{background:var(--t0);border:1px solid var(--t3);border-radius:14px;padding:20px 22px;margin-bottom:16px;box-shadow:var(--sh-1);transition:box-shadow .12s}
+.card:hover{box-shadow:var(--sh-2)}
+.card h3{font-size:15px;color:var(--t9);font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px;padding-bottom:10px;border-bottom:1px solid var(--t3);letter-spacing:-.2px}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+
+.field{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
+.field label{font-size:11.5px;font-weight:600;color:var(--t7);letter-spacing:.05px}
+.field input,.field select{padding:9px 12px;border:1px solid var(--t3);border-radius:8px;font-size:13px;background:var(--t0);color:var(--t8);outline:none;font-family:inherit;font-weight:500;transition:all .12s}
+.field input:focus,.field select:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-l)}
+
+.btn{border:1px solid transparent;border-radius:7px;padding:8px 14px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .12s;display:inline-flex;align-items:center;gap:6px}
+.bp{background:var(--primary);color:#fff;border-color:var(--primary);box-shadow:var(--sh-1)}.bp:hover{background:var(--primary-h);box-shadow:var(--sh-2)}
+.bc{background:var(--accent);color:#fff;border-color:var(--accent)}.bc:hover{background:#0891B2}
+.bg{background:var(--t0);border:1px solid var(--t3);color:var(--t7)}.bg:hover{background:var(--t2);color:var(--t9)}
+
+.result-box{background:linear-gradient(135deg,#e8f0fb,#d6f1fc);border:0.5px solid #b5cae8;border-radius:8px;padding:14px 16px;margin-top:10px}
+.result-box.warn{background:linear-gradient(135deg,#fff3e0,#fce0a8);border-color:#e8c285}
+.result-box.danger{background:linear-gradient(135deg,#fdecea,#f4c8c4);border-color:#e6a39e}
+.result-box.ok{background:linear-gradient(135deg,#e6f5ed,#c3e8d4);border-color:#a4cdb6}
+.r-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;font-size:12px;border-bottom:0.5px dashed rgba(11,61,145,.15)}
+.r-row:last-child{border-bottom:none}
+.r-row b{color:var(--hb);font-family:monospace;font-size:13px}
+.r-big{font-size:22px;font-weight:600;color:var(--hb);text-align:center;margin:7px 0;font-family:monospace}
+.r-label{font-size:10px;color:var(--hmu);text-align:center;text-transform:uppercase;letter-spacing:.5px}
+
+.info{background:var(--hbl);border-left:3px solid var(--hbm);padding:9px 12px;font-size:11px;color:var(--hb);border-radius:5px;margin:10px 0;line-height:1.55}
+.info b{color:var(--hb)}
+.tip{background:var(--hwl);border-left:3px solid var(--hw);padding:9px 12px;font-size:11px;color:#7c4400;border-radius:5px;margin:10px 0;line-height:1.55}
+
+table.lk{width:100%;border-collapse:collapse;font-size:11px;margin-top:8px}
+table.lk th{background:var(--bg2);padding:6px 8px;text-align:left;font-size:10px;text-transform:uppercase;color:var(--hmu);border-bottom:0.5px solid var(--hbr);font-weight:600;letter-spacing:.4px}
+table.lk td{padding:5px 8px;border-bottom:0.5px solid var(--hbr);font-family:monospace}
+table.lk tr:hover{background:var(--hbl)}
+
+.chk-list{display:flex;flex-direction:column;gap:5px}
+.chk-row{display:flex;align-items:flex-start;gap:8px;padding:8px 10px;background:var(--bg2);border-radius:6px;border-left:3px solid var(--hbr);cursor:pointer;font-size:11.5px;line-height:1.45;transition:all .15s}
+.chk-row:hover{background:var(--hbl)}
+.chk-row.done{background:var(--hsl);border-left-color:var(--hs);opacity:.7}
+.chk-row.done .chk-txt{text-decoration:line-through;color:var(--hmu)}
+.chk-row.na{background:var(--bg2);border-left-color:var(--hmu);opacity:.5}
+.chk-cb{margin-top:2px;flex-shrink:0;width:14px;height:14px;cursor:pointer}
+.chk-txt{flex:1}
+.chk-cat{font-size:9px;text-transform:uppercase;color:var(--hmu);font-weight:600;letter-spacing:.4px}
+
+.tabs{display:flex;gap:1px;background:var(--bg2);border-radius:7px;padding:3px;margin-bottom:14px}
+.tab{flex:1;text-align:center;padding:7px 10px;font-size:11px;color:var(--hmu);border-radius:5px;cursor:pointer;font-weight:500;background:none;border:none;font-family:inherit}
+.tab.active{background:var(--hb);color:#fff}
+
+.toast-wrap{position:fixed;bottom:20px;right:20px;z-index:999;display:flex;flex-direction:column;gap:6px}
+.toast{background:var(--ht);color:#fff;padding:9px 14px;border-radius:6px;font-size:11.5px;box-shadow:0 6px 20px rgba(0,0,0,.25);animation:tin .2s ease-out;max-width:340px}
+.toast.ok{background:var(--hs)}.toast.err{background:var(--hd)}.toast.warn{background:var(--hw)}
+@keyframes tin{from{transform:translateY(8px);opacity:0}to{transform:translateY(0);opacity:1}}
+
+.badge{display:inline-block;padding:2px 7px;border-radius:8px;font-size:9px;font-weight:500;letter-spacing:.3px}
+.b-sim{background:var(--hsl);color:#0f5c33}
+.b-nao{background:#fdecea;color:#7a1c12}
+.b-pen{background:#fff3e0;color:#7c4400}
+.b-info{background:var(--hbl);color:var(--hb)}
+
+.kpi{background:var(--bg2);border:0.5px solid var(--hbr);border-radius:8px;padding:10px;text-align:center}
+.kpi-val{font-size:18px;font-weight:600;color:var(--hb);font-family:monospace}
+.kpi-lbl{font-size:9.5px;color:var(--hmu);text-transform:uppercase;letter-spacing:.4px;margin-top:2px}
+
+.help{font-size:10.5px;color:var(--hmu);margin-top:4px;font-style:italic}
+
+.mono{font-family:monospace}
+</style>
+<script>if(location.protocol==="file:"){/* manifest CORS bloqueia em file:// */}else{document.write('<link rel="manifest" href="manifest.json">');}</script>
+<meta name="theme-color" content="#0A1628"/>
+</head>
+<body>
+<div class="app">
+  <div class="hdr">
+    <div class="hdr-brand">
+      <svg class="hdr-logo" viewBox="0 0 72 72" xmlns="http://www.w3.org/2000/svg" width="34" height="34">
+        <defs><linearGradient id="he1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#22D3EE"/><stop offset="100%" stop-color="#A78BFA"/></linearGradient></defs>
+        <path d="M 36 8 L 60 22 L 36 36 L 12 22 Z" fill="#fff"/>
+        <path d="M 12 22 L 36 36 L 36 64 L 12 50 Z" fill="rgba(255,255,255,.55)"/>
+        <path d="M 60 22 L 36 36 L 36 64 L 60 50 Z" fill="rgba(255,255,255,.30)"/>
+        <circle cx="36" cy="36" r="5" fill="url(#he1)"/>
+      </svg>
+      <div>
+        <div class="hdr-name">PROJECT<span style="color:#22D3EE">.</span><span style="background:linear-gradient(135deg,#22D3EE,#A78BFA);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;font-weight:900">IA</span> · Caixa de Ferramentas</div>
+        <div class="hdr-sub">Soldagem · Tubulação · NR-13 · END · Conversor · Multi-disciplinar</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:0">
+      <button class="theme-toggle" onclick="toggleTheme()" title="Alternar tema"><i data-lucide="sun" id="ico-theme" style="width:18px;height:18px"></i></button>
+      <a class="hdr-back" href="hydrostec_v9.html"><i data-lucide="arrow-left" style="width:14px;height:14px"></i>Voltar ao sistema</a>
+    </div>
+    <script>
+      function _renderIcons(){if(typeof lucide !== 'undefined' && lucide.createIcons){try{lucide.createIcons({attrs:{'stroke-width':1.75}});}catch(e){}}}
+      function toggleTheme(){const c=document.documentElement.getAttribute('data-theme')||'light';const n=c==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',n);localStorage.setItem('projectia-theme',n);const i=document.getElementById('ico-theme');if(i){i.setAttribute('data-lucide',n==='dark'?'moon':'sun');_renderIcons();}}
+      window.addEventListener('DOMContentLoaded',()=>{
+        const cur=localStorage.getItem('projectia-theme')||'light';
+        const i=document.getElementById('ico-theme');
+        if(i)i.setAttribute('data-lucide',cur==='dark'?'moon':'sun');
+        _renderIcons();
+      });
+    </script>
+  </div>
+
+  <div class="app-body">
+    <aside class="sidebar">
+      <div class="side-sec">Soldagem</div>
+      <button class="side-item active" data-view="heat-input"><i data-lucide="flame" class="ico"></i><span>Heat Input (aporte)</span></button>
+      <button class="side-item" data-view="preheat"><i data-lucide="thermometer" class="ico"></i><span>Pré-aquecimento (CE)</span></button>
+      <button class="side-item" data-view="consumo"><i data-lucide="zap" class="ico"></i><span>Consumo de eletrodo</span></button>
+      <button class="side-item" data-view="bevel"><i data-lucide="triangle" class="ico"></i><span>Chanfro / Volume</span></button>
+      <button class="side-item" data-view="welders"><i data-lucide="hard-hat" class="ico"></i><span>Qualificação</span></button>
+
+      <div class="side-sec">Tubulação &amp; Pressão</div>
+      <button class="side-item" data-view="schedule"><i data-lucide="layers" class="ico"></i><span>Schedule ASME B36.10</span></button>
+      <button class="side-item" data-view="peso"><i data-lucide="scale" class="ico"></i><span>Peso de tubo / fluido</span></button>
+      <button class="side-item" data-view="th"><i data-lucide="droplets" class="ico"></i><span>Pressão de Teste Hidro</span></button>
+      <button class="side-item" data-view="torque"><i data-lucide="wrench" class="ico"></i><span>Torque de parafuso</span></button>
+
+      <div class="side-sec">Inspeção &amp; END</div>
+      <button class="side-item" data-view="nr13"><i data-lucide="clipboard-check" class="ico"></i><span>Checklist NR-13</span></button>
+      <button class="side-item" data-view="end"><i data-lucide="search" class="ico"></i><span>Amostragem END</span></button>
+      <button class="side-item" data-view="inspecao"><i data-lucide="check-circle-2" class="ico"></i><span>Inspeção visual</span></button>
+
+      <div class="side-sec">Produtividade</div>
+      <button class="side-item" data-view="hh"><i data-lucide="timer" class="ico"></i><span>Estimativa de HH</span></button>
+      <button class="side-item" data-view="curvas"><i data-lucide="trending-up" class="ico"></i><span>Curva S</span></button>
+
+      <div class="side-sec">Utilitários</div>
+      <button class="side-item" data-view="conv"><i data-lucide="arrow-right-left" class="ico"></i><span>Conversor de unidades</span></button>
+      <button class="side-item" data-view="materiais"><i data-lucide="package" class="ico"></i><span>Propriedades materiais</span></button>
+      <button class="side-item" data-view="referencias"><i data-lucide="book-open" class="ico"></i><span>Normas &amp; Referências</span></button>
+    </aside>
+
+    <div class="content" id="content"></div>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toasts"></div>
+
+<script>
+// ═══════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════
+function toast(msg,t='ok'){const el=document.createElement('div');el.className='toast '+t;el.textContent=msg;document.getElementById('toasts').appendChild(el);setTimeout(()=>el.remove(),3800);}
+function n(id){const v=parseFloat(document.getElementById(id).value.replace(',','.'));return isNaN(v)?0:v;}
+function s(id){return document.getElementById(id).value.trim();}
+function fmt(v,d=2){return (+v||0).toLocaleString('pt-BR',{minimumFractionDigits:d,maximumFractionDigits:d});}
+
+// ═══════════════════════════════════════════════════
+// BASES DE DADOS (Schedule ASME B36.10, densidades, eletrodos)
+// ═══════════════════════════════════════════════════
+// ASME B36.10 — diâmetro nominal (NPS), diâmetro externo (mm), espessura por schedule (mm)
+const SCH_B3610={
+  // NPS: [OD_mm, {sch10, sch20, sch30, sch40, std, sch60, sch80, xs, sch100, sch120, sch140, sch160, xxs}]
+  '1/2':  [21.3,  {sch10:2.11,sch40:2.77,std:2.77,sch80:3.73,xs:3.73,sch160:4.78,xxs:7.47}],
+  '3/4':  [26.7,  {sch10:2.11,sch40:2.87,std:2.87,sch80:3.91,xs:3.91,sch160:5.56,xxs:7.82}],
+  '1':    [33.4,  {sch10:2.77,sch40:3.38,std:3.38,sch80:4.55,xs:4.55,sch160:6.35,xxs:9.09}],
+  '1.1/4':[42.2,  {sch10:2.77,sch40:3.56,std:3.56,sch80:4.85,xs:4.85,sch160:6.35,xxs:9.70}],
+  '1.1/2':[48.3,  {sch10:2.77,sch40:3.68,std:3.68,sch80:5.08,xs:5.08,sch160:7.14,xxs:10.16}],
+  '2':    [60.3,  {sch10:2.77,sch40:3.91,std:3.91,sch80:5.54,xs:5.54,sch160:8.74,xxs:11.07}],
+  '2.1/2':[73.0,  {sch10:3.05,sch40:5.16,std:5.16,sch80:7.01,xs:7.01,sch160:9.53,xxs:14.02}],
+  '3':    [88.9,  {sch10:3.05,sch40:5.49,std:5.49,sch80:7.62,xs:7.62,sch160:11.13,xxs:15.24}],
+  '4':    [114.3, {sch10:3.05,sch40:6.02,std:6.02,sch80:8.56,xs:8.56,sch120:11.13,sch160:13.49,xxs:17.12}],
+  '6':    [168.3, {sch10:3.40,sch40:7.11,std:7.11,sch80:10.97,xs:10.97,sch120:14.27,sch160:18.26,xxs:21.95}],
+  '8':    [219.1, {sch10:3.76,sch20:6.35,sch30:7.04,sch40:8.18,std:8.18,sch60:10.31,sch80:12.70,xs:12.70,sch100:15.09,sch120:18.26,sch140:20.62,sch160:23.01,xxs:22.23}],
+  '10':   [273.0, {sch10:4.19,sch20:6.35,sch30:7.80,sch40:9.27,std:9.27,sch60:12.70,sch80:15.09,xs:12.70,sch100:18.26,sch120:21.44,sch140:25.40,sch160:28.58}],
+  '12':   [323.8, {sch10:4.57,sch20:6.35,sch30:8.38,sch40:10.31,std:9.53,sch60:14.27,sch80:17.48,xs:12.70,sch100:21.44,sch120:25.40,sch140:28.58,sch160:33.32}],
+  '14':   [355.6, {sch10:6.35,sch20:7.92,sch30:9.53,sch40:11.13,std:9.53,sch60:15.09,sch80:19.05,xs:12.70,sch100:23.83,sch120:27.79,sch140:31.75,sch160:35.71}],
+  '16':   [406.4, {sch10:6.35,sch20:7.92,sch30:9.53,sch40:12.70,std:9.53,sch60:16.66,sch80:21.44,xs:12.70,sch100:26.19,sch120:30.96,sch140:36.53,sch160:40.49}],
+  '18':   [457.2, {sch10:6.35,sch20:7.92,sch30:11.13,sch40:14.27,std:9.53,sch60:19.05,sch80:23.83,xs:12.70,sch100:29.36,sch120:34.93,sch140:39.69,sch160:45.24}],
+  '20':   [508.0, {sch10:6.35,sch20:9.53,sch30:12.70,sch40:15.09,std:9.53,sch60:20.62,sch80:26.19,xs:12.70,sch100:32.54,sch120:38.10,sch140:44.45,sch160:50.01}],
+  '24':   [609.6, {sch10:6.35,sch20:9.53,sch30:14.27,sch40:17.48,std:9.53,sch60:24.61,sch80:30.96,xs:12.70,sch100:38.89,sch120:46.02,sch140:52.37,sch160:59.54}]
+};
+
+// Densidades (kg/m³)
+const DENS={
+  ac_carbono: 7850, inox_304: 8000, inox_316: 8000, aluminio: 2700, cobre: 8960, ferro_fundido: 7200,
+  // fluidos
+  agua_20: 998, agua_quente: 970, vapor_baixa: 0.6, oleo_med: 870, gasolina: 740, glp: 540, ar: 1.2, gas_natural: 0.75
+};
+
+// Carbono equivalente fórmula IIW
+function carbonoEquiv(C,Mn,Cr,Mo,V,Ni,Cu){
+  return C + Mn/6 + (Cr+Mo+V)/5 + (Ni+Cu)/15;
+}
+
+// ═══════════════════════════════════════════════════
+// NAV
+// ═══════════════════════════════════════════════════
+const VIEWS={
+  'heat-input':renderHeatInput,
+  'preheat':renderPreheat,
+  'consumo':renderConsumo,
+  'bevel':renderBevel,
+  'welders':renderWelders,
+  'schedule':renderSchedule,
+  'peso':renderPeso,
+  'th':renderTH,
+  'torque':renderTorque,
+  'nr13':renderNR13,
+  'end':renderEND,
+  'inspecao':renderInspecao,
+  'hh':renderHH,
+  'curvas':renderCurvas,
+  'conv':renderConv,
+  'materiais':renderMateriais,
+  'referencias':renderReferencias
+};
+function go(view){
+  document.querySelectorAll('.side-item').forEach(b=>b.classList.toggle('active',b.dataset.view===view));
+  VIEWS[view]();
+  if(history.pushState)history.replaceState(null,'','#'+view);
+  setTimeout(_renderIcons, 50);
+}
+document.querySelectorAll('.side-item').forEach(b=>b.addEventListener('click',()=>go(b.dataset.view)));
+
+// ═══════════════════════════════════════════════════
+// 1. HEAT INPUT (Aporte térmico) — AWS D1.1 / ASME IX
+// ═══════════════════════════════════════════════════
+function renderHeatInput(){
+  document.getElementById('content').innerHTML=`
+    <div class="page-title">🔥 Heat Input — Aporte Térmico</div>
+    <div class="page-sub">Calcula o aporte térmico de soldagem (kJ/mm) conforme AWS D1.1 e ASME Sec. IX. Essencial para qualificar EPS e respeitar faixas validadas em PQR. <b>Fórmula:</b> HI = (60 · V · A · η) / (1000 · velocidade_mm/min).</div>
+    <div class="grid2">
+      <div class="card">
+        <h3>📥 Entradas</h3>
+        <div class="grid2">
+          <div class="field"><label>Tensão (V)</label><input id="hi-v" type="number" step="0.1" value="22"></div>
+          <div class="field"><label>Corrente (A)</label><input id="hi-a" type="number" step="1" value="140"></div>
+        </div>
+        <div class="field"><label>Velocidade de soldagem (mm/min)</label><input id="hi-s" type="number" step="1" value="180"></div>
+        <div class="field"><label>Processo (eficiência η)</label>
+          <select id="hi-p">
+            <option value="0.80">SMAW · Eletrodo revestido (0,80)</option>
+            <option value="0.65">GTAW · TIG (0,65)</option>
+            <option value="0.85" selected>GMAW · MIG/MAG (0,85)</option>
+            <option value="0.85">FCAW · Arame tubular (0,85)</option>
+            <option value="0.95">SAW · Arco submerso (0,95)</option>
+            <option value="1.00">Plasma · PAW (1,00)</option>
+          </select>
+        </div>
+        <button class="btn bp" onclick="calcHI()">Calcular HI</button>
+        <button class="btn bg" onclick="setHIDefaults()">⟲ Padrão</button>
+        <div class="info"><b>Atenção:</b> Para PQR, sempre registre os 3 valores (V, A, vel.) medidos na junta de qualificação. Variações &gt; ±10% exigem requalificação (ASME IX QW-409).</div>
+      </div>
+      <div class="card">
+        <h3>📤 Resultado</h3>
+        <div id="hi-out" class="result-box">
+          <div class="r-label">Aporte térmico</div>
+          <div class="r-big" id="hi-val">—</div>
+          <div class="r-row"><span>HI (J/mm)</span><b id="hi-j">—</b></div>
+          <div class="r-row"><span>Potência do arco (W)</span><b id="hi-p">—</b></div>
+          <div class="r-row"><span>Velocidade (mm/s)</span><b id="hi-vs">—</b></div>
+          <div class="r-row"><span>Classificação</span><b id="hi-cls">—</b></div>
+        </div>
+        <div class="info" id="hi-rec" style="display:none"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>📊 Faixa típica por processo (aço carbono, espessura ≤ 25 mm)</h3>
+      <table class="lk">
+        <thead><tr><th>Processo</th><th>HI mínimo</th><th>HI máximo</th><th>Observações</th></tr></thead>
+        <tbody>
+          <tr><td>SMAW</td><td>0,8 kJ/mm</td><td>2,5 kJ/mm</td><td style="font-family:inherit">Eletrodos baixo hidrogênio (E7018), pré-aquecer acima de 13 mm</td></tr>
+          <tr><td>GTAW (TIG)</td><td>0,3 kJ/mm</td><td>1,5 kJ/mm</td><td style="font-family:inherit">Inox e raiz de tubulação NR-13</td></tr>
+          <tr><td>GMAW / FCAW</td><td>0,5 kJ/mm</td><td>2,5 kJ/mm</td><td style="font-family:inherit">Posição plana, sem vento</td></tr>
+          <tr><td>SAW</td><td>1,5 kJ/mm</td><td>5,0 kJ/mm</td><td style="font-family:inherit">Costura longitudinal em pipes</td></tr>
+        </tbody>
+      </table>
+    </div>`;
+}
+function setHIDefaults(){document.getElementById('hi-v').value=22;document.getElementById('hi-a').value=140;document.getElementById('hi-s').value=180;document.getElementById('hi-p').value='0.85';calcHI();}
+function calcHI(){
+  const V=n('hi-v'),A=n('hi-a'),vel=n('hi-s'),eta=parseFloat(document.getElementById('hi-p').value);
+  if(!V||!A||!vel){toast('Preencha V, A e velocidade','warn');return;}
+  const HI_J=(60*V*A*eta)/vel; // J/mm
+  const HI_kJ=HI_J/1000;
+  document.getElementById('hi-val').textContent=fmt(HI_kJ,2)+' kJ/mm';
+  document.getElementById('hi-j').textContent=fmt(HI_J,0)+' J/mm';
+  document.getElementById('hi-p').textContent=fmt(V*A,0)+' W';
+  document.getElementById('hi-vs').textContent=fmt(vel/60,2)+' mm/s';
+  let cls,col,rec;
+  if(HI_kJ<0.5){cls='Muito baixo';col='warn';rec='⚠️ Aporte muito baixo pode gerar falta de fusão. Verifique a velocidade.';}
+  else if(HI_kJ<1.5){cls='Faixa normal';col='ok';rec='✔ Faixa adequada para a maioria dos processos de tubulação industrial.';}
+  else if(HI_kJ<3.0){cls='Alto';col='warn';rec='⚠️ Aporte alto. Pode gerar zona termicamente afetada (ZTA) larga e perda de tenacidade. Confirme com PQR.';}
+  else{cls='Excessivo';col='danger';rec='⛔ Aporte excessivo. Risco de distorção e degradação de propriedades mecânicas.';}
+  document.getElementById('hi-cls').textContent=cls;
+  const box=document.getElementById('hi-out');box.className='result-box '+col;
+  const recBox=document.getElementById('hi-rec');recBox.style.display='block';recBox.textContent=rec;
+}
+
+// ═══════════════════════════════════════════════════
+// 2. PRÉ-AQUECIMENTO (Carbono Equivalente IIW)
+// ═══════════════════════════════════════════════════
+function renderPreheat(){
+  document.getElementById('content').innerHTML=`
+    <div class="page-title">🌡️ Pré-aquecimento — Carbono Equivalente (CE)</div>
+    <div class="page-sub">Calcula o Carbono Equivalente pela fórmula IIW e indica a temperatura de pré-aquecimento conforme AWS D1.1 (tabela 5.8) e Pcm (NR-13 / API 1104). Use o boletim de análise química do material.</div>
+    <div class="grid2">
+      <div class="card">
+        <h3>🧪 Composição química (%)</h3>
+        <div class="grid3">
+          <div class="field"><label>C (Carbono)</label><input id="pa-c" type="number" step="0.001" value="0.22"></div>
+          <div class="field"><label>Mn (Manganês)</label><input id="pa-mn" type="number" step="0.01" value="1.10"></div>
+          <div class="field"><label>Cr (Cromo)</label><input id="pa-cr" type="number" step="0.01" value="0.15"></div>
+          <div class="field"><label>Mo (Molibdênio)</label><input id="pa-mo" type="number" step="0.01" value="0.05"></div>
+          <div class="field"><label>V (Vanádio)</label><input id="pa-v" type="number" step="0.01" value="0"></div>
+          <div class="field"><label>Ni (Níquel)</label><input id="pa-ni" type="number" step="0.01" value="0.10"></div>
+          <div class="field"><label>Cu (Cobre)</label><input id="pa-cu" type="number" step="0.01" value="0.15"></div>
+          <div class="field"><label>Espessura (mm)</label><input id="pa-t" type="number" step="0.5" value="12"></div>
+          <div class="field"><label>Hidrogênio difusível</label>
+            <select id="pa-h">
+              <option value="5">Muito baixo (&lt; 5 ml/100g) · TIG, SAW</option>
+              <option value="10" selected>Baixo (5–10) · Eletrodo básico 7018</option>
+              <option value="15">Médio (10–15) · 7016, 6013</option>
+              <option value="20">Alto (&gt; 15) · 6010, FCAW</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn bp" onclick="calcCE()">Calcular CE</button>
+        <button class="btn bg" onclick="presetMat('a106b')">A106-B</button>
+        <button class="btn bg" onclick="presetMat('a335p11')">A335 P11</button>
+        <button class="btn bg" onclick="presetMat('a335p22')">A335 P22</button>
+      </div>
+      <div class="card">
+        <h3>🌡️ Resultado</h3>
+        <div id="pa-out" class="result-box">
+          <div class="r-label">Temperatura de pré-aquecimento</div>
+          <div class="r-big" id="pa-temp">—</div>
+          <div class="r-row"><span>CE (IIW)</span><b id="pa-ce">—</b></div>
+          <div class="r-row"><span>Pcm (Ito-Bessyo)</span><b id="pa-pcm">—</b></div>
+          <div class="r-row"><span>Soldabilidade</span><b id="pa-sold">—</b></div>
+          <div class="r-row"><span>Interpasse máx</span><b id="pa-inter">—</b></div>
+        </div>
+        <div class="info" id="pa-rec" style="display:none"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>📐 Fórmulas usadas</h3>
+      <div style="font-size:11.5px;line-height:1.85;font-family:monospace;background:var(--bg2);padding:11px 14px;border-radius:6px">
+        CE<sub>IIW</sub> = C + Mn/6 + (Cr + Mo + V)/5 + (Ni + Cu)/15<br>
+        Pcm = C + Si/30 + (Mn + Cu + Cr)/20 + Ni/60 + Mo/15 + V/10 + 5B<br>
+        T<sub>preheat</sub> ≈ 350·√(CE − 0,25) + 25·log(espessura) − 50  (faixa orientativa)
+      </div>
+      <div class="tip"><b>NR-13 / normas industriais de soldagem:</b> qualquer junta com CE &gt; 0,45 ou espessura &gt; 25 mm exige pré-aquecimento documentado e medido com lápis indicador (Tempilstik) ou pirômetro de contato. Registre temperatura no RDO.</div>
+    </div>`;
+}
+function presetMat(m){
+  const presets={
+    a106b:{c:0.30,mn:1.06,cr:0.40,mo:0.15,v:0.08,ni:0.40,cu:0.40},
+    a335p11:{c:0.15,mn:0.50,cr:1.25,mo:0.50,v:0,ni:0,cu:0},
+    a335p22:{c:0.15,mn:0.45,cr:2.25,mo:1.00,v:0,ni:0,cu:0}
+  };
+  const p=presets[m];if(!p)return;
+  Object.keys(p).forEach(k=>document.getElementById('pa-'+k).value=p[k]);
+  calcCE();
+}
+function calcCE(){
+  const C=n('pa-c'),Mn=n('pa-mn'),Cr=n('pa-cr'),Mo=n('pa-mo'),V=n('pa-v'),Ni=n('pa-ni'),Cu=n('pa-cu');
+  const t=n('pa-t'),H=parseFloat(document.getElementById('pa-h').value);
+  const CE=carbonoEquiv(C,Mn,Cr,Mo,V,Ni,Cu);
+  const Pcm=C + Mn/20 + (Cu+Cr)/20 + Ni/60 + Mo/15 + V/10; // simplificado sem Si/B
+  let Tp;
+  if(CE<0.30)Tp=0;
+  else if(CE<0.40)Tp=Math.max(0,50+t*1.0+(H-10)*2);
+  else if(CE<0.50)Tp=Math.max(100,80+t*1.5+(H-10)*3);
+  else Tp=Math.max(150,120+t*2+(H-10)*4);
+  // limite alto típico ~250°C
+  if(Tp>300)Tp=300;
+  let sold='Excelente',col='ok';
+  if(CE>=0.30)sold='Boa';
+  if(CE>=0.40){sold='Cuidado';col='warn';}
+  if(CE>=0.55){sold='Difícil — soldagem qualificada e PWHT';col='danger';}
+  let inter=300;
+  if(CE>=0.40)inter=260;
+  if(CE>=0.50)inter=230;
+  document.getElementById('pa-temp').textContent=Tp>0?Math.round(Tp)+' °C':'Não exigido';
+  document.getElementById('pa-ce').textContent=fmt(CE,3);
+  document.getElementById('pa-pcm').textContent=fmt(Pcm,3);
+  document.getElementById('pa-sold').textContent=sold;
+  document.getElementById('pa-inter').textContent=inter+' °C';
+  document.getElementById('pa-out').className='result-box '+col;
+  const r=document.getElementById('pa-rec');r.style.display='block';
+  if(CE<0.30)r.innerHTML='✔ <b>Soldabilidade excelente.</b> Pré-aquecimento normalmente dispensado. Verifique apenas a presença de umidade.';
+  else if(CE<0.45)r.innerHTML='⚠️ <b>Pré-aquecer a '+Math.round(Tp)+' °C.</b> Use lápis indicador (Tempilstik) ou pirômetro. Manter interpasse até '+inter+' °C.';
+  else r.innerHTML='⛔ <b>Material com risco de trinca a frio.</b> Pré-aquecimento obrigatório a '+Math.round(Tp)+' °C. Considere PWHT (alívio de tensões pós-soldagem).';
+}
+
+// ═══════════════════════════════════════════════════
+// 3. CONSUMO DE ELETRODO
+// ═══════════════════════════════════════════════════
+function renderConsumo(){
+  document.getElementById('content').innerHTML=`
+    <div class="page-title">⚡ Consumo de Eletrodo / Arame</div>
+    <div class="page-sub">Estima o consumo de consumíveis com base no comprimento da junta, área da seção depositada e densidade do metal de adição. Útil para orçar e dimensionar pedidos de compra.</div>
+    <div class="grid2">
+      <div class="card">
+        <h3>📥 Dados da junta</h3>
+        <div class="field"><label>Tipo de chanfro</label>
+          <select id="co-chf" onchange="atualizaArea()">
+            <option value="60">V — ângulo 60°</option>
+            <option value="70">V — ângulo 70°</option>
+            <option value="x">Duplo V (X)</option>
+            <option value="u">U</option>
+            <option value="fillet">Filete (ângulo)</option>
+          </select>
+        </div>
+        <div class="grid2">
+          <div class="field"><label>Espessura (mm)</label><input id="co-t" type="number" step="0.5" value="10" oninput="atualizaArea()"></div>
+          <div class="field"><label>Folga raiz (mm)</label><input id="co-gap" type="number" step="0.5" value="2" oninput="atualizaArea()"></div>
+          <div class="field"><label>Reforço (mm)</label><input id="co-ref" type="number" step="0.5" value="1.5" oninput="atualizaArea()"></div>
+          <div class="field"><label>Largura reforço (mm)</label><input id="co-lar" type="number" step="0.5" value="14" oninput="atualizaArea()"></div>
+        </div>
+        <div class="field"><label>Comprimento total da junta (m)</label><input id="co-l" type="number" step="0.01" value="50"></div>
+        <div class="grid2">
+          <div class="field"><label>Processo (rendimento)</label>
+            <select id="co-rend">
+              <option value="0.60">SMAW · 60% (eletrodo)</option>
+              <option value="0.92" selected>GMAW · 92% (MIG/MAG)</option>
+              <option value="0.99">GTAW · 99% (TIG)</option>
+              <option value="0.85">FCAW · 85% (tubular)</option>
+              <option value="1.00">SAW · 100% (submerso)</option>
+            </select>
+          </div>
+          <div class="field"><label>Densidade do metal de adição (g/cm³)</label><input id="co-dens" type="number" step="0.01" value="7.85"></div>
+        </div>
+        <button class="btn bp" onclick="calcConsumo()">Calcular</button>
+      </div>
+      <div class="card">
+        <h3>📤 Consumo estimado</h3>
+        <div class="result-box">
+          <div class="r-label">Massa total de metal depositado</div>
+          <div class="r-big" id="co-massa">—</div>
+          <div class="r-row"><span>Área da seção (mm²)</span><b id="co-area">—</b></div>
+          <div class="r-row"><span>Volume depositado (cm³)</span><b id="co-vol">—</b></div>
+          <div class="r-row"><span>Compra (com rendimento)</span><b id="co-compra">—</b></div>
+          <div class="r-row"><span>Eletrodos de 4 mm × 350 mm</span><b id="co-und">—</b></div>
+        </div>
+        <div class="info">Cada eletrodo 4×350 mm pesa ≈ 50 g (parte metálica). Para MIG, considere 1 bobina de 15 kg como referência.</div>
+      </div>
+    </div>`;
+  atualizaArea();
+}
+function atualizaArea(){
+  const t=n('co-t'),g=n('co-gap'),r=n('co-ref'),lr=n('co-lar');
+  const chf=document.getElementById('co-chf').value;
+  let area;
+  if(chf==='60')area=t*t*Math.tan(30*Math.PI/180)+t*g+r*lr*0.5;
+  else if(chf==='70')area=t*t*Math.tan(35*Math.PI/180)+t*g+r*lr*0.5;
+  else if(chf==='x')area=t*t*0.5*Math.tan(30*Math.PI/180)+t*g+r*lr;
+  else if(chf==='u')area=t*g+Math.PI*Math.pow(t/2,2)*0.6+r*lr*0.5;
+  else area=t*t*0.5; // filete
+  document.getElementById('co-area').textContent=fmt(area,1)+' mm²';
+}
+function calcConsumo(){
+  atualizaArea();
+  const area=parseFloat(document.getElementById('co-area').textContent);
+  const L=n('co-l'),rend=parseFloat(document.getElementById('co-rend').value),dens=n('co-dens');
+  const vol_cm3=area*L*1000/1000; // mm²·m → mm²·1000mm → mm³, /1000 → cm³
+  const massa_g=vol_cm3*dens;
+  const compra_kg=(massa_g/1000)/rend;
+  document.getElementById('co-vol').textContent=fmt(vol_cm3,1)+' cm³';
+  document.getElementById('co-massa').textContent=fmt(massa_g/1000,3)+' kg';
+  document.getElementById('co-compra').textContent=fmt(compra_kg,3)+' kg';
+  document.getElementById('co-und').textContent=Math.ceil(compra_kg*1000/50)+' und';
+}
+
+// ═══════════════════════════════════════════════════
+// 4. CHANFRO / VOLUME DE SOLDA
+// ═══════════════════════════════════════════════════
+function renderBevel(){
+  document.getElementById('content').innerHTML=`
+    <div class="page-title">📐 Chanfro / Volume de Solda</div>
+    <div class="page-sub">Gera o desenho técnico do chanfro recomendado conforme ASME B16.25 e calcula o volume de metal a depositar. Visual ajuda o caldeireiro e o inspetor.</div>
+    <div class="grid2">
+      <div class="card">
+        <h3>📥 Parâmetros</h3>
+        <div class="field"><label>Espessura t (mm)</label><input id="bv-t" type="number" step="0.5" value="12" oninput="bvDraw()"></div>
+        <div class="field"><label>Ângulo total (graus)</label><input id="bv-ang" type="number" step="1" value="60" oninput="bvDraw()"></div>
+        <div class="field"><label>Talão / nariz (mm)</label><input id="bv-nose" type="number" step="0.5" value="1.5" oninput="bvDraw()"></div>
+        <div class="field"><label>Folga raiz (mm)</label><input id="bv-gap" type="number" step="0.5" value="2" oninput="bvDraw()"></div>
+        <div class="info">Padrões ASME B16.25 para Sch 40: chanfro V 37,5° (75° total), talão 1,6 mm, folga 1,6 mm.</div>
+      </div>
+      <div class="card">
+        <h3>🖼️ Visualização</h3>
+        <svg viewBox="0 0 320 220" style="width:100%;height:auto;background:var(--bg2);border-radius:6px">
+          <g id="bv-svg"></g>
+        </svg>
+        <div class="r-row"><span>Área aprox. da seção</span><b id="bv-area">—</b></div>
+        <div class="r-row"><span>Volume por metro de junta</span><b id="bv-vol">—</b></div>
+      </div>
+    </div>`;
+  bvDraw();
+}
+function bvDraw(){
+  const t=n('bv-t'),ang=n('bv-ang'),nose=n('bv-nose'),gap=n('bv-gap');
+  const halfAng=ang/2*Math.PI/180;
+  const scale=Math.min(180/t,10);
+  // Ponto central do nariz
+  const cx=160,cy=180;
+  const tH=t*scale,gH=gap*scale,nH=nose*scale;
+  const angX=(tH-nH)*Math.tan(halfAng);
+  // Lado esquerdo do chanfro
+  const ptsL=[[cx-gH/2,cy],[cx-gH/2,cy-nH],[cx-gH/2-angX,cy-tH],[cx-50,cy-tH],[cx-50,cy]];
+  const ptsR=[[cx+gH/2,cy],[cx+gH/2,cy-nH],[cx+gH/2+angX,cy-tH],[cx+50,cy-tH],[cx+50,cy]];
+  const path=(arr)=>'M '+arr.map(p=>p.join(' ')).join(' L ')+' Z';
+  document.getElementById('bv-svg').innerHTML=`
+    <path d="${path(ptsL)}" fill="#5a6a85" stroke="#1a2336" stroke-width="1"/>
+    <path d="${path(ptsR)}" fill="#5a6a85" stroke="#1a2336" stroke-width="1"/>
+    <path d="M ${cx-gH/2} ${cy-nH} L ${cx-gH/2-angX} ${cy-tH} L ${cx+gH/2+angX} ${cy-tH} L ${cx+gH/2} ${cy-nH} L ${cx+gH/2} ${cy} L ${cx-gH/2} ${cy} Z" fill="#00A8E8" opacity="0.5"/>
+    <text x="${cx}" y="${cy-tH-10}" text-anchor="middle" font-size="10" fill="#0B3D91">t=${t} mm</text>
+    <text x="${cx}" y="${cy+15}" text-anchor="middle" font-size="9" fill="#0B3D91">gap=${gap} mm · ${ang}°</text>
+    <text x="${cx+gH/2+angX+5}" y="${cy-tH/2}" font-size="9" fill="#7c4400">${ang/2}°</text>`;
+  // Área
+  const area=t*gap + (t-nose)*(t-nose)*Math.tan(halfAng);
+  document.getElementById('bv-area').textContent=fmt(area,1)+' mm²';
+  document.getElementById('bv-vol').textContent=fmt(area*1000/1000,1)+' cm³/m';
+}
+
+// ═══════════════════════════════════════════════════
+// 5. VALIDADE DE QUALIFICAÇÃO (Soldadores)
+// ═══════════════════════════════════════════════════
+function renderWelders(){
+  // Carrega do localStorage
+  const data=JSON.parse(localStorage.getItem('hyd_welders_qual')||'[]');
+  document.getElementById('content').innerHTML=`
+    <div class="page-title">👷 Validade de Qualificação de Soldadores</div>
+    <div class="page-sub">Controla os 6 meses de validade da qualificação ASME IX (QW-322). Os registros ficam salvos no navegador (futuro: sincronizar com o módulo Soldadores do sistema).</div>
+    <div class="card">
+      <h3>➕ Cadastrar qualificação</h3>
+      <div class="grid4">
+        <div class="field"><label>Matrícula</label><input id="w-mat" placeholder="SOL-001"></div>
+        <div class="field"><label>Nome</label><input id="w-nome" placeholder="João da Silva"></div>
+        <div class="field"><label>Processo</label>
+          <select id="w-proc">
+            <option>SMAW</option><option>GTAW</option><option>GMAW</option><option>FCAW</option><option>SAW</option>
+          </select>
+        </div>
+        <div class="field"><label>Posição (ASME)</label>
+          <select id="w-pos">
+            <option>1G</option><option>2G</option><option>3G</option><option>4G</option><option>5G</option><option>6G</option>
+            <option>1F</option><option>2F</option><option>3F</option><option>4F</option><option>5F</option>
+          </select>
+        </div>
+        <div class="field"><label>Material</label><input id="w-mat-aco" placeholder="AC, INOX, P22..."></div>
+        <div class="field"><label>Ø (pol)</label><input id="w-dia" type="number" step="0.5" value="6"></div>
+        <div class="field"><label>Última solda (ou qualificação)</label><input id="w-data" type="date"></div>
+        <div class="field"><label>Nº PQR/EPS</label><input id="w-pqr" placeholder="PQR-001"></div>
+      </div>
+      <button class="btn bp" onclick="addWelder()">+ Adicionar</button>
+      <button class="btn bg" onclick="exportWelders()"><i data-lucide="file-down"></i>Exportar JSON</button>
+      <input type="file" id="w-imp" accept=".json" style="display:none" onchange="importWelders(this)">
+      <button class="btn bg" onclick="document.getElementById('w-imp').click()"><i data-lucide="file-up"></i>Importar JSON</button>
+    </div>
+    <div class="card">
+      <h3>📋 Lista (${data.length} registros)</h3>
+      <table class="lk">
+        <thead><tr><th>Matrícula</th><th>Nome</th><th>Processo</th><th>Posição</th><th>Material</th><th>Ø</th><th>PQR</th><th>Última solda</th><th>Vence</th><th>Status</th><th></th></tr></thead>
+        <tbody id="w-tb"></tbody>
+      </table>
+      <div class="info">⚠️ <b>ASME IX QW-322.1:</b> a qualificação caduca quando o soldador <i>não usa o processo por mais de 6 meses</i>. Atualize a data sempre que ele soldar uma junta válida.</div>
+    </div>`;
+  renderWeldersTable();
+}
+function renderWeldersTable(){
+  const data=JSON.parse(localStorage.getItem('hyd_welders_qual')||'[]');
+  const now=new Date();
+  document.getElementById('w-tb').innerHTML=data.length?data.map((w,i)=>{
+    const last=w.data?new Date(w.data):null;
+    let venc=null,daysLeft=null,status='—',badge='b-info';
+    if(last){
+      venc=new Date(last);venc.setMonth(venc.getMonth()+6);
+      daysLeft=Math.floor((venc-now)/86400000);
+      if(daysLeft<0){status='VENCIDA há '+(-daysLeft)+' d';badge='b-nao';}
+      else if(daysLeft<=15){status='Vence em '+daysLeft+' d';badge='b-pen';}
+      else{status='OK ('+daysLeft+' d)';badge='b-sim';}
+    }
+    return `<tr>
+      <td>${esc(w.mat)}</td><td>${esc(w.nome)}</td><td>${esc(w.proc)}</td><td>${esc(w.pos)}</td>
+      <td>${esc(w.material||'—')}</td><td>${esc(w.dia||'—')}"</td><td>${esc(w.pqr||'—')}</td>
+      <td>${w.data||'—'}</td>
+      <td>${venc?venc.toLocaleDateString('pt-BR'):'—'}</td>
+      <td><span class="badge ${badge}">${status}</span></td>
+      <td><button class="btn bg" style="padding:3px 7px;font-size:10px" onclick="rmWelder(${i})">🗑</button></td>
+    </tr>`;
+  }).join(''):'<tr><td colspan="11" style="text-align:center;padding:20px;color:var(--hmu);font-family:inherit">Nenhum soldador. Adicione acima.</td></tr>';
+}
+function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function addWelder(){
+  const mat=s('w-mat'),nome=s('w-nome');
+  if(!mat||!nome){toast('Matrícula e nome obrigatórios','warn');return;}
+  const data=JSON.parse(localStorage.getItem('hyd_welders_qual')||'[]');
+  data.push({mat,nome,proc:s('w-proc'),pos:s('w-pos'),material:s('w-mat-aco'),dia:s('w-dia'),data:s('w-data'),pqr:s('w-pqr')});
+  localStorage.setItem('hyd_welders_qual',JSON.stringify(data));
+  ['w-mat','w-nome','w-mat-aco','w-dia','w-data','w-pqr'].forEach(id=>document.getElementById(id).value='');
+  toast('Adicionado','ok');renderWeldersTable();
+}
+function rmWelder(i){
+  const data=JSON.parse(localStorage.getItem('hyd_welders_qual')||'[]');
+  data.splice(i,1);localStorage.setItem('hyd_welders_qual',JSON.stringify(data));renderWeldersTable();
+}
+function exportWelders(){
+  const data=localStorage.getItem('hyd_welders_qual')||'[]';
+  const blob=new Blob([data],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='soldadores_qualificacao.json';a.click();
+}
+function importWelders(inp){
+  const f=inp.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{try{const d=JSON.parse(r.result);localStorage.setItem('hyd_welders_qual',JSON.stringify(d));toast('Importado','ok');renderWeldersTable();}catch(e){toast('JSON inválido','err');}};
+  r.readAsText(f);
+}
+
+// ═══════════════════════════════════════════════════
+// 6. SCHEDULE ASME B36.10
+// ═══════════════════════════════════════════════════
+function renderSchedule(){
+  const opts=Object.keys(SCH_B3610).map(k=>`<option value="${k}">${k}" (OD ${SCH_B3610[k][0]} mm)</option>`).join('');
+  document.getElementById('content').innerHTML=`
+    <div class="page-title">🔩 Schedule ASME B36.10</div>
+    <div class="page-sub">Consulta rápida de espessura de parede por diâmetro nominal e schedule. Inclui sch 10/40/80/STD/XS/XXS/160. Útil para dimensionar tubos, calcular pesos e validar isométricos.</div>
+    <div class="card">
+      <h3>🔍 Consultar</h3>
+      <div class="grid3">
+        <div class="field"><label>Diâmetro nominal (NPS)</label><select id="sch-nps" onchange="schGo()">${opts}</select></div>
+        <div class="field"><label>Schedule</label>
+          <select id="sch-sch" onchange="schGo()">
+            <option value="sch10">SCH 10</option>
+            <option value="sch20">SCH 20</option>
+            <option value="sch30">SCH 30</option>
+            <option value="sch40" selected>SCH 40</option>
+            <option value="std">STD</option>
+            <option value="sch60">SCH 60</option>
+            <option value="sch80">SCH 80</option>
+            <option value="xs">XS</option>
+            <option value="sch100">SCH 100</option>
+            <option value="sch120">SCH 120</option>
+            <option value="sch140">SCH 140</option>
+            <option value="sch160">SCH 160</option>
+            <option value="xxs">XXS</option>
+          </select>
+        </div>
+        <div class="field"><label>Material</label>
+          <select id="sch-mat" onchange="schGo()">
+            <option value="ac_carbono">Aço Carbono</option>
+            <option value="inox_304">Inox 304</option>
+            <option value="inox_316">Inox 316</option>
+          </select>
+        </div>
+      </div>
+      <div class="result-box ok" id="sch-out">
+        <div class="r-label">Especificação selecionada</div>
+        <div class="grid4" style="margin-top:8px">
+          <div class="kpi"><div class="kpi-val" id="sch-od">—</div><div class="kpi-lbl">OD (mm)</div></div>
+          <div class="kpi"><div class="kpi-val" id="sch-wt">—</div><div class="kpi-lbl">Parede (mm)</div></div>
+          <div class="kpi"><div class="kpi-val" id="sch-id">—</div><div class="kpi-lbl">ID (mm)</div></div>
+          <div class="kpi"><div class="kpi-val" id="sch-pm">—</div><div class="kpi-lbl">Peso (kg/m)</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>📊 Tabela completa para o diâmetro selecionado</h3>
+      <table class="lk" id="sch-tbl"><thead><tr><th>Schedule</th><th>Parede (mm)</th><th>ID (mm)</th><th>Peso (kg/m)</th></tr></thead><tbody></tbody></table>
+    </div>`;
+  schGo();
+}
+function schGo(){
+  const nps=document.getElementById('sch-nps').value,sch=document.getElementById('sch-sch').value;
+  const mat=document.getElementById('sch-mat').value;
+  const dens=DENS[mat]||7850;
+  const e=SCH_B3610[nps];if(!e)return;
+  const od=e[0];const wt=e[1][sch];
+  if(wt){
+    const id=od-2*wt;
+    const peso=Math.PI*(od-wt)*wt*dens/1e6; // kg/m
+    document.getElementById('sch-od').textContent=fmt(od,1);
+    document.getElementById('sch-wt').textContent=fmt(wt,2);
+    document.getElementById('sch-id').textContent=fmt(id,1);
+    document.getElementById('sch-pm').textContent=fmt(peso,2);
+  }else{
+    document.getElementById('sch-od').textContent='—';
+    document.getElementById('sch-wt').textContent='N/A';
+    document.getElementById('sch-id').textContent='—';
+    document.getElementById('sch-pm').textContent='—';
+  }
+  // Tabela completa
+  const tb=document.querySelector('#sch-tbl tbody');
+  tb.innerHTML=Object.keys(e[1]).map(k=>{
+    const w=e[1][k];const id=od-2*w;const p=Math.PI*(od-w)*w*dens/1e6;
+    return `<tr><td>${k.toUpperCase()}</td><td>${fmt(w,2)}</td><td>${fmt(id,1)}</td><td>${fmt(p,2)}</td></tr>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════
+// 7. PESO DE TUBO / FLUIDO
+// ═══════════════════════════════════════════════════
+function renderPeso(){
+  document.getElementById('content').innerHTML=`
+    <div class="page-title">⚖️ Peso de Tubo e Fluido</div>
+    <div class="page-sub">Calcula o peso linear do tubo, do fluido contido e o peso total cheio. Essencial para dimensionar suportes e calcular o teste hidrostático.</div>
+    <div class="grid2">
+      <div class="card">
+        <h3>📥 Tubulação</h3>
+        <div class="grid2">
+          <div class="field"><label>OD (mm)</label><input id="pe-od" type="number" step="0.1" value="60.3"></div>
+          <div class="field"><label>Parede (mm)</label><input id="pe-wt" type="number" step="0.1" value="3.91"></div>
+        </div>
+        <div class="field"><label>Material do tubo</label>
+          <select id="pe-mat">
+            <option value="7850">Aço Carbono (7850 kg/m³)</option>
+            <option value="8000">Inox 304/316 (8000)</option>
+            <option value="2700">Alumínio (2700)</option>
+            <option value="8960">Cobre (8960)</option>
+          </select>
+        </div>
+        <div class="field"><label>Fluido</label>
+          <select id="pe-flu">
+            <option value="998">Água 20°C (998 kg/m³)</option>
+            <option value="0">Vazio</option>
+            <option value="970">Água quente (970)</option>
+            <option value="870">Óleo médio (870)</option>
+            <option value="740">Gasolina (740)</option>
+            <option value="540">GLP líq. (540)</option>
+            <option value="1.2">Ar (1,2)</option>
+            <option value="0.6">Vapor baixa (0,6)</option>
+          </select>
+        </div>
+        <div class="field"><label>Comprimento (m)</label><input id="pe-l" type="number" step="0.1" value="100"></div>
+        <button class="btn bp" onclick="calcPeso()">Calcular</button>
+      </div>
+      <div class="card">
+        <h3>📤 Pesos</h3>
+        <div class="result-box ok">
+          <div class="grid2" style="margin-top:5px">
+            <div class="kpi"><div class="kpi-val" id="pe-pt">—</div><div class="kpi-lbl">Tubo (kg/m)</div></div>
+            <div class="kpi"><div class="kpi-val" id="pe-pf">—</div><div class="kpi-lbl">Fluido (kg/m)</div></div>
+          </div>
+          <div class="grid2" style="margin-top:8px">
+            <div class="kpi"><div class="kpi-val" id="pe-pts">—</div><div class="kpi-lbl">Tubo total (kg)</div></div>
+            <div class="kpi"><div class="kpi-val" id="pe-pcs">—</div><div class="kpi-lbl">Cheio total (kg)</div></div>
+          </div>
+        </div>
+        <div class="info">Use o "peso cheio" como carga estática vertical para dimensionar suportes e linhas de pipe-rack. Adicione um fator dinâmico de 1,15 a 1,30 quando houver pulsação.</div>
+      </div>
+    </div>`;
+}
+function calcPeso(){
+  const od=n('pe-od'),wt=n('pe-wt');
+  const denT=parseFloat(document.getElementById('pe-mat').value);
+  const denF=parseFloat(document.getElementById('pe-flu').value);
+  const L=n('pe-l');
+  const idd=od-2*wt;
+  const pt=Math.PI*(od-wt)*wt*denT/1e6;
+  const pf=Math.PI*Math.pow(idd/2,2)*denF/1e6;
+  document.getElementById('pe-pt').textContent=fmt(pt,2);
+  document.getElementById('pe-pf').textContent=fmt(pf,2);
+  document.getElementById('pe-pts').textContent=fmt(pt*L,1);
+  document.getElementById('pe-pcs').textContent=fmt((pt+pf)*L,1);
+}
+
+// ═══════════════════════════════════════════════════
+// 8. PRESSÃO DE TESTE HIDROSTÁTICO
+// ═══════════════════════════════════════════════════
+function renderTH(){
+  document.getElementById('content').innerHTML=`
+    <div class="page-title">💧 Pressão de Teste Hidrostático</div>
+    <div class="page-sub">Calcula a pressão de teste conforme <b>ASME B31.3 (par. 345.4.2)</b> e <b>NR-13 anexo II</b>. Use o resultado para emitir a planilha de TH e validar a faixa de pressão da bomba.</div>
+    <div class="grid2">
+      <div class="card">
+        <h3>📥 Entradas</h3>
+        <div class="field"><label>Norma de projeto</label>
+          <select id="th-norm" onchange="calcTH()">
+            <option value="b313">ASME B31.3 — Tubulação de processo</option>
+            <option value="b311">ASME B31.1 — Tubulação de potência</option>
+            <option value="nr13">NR-13 — Caldeiras e vasos</option>
+            <option value="petrobras">normas industriais de montagem</option>
+          </select>
+        </div>
+        <div class="grid2">
+          <div class="field"><label>Pressão de projeto P (bar)</label><input id="th-p" type="number" step="0.1" value="20" oninput="calcTH()"></div>
+          <div class="field"><label>Temperatura projeto (°C)</label><input id="th-t" type="number" step="1" value="150" oninput="calcTH()"></div>
+        </div>
+        <div class="grid2">
+          <div class="field"><label>Tensão admissível @ T (St)</label><input id="th-st" type="number" step="1" value="124" oninput="calcTH()"></div>
+          <div class="field"><label>Tensão admissível @ 20°C (S20)</label><input id="th-s20" type="number" step="1" value="138" oninput="calcTH()"></div>
+        </div>
+        <button class="btn bp" onclick="calcTH()">Calcular</button>
+        <div class="tip">⚠️ Quando S20/St &gt; 6,5, limite a pressão de teste para evitar deformação plástica. Verifique também a pressão máxima das flanges (ASME B16.5).</div>
+      </div>
+      <div class="card">
+        <h3>📤 Resultado</h3>
+        <div class="result-box ok">
+          <div class="r-label">Pressão de teste hidrostático</div>
+          <div class="r-big" id="th-pt">—</div>
+          <div class="r-row"><span>Multiplicador da norma</span><b id="th-mult">—</b></div>
+          <div class="r-row"><span>Fator térmico (S20/St)</span><b id="th-ft">—</b></div>
+          <div class="r-row"><span>Pressão equivalente psi</span><b id="th-psi">—</b></div>
+          <div class="r-row"><span>Duração mínima</span><b id="th-dur">—</b></div>
+        </div>
+        <div class="info"><b>Procedimento:</b> Pressurizar a 50% da pressão de teste; inspecionar; subir aos 100% e manter por no mínimo 10 min sem queda. Liberar com perda de no máximo 0,5%/h.</div>
+      </div>
+    </div>`;
+  calcTH();
+}
+function calcTH(){
+  const norm=document.getElementById('th-norm').value;
+  const P=n('th-p'),T=n('th-t'),St=n('th-st'),S20=n('th-s20');
+  let mult,dur;
+  if(norm==='b313'){mult=1.5;dur='10 min';}
+  else if(norm==='b311'){mult=1.5;dur='10 min';}
+  else if(norm==='nr13'){mult=1.5;dur='15 min';}
+  else {mult=1.5;dur='30 min';}
+  let ft=St>0?S20/St:1;if(ft>6.5)ft=6.5;
+  let Pt=P*mult*ft;
+  document.getElementById('th-mult').textContent=mult+'·P';
+  document.getElementById('th-ft').textContent=fmt(ft,3);
+  document.getElementById('th-pt').textContent=fmt(Pt,2)+' bar';
+  document.getElementById('th-psi').textContent=fmt(Pt*14.5038,1)+' psi';
+  document.getElementById('th-dur').textContent=dur;
+}
+
+// ═══════════════════════════════════════════════════
+// 9. TORQUE DE FLANGE
+// ═══════════════════════════════════════════════════
+function renderTorque(){
+  document.getElementById('content').innerHTML=`
+    <div class="page-title">🔧 Torque de Parafuso (Flange)</div>
+    <div class="page-sub">Calcula o torque de aperto recomendado para parafusos de flange. Baseado em K=0,16 (parafuso lubrificado) com fator de aperto típico de 50% da tensão de escoamento.</div>
+    <div class="grid2">
+      <div class="card">
+        <h3>📥 Entradas</h3>
+        <div class="field"><label>Parafuso</label>
+          <select id="tq-bolt">
+            <option value="M16">M16 (A193 B7) — 16 mm</option>
+            <option value="M20">M20 — 20 mm</option>
+            <option value="M24" selected>M24 — 24 mm</option>
+            <option value="M30">M30 — 30 mm</option>
+            <option value="M36">M36 — 36 mm</option>
+            <option value="3/4">3/4" UNC</option>
+            <option value="7/8">7/8" UNC</option>
+            <option value="1">1" UNC</option>
+            <option value="1.1/4">1.1/4" UNC</option>
+          </select>
+        </div>
+        <div class="field"><label>Classe do parafuso</label>
+          <select id="tq-cl">
+            <option value="724">A193 B7 (σy = 724 MPa)</option>
+            <option value="930">A193 B16</option>
+            <option value="965">A540 Gr.B23</option>
+            <option value="240">Aço comum 8.8</option>
+          </select>
+        </div>
+        <div class="field"><label>K (coef. atrito)</label>
+          <select id="tq-k">
+            <option value="0.20">0,20 — Seco</option>
+            <option value="0.16" selected>0,16 — Lubrificado óleo</option>
+            <option value="0.14">0,14 — Pasta de Mo (Molykote)</option>
+            <option value="0.12">0,12 — Anti-engripante</option>
+          </select>
+        </div>
+        <div class="field"><label>% da tensão de escoamento</label><input id="tq-pct" type="number" step="5" value="50"></div>
+        <button class="btn bp" onclick="calcTQ()">Calcular</button>
+      </div>
+      <div class="card">
+        <h3>📤 Torque recomendado</h3>
+        <div class="result-box ok">
+          <div class="r-big" id="tq-val">—</div>
+          <div class="r-row"><span>Tração de aperto (F)</span><b id="tq-f">—</b></div>
+          <div class="r-row"><span>Área de tração</span><b id="tq-at">—</b></div>
+          <div class="r-row"><span>Conversão lb·ft</span><b id="tq-lb">—</b></div>
+        </div>
+        <div class="info">Para aperto cruzado: aplicar 30% → 60% → 100% do torque, sempre cruzado (norma ASME PCC-1). Recalibrar torquímetro a cada 6 meses.</div>
+      </div>
+    </div>`;
+  calcTQ();
+}
+const BOLTS={'M16':[16,156],'M20':[20,245],'M24':[24,353],'M30':[30,561],'M36':[36,817],'3/4':[19.05,215],'7/8':[22.23,298],'1':[25.4,391],'1.1/4':[31.75,624]};
+function calcTQ(){
+  const b=document.getElementById('tq-bolt').value;
+  const cl=parseFloat(document.getElementById('tq-cl').value);
+  const K=parseFloat(document.getElementById('tq-k').value);
+  const pct=n('tq-pct')/100;
+  const [d,At]=BOLTS[b];
+  const F=cl*At*pct; // N
+  const Tnm=K*d/1000*F; // Nm
+  document.getElementById('tq-val').textContent=fmt(Tnm,0)+' N·m';
+  document.getElementById('tq-f').textContent=fmt(F/1000,2)+' kN';
+  document.getElementById('tq-at').textContent=At+' mm²';
+  document.getElementById('tq-lb').textContent=fmt(Tnm*0.7376,0)+' lb·ft';
+}
+
+// ═══════════════════════════════════════════════════
+// 10. CHECKLIST NR-13
+// ═══════════════════════════════════════════════════
+const NR13_ITEMS=[
+  {cat:'Documentação',txt:'Prontuário do equipamento atualizado e disponível no local'},
+  {cat:'Documentação',txt:'Registro de Segurança do equipamento (livro de ocorrências) preenchido'},
+  {cat:'Documentação',txt:'Manual de operação atualizado e legível'},
+  {cat:'Documentação',txt:'Projeto de instalação e ART do PH (Profissional Habilitado)'},
+  {cat:'Documentação',txt:'Memorial de cálculo conforme ASME VIII Div. 1 ou equivalente'},
+  {cat:'Inspeção inicial',txt:'Exame externo realizado por PH'},
+  {cat:'Inspeção inicial',txt:'Exame interno realizado (vasos categoria I/II/III)'},
+  {cat:'Inspeção inicial',txt:'TH inicial executado a 1,5× P de projeto'},
+  {cat:'Inspeção periódica',txt:'Periodicidade do exame externo cumprida (1 ano normal)'},
+  {cat:'Inspeção periódica',txt:'Periodicidade do exame interno cumprida'},
+  {cat:'Inspeção periódica',txt:'Re-teste hidrostático realizado se exigido (vasos cat. I)'},
+  {cat:'Segurança',txt:'PSV/VSR válvulas de segurança ensaiadas e lacradas'},
+  {cat:'Segurança',txt:'Manômetro calibrado nos últimos 12 meses'},
+  {cat:'Segurança',txt:'Pressostato de segurança testado'},
+  {cat:'Segurança',txt:'Indicador de nível, blocos e drenos OK'},
+  {cat:'Operador',txt:'Operador qualificado (curso NR-13) e válido'},
+  {cat:'Operador',txt:'Treinamento de reciclagem em dia (vence em 3 anos)'},
+  {cat:'Soldagem',txt:'Reparos por soldagem com PQR/EPS qualificada'},
+  {cat:'Soldagem',txt:'Soldador qualificado para o procedimento aplicado'},
+  {cat:'Soldagem',txt:'Tratamento térmico pós-soldagem registrado (quando exigido)'},
+  {cat:'END',txt:'Radiografia (RT) das soldas categoria A,B,C,D realizada'},
+  {cat:'END',txt:'Líquido penetrante / partícula magnética em soldas críticas'},
+  {cat:'END',txt:'Espessura de parede medida (UT) sem corrosão > limite'},
+  {cat:'Identificação',txt:'Placa de identificação NR-13 íntegra e legível'},
+  {cat:'Identificação',txt:'TAG do equipamento visível e único no plot plan'}
+];
+function renderNR13(){
+  const key='hyd_nr13_'+new Date().toISOString().slice(0,10);
+  const done=JSON.parse(localStorage.getItem(key)||'{}');
+  const items=NR13_ITEMS.map((it,i)=>{
+    const st=done[i]||'pend';
+    const cls=st==='ok'?'done':st==='na'?'na':'';
+    return `<div class="chk-row ${cls}" onclick="tgNR13(${i})">
+      <input type="checkbox" class="chk-cb" ${st==='ok'?'checked':''}>
+      <div class="chk-txt">
+        <div class="chk-cat">${it.cat}</div>
+        <div>${it.txt}</div>
+      </div>
+      <button class="btn bg" style="padding:2px 7px;font-size:9.5px" onclick="event.stopPropagation();naNR13(${i})">${st==='na'?'↺':'N/A'}</button>
+    </div>`;
+  }).join('');
+  const ok=Object.values(done).filter(v=>v==='ok').length;
+  const na=Object.values(done).filter(v=>v==='na').length;
+  const pend=NR13_ITEMS.length-ok-na;
+  const pct=Math.round(ok/(NR13_ITEMS.length-na)*100);
+  document.getElementById('content').innerHTML=`
+    <div class="page-title">📋 Checklist NR-13</div>
+    <div class="page-sub">Lista de verificação prática baseada na NR-13 (Caldeiras, Vasos de Pressão e Tubulações). Os itens marcados ficam salvos no navegador por dia.</div>
+    <div class="card">
+      <h3>📊 Resumo de hoje</h3>
+      <div class="grid4">
+        <div class="kpi"><div class="kpi-val">${ok}</div><div class="kpi-lbl">Conformes</div></div>
+        <div class="kpi"><div class="kpi-val">${pend}</div><div class="kpi-lbl">Pendentes</div></div>
+        <div class="kpi"><div class="kpi-val">${na}</div><div class="kpi-lbl">Não aplicáveis</div></div>
+        <div class="kpi"><div class="kpi-val">${isFinite(pct)?pct:0}%</div><div class="kpi-lbl">Conformidade</div></div>
+      </div>
+      <button class="btn bp" onclick="exportNR13()" style="margin-top:10px">📄 Exportar laudo</button>
+      <button class="btn bg" onclick="resetNR13()">🗑 Limpar dia</button>
+    </div>
+    <div class="card">
+      <h3>✅ Itens (clique para marcar)</h3>
+      <div class="chk-list">${items}</div>
+    </div>`;
+}
+function tgNR13(i){
+  const key='hyd_nr13_'+new Date().toISOString().slice(0,10);
+  const d=JSON.parse(localStorage.getItem(key)||'{}');
+  d[i]=d[i]==='ok'?'pend':'ok';
+  localStorage.setItem(key,JSON.stringify(d));renderNR13();
+}
+function naNR13(i){
+  const key='hyd_nr13_'+new Date().toISOString().slice(0,10);
+  const d=JSON.parse(localStorage.getItem(key)||'{}');
+  d[i]=d[i]==='na'?'pend':'na';
+  localStorage.setItem(key,JSON.stringify(d));renderNR13();
+}
+function resetNR13(){
+  if(!confirm('Limpar checklist de hoje?'))return;
+  localStorage.removeItem('hyd_nr13_'+new Date().toISOString().slice(0,10));renderNR13();
+}
+function exportNR13(){
+  const key='hyd_nr13_'+new Date().toISOString().slice(0,10);
+  const d=JSON.parse(localStorage.getItem(key)||'{}');
+  const lines=['CHECKLIST NR-13 — '+new Date().toLocaleDateString('pt-BR'),''];
+  NR13_ITEMS.forEach((it,i)=>{const st=d[i]||'pend';lines.push(`[${st==='ok'?'X':st==='na'?'-':' '}] ${it.cat}: ${it.txt}`);});
+  const blob=new Blob([lines.join('\n')],{type:'text/plain'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='checklist_nr13_'+new Date().toISOString().slice(0,10)+'.txt';a.click();
+}
+
+// ═══════════════════════════════════════════════════
+// 11. AMOSTRAGEM END
+// ═══════════════════════════════════════════════════
+function renderEND(){
+  document.getElementById('content').innerHTML=`
+    <div class="page-title">🔬 Amostragem de END (RT / UT / LP / PM)</div>
+    <div class="page-sub">Calcula o número de juntas a serem inspecionadas conforme a classe de fluido e a categoria da tubulação (ASME B31.3 / normas industriais de END).</div>
+    <div class="grid2">
+      <div class="card">
+        <h3>📥 Entradas</h3>
+        <div class="field"><label>Categoria/Classe ASME B31.3</label>
+          <select id="nd-cat" onchange="calcEND()">
+            <option value="D">D — Fluido categoria D (baixo risco)</option>
+            <option value="N" selected>N — Normal (a maior parte)</option>
+            <option value="S">S — Severo</option>
+            <option value="H">H — Pressão alta</option>
+            <option value="M">M — Fluido categoria M (perigoso)</option>
+          </select>
+        </div>
+        <div class="field"><label>Nº total de juntas</label><input id="nd-jt" type="number" step="1" value="120" oninput="calcEND()"></div>
+        <div class="field"><label>Comprimento total (m)</label><input id="nd-l" type="number" step="0.5" value="800" oninput="calcEND()"></div>
+        <div class="field"><label>Diâmetro médio (pol)</label><input id="nd-d" type="number" step="0.5" value="4" oninput="calcEND()"></div>
+        <button class="btn bp" onclick="calcEND()">Calcular</button>
+      </div>
+      <div class="card">
+        <h3>📤 Amostragem recomendada</h3>
+        <div class="result-box ok">
+          <div class="grid2">
+            <div class="kpi"><div class="kpi-val" id="nd-rt">—</div><div class="kpi-lbl">Radiografia (RT)</div></div>
+            <div class="kpi"><div class="kpi-val" id="nd-ut">—</div><div class="kpi-lbl">Ultrassom (UT)</div></div>
+            <div class="kpi"><div class="kpi-val" id="nd-lp">—</div><div class="kpi-lbl">Líq. Penetrante</div></div>
+            <div class="kpi"><div class="kpi-val" id="nd-vt">—</div><div class="kpi-lbl">Visual (VT)</div></div>
+          </div>
+          <div class="r-row" style="margin-top:8px"><span>% RT do total</span><b id="nd-pct">—</b></div>
+          <div class="r-row"><span>HH de END estimado</span><b id="nd-hh">—</b></div>
+          <div class="r-row"><span>Custo aproximado (R$)</span><b id="nd-cost">—</b></div>
+        </div>
+        <div class="tip">Fluido M / NR-13 / alta pressão → 100% RT em juntas longitudinais e 100% UT em juntas circunferenciais &gt; 50 mm.</div>
+      </div>
+    </div>`;
+  calcEND();
+}
+function calcEND(){
+  const cat=document.getElementById('nd-cat').value;
+  const jt=n('nd-jt'),L=n('nd-l');
+  const pct={D:5,N:10,S:25,H:100,M:100}[cat]||10;
+  const rt=Math.ceil(jt*pct/100);
+  const ut=Math.ceil(jt*pct/100*(cat==='M'||cat==='H'?1:0.3));
+  const lp=Math.ceil(jt*0.1); // boas práticas industriais: 10% no mínimo
+  const vt=jt; // 100% visual sempre
+  const hh=rt*1.5+ut*1.0+lp*0.3+vt*0.1;
+  const cost=rt*85+ut*65+lp*25+vt*5;
+  document.getElementById('nd-rt').textContent=rt;
+  document.getElementById('nd-ut').textContent=ut;
+  document.getElementById('nd-lp').textContent=lp;
+  document.getElementById('nd-vt').textContent=vt;
+  document.getElementById('nd-pct').textContent=pct+'%';
+  document.getElementById('nd-hh').textContent=fmt(hh,1)+' HH';
+  document.getElementById('nd-cost').textContent='R$ '+fmt(cost,0);
+}
+
+// ═══════════════════════════════════════════════════
+// 12. INSPEÇÃO VISUAL DIÁRIA
+// ═══════════════════════════════════════════════════
+const VT_ITEMS=[
+  'Mordedura (undercut) ≤ 0,8 mm e ≤ 5% da espessura',
+  'Reforço excessivo (> 3 mm acima da chapa)',
+  'Falta de fusão / falta de penetração visível',
+  'Trincas longitudinais ou transversais — REJEITA',
+  'Porosidade superficial agrupada',
+  'Respingos não removidos',
+  'Sobreposição (overlap)',
+  'Concavidade excessiva no passe raiz',
+  'Inclusão de escória aflorando',
+  'Alinhamento desalinhado (high-low > 1,5 mm)',
+  'Marcação do soldador presente (estampagem)',
+  'Identificação da junta no isométrico (J-XX)',
+  'Pintura/jato após END (não antes)'
+];
+function renderInspecao(){
+  document.getElementById('content').innerHTML=`
+    <div class="page-title">✅ Inspeção Visual Diária</div>
+    <div class="page-sub">Lista de descontinuidades a verificar em inspeção visual (VT) conforme AWS D1.1 e normas industriais de inspeção. Use no celular durante a inspeção em campo.</div>
+    <div class="card">
+      <h3>📝 Junta inspecionada</h3>
+      <div class="grid3">
+        <div class="field"><label>Nº da junta</label><input id="iv-jt" placeholder="J-001"></div>
+        <div class="field"><label>Soldador</label><input id="iv-sld" placeholder="SOL-001"></div>
+        <div class="field"><label>Data</label><input id="iv-dt" type="date"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>🔍 Descontinuidades (marque o que ENCONTROU)</h3>
+      <div class="chk-list">
+        ${VT_ITEMS.map((it,i)=>`<div class="chk-row" onclick="this.classList.toggle('done');this.querySelector('input').checked=!this.querySelector('input').checked"><input type="checkbox" class="chk-cb"><div class="chk-txt">${it}</div></div>`).join('')}
+      </div>
+      <div class="field" style="margin-top:14px"><label>Observações</label><input id="iv-obs"></div>
+      <button class="btn bp" onclick="exportVT()">📄 Salvar relatório (TXT)</button>
+    </div>`;
+}
+function exportVT(){
+  const jt=s('iv-jt'),sld=s('iv-sld'),dt=s('iv-dt'),obs=s('iv-obs');
+  const enc=[];document.querySelectorAll('.chk-row.done .chk-txt').forEach(el=>enc.push(el.textContent));
+  const txt=`RELATÓRIO DE INSPEÇÃO VISUAL (VT)\n\nJunta: ${jt}\nSoldador: ${sld}\nData: ${dt}\n\nDescontinuidades encontradas (${enc.length}):\n${enc.map(e=>'- '+e).join('\n')||'(nenhuma)'}\n\nObservações: ${obs||'—'}\n\nResultado: ${enc.length?'REJEITADO / RETRABALHO':'APROVADO'}`;
+  const b=new Blob([txt],{type:'text/plain'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='VT_'+jt+'_'+dt+'.txt';a.click();
+}
+
+// ═══════════════════════════════════════════════════
+// 13. ESTIMATIVA DE HH
+// ═══════════════════════════════════════════════════
+function renderHH(){
+  document.getElementById('content').innerHTML=`
+    <div class="page-title">⏱️ Estimativa de Horas-Homem (HH)</div>
+    <div class="page-sub">Calcula o HH planejado de um escopo (fabricação + montagem) usando coeficientes Brasil. Útil para orçamento, curva S e proposta comercial.</div>
+    <div class="grid2">
+      <div class="card">
+        <h3>📥 Escopo</h3>
+        <div class="grid2">
+          <div class="field"><label>Comprimento (m)</label><input id="hh-l" type="number" step="0.5" value="200"></div>
+          <div class="field"><label>Nº juntas</label><input id="hh-j" type="number" step="1" value="40"></div>
+          <div class="field"><label>Nº suportes</label><input id="hh-sp" type="number" step="1" value="22"></div>
+          <div class="field"><label>Nº flanges</label><input id="hh-fl" type="number" step="1" value="18"></div>
+        </div>
+        <div class="field"><label>Material</label>
+          <select id="hh-mat">
+            <option value="1.0">Aço Carbono</option>
+            <option value="1.5">Inox 304/316</option>
+            <option value="1.15">AC galvanizado</option>
+            <option value="1.8">Liga (P11, P22)</option>
+          </select>
+        </div>
+        <div class="field"><label>Processo predominante</label>
+          <select id="hh-pr">
+            <option value="smaw">SMAW · 0,85 hh/m · 0,65 hh/junta</option>
+            <option value="tig">TIG · 1,40 hh/m · 1,10 hh/junta</option>
+            <option value="mig" selected>MIG/MAG · 0,55 hh/m · 0,40 hh/junta</option>
+            <option value="tubular">FCAW · 0,60 hh/m · 0,45 hh/junta</option>
+          </select>
+        </div>
+        <div class="field"><label>Fator campo (1,0 = oficina)</label><input id="hh-fc" type="number" step="0.05" value="1.15"></div>
+        <button class="btn bp" onclick="calcHH()">Calcular</button>
+      </div>
+      <div class="card">
+        <h3>📤 HH estimado</h3>
+        <div class="result-box ok">
+          <div class="r-big" id="hh-tot">—</div>
+          <div class="r-row"><span>HH soldagem</span><b id="hh-sold">—</b></div>
+          <div class="r-row"><span>HH suportes</span><b id="hh-sup">—</b></div>
+          <div class="r-row"><span>HH flanges</span><b id="hh-flg">—</b></div>
+          <div class="r-row"><span>Custo estimado (R$ 65/hh)</span><b id="hh-rs">—</b></div>
+          <div class="r-row"><span>Duração (15 pessoas)</span><b id="hh-dur">—</b></div>
+        </div>
+        <div class="info">Para fabricação em oficina, usar fator 1,0. Para montagem em campo (altura, andaime, vento), aplicar 1,15 a 1,30 dependendo da complexidade.</div>
+      </div>
+    </div>`;
+}
+function calcHH(){
+  const L=n('hh-l'),J=n('hh-j'),Sp=n('hh-sp'),Fl=n('hh-fl');
+  const mat=parseFloat(document.getElementById('hh-mat').value);
+  const proc=document.getElementById('hh-pr').value;
+  const fc=n('hh-fc');
+  const tabela={smaw:[0.85,0.65],tig:[1.40,1.10],mig:[0.55,0.40],tubular:[0.60,0.45]};
+  const [hm,hj]=tabela[proc];
+  const hSold=(L*hm+J*hj)*mat*fc;
+  const hSup=Sp*1.8*fc;
+  const hFlg=Fl*0.85*fc;
+  const tot=hSold+hSup+hFlg;
+  document.getElementById('hh-sold').textContent=fmt(hSold,1)+' hh';
+  document.getElementById('hh-sup').textContent=fmt(hSup,1)+' hh';
+  document.getElementById('hh-flg').textContent=fmt(hFlg,1)+' hh';
+  document.getElementById('hh-tot').textContent=fmt(tot,0)+' HH';
+  document.getElementById('hh-rs').textContent='R$ '+fmt(tot*65,0);
+  document.getElementById('hh-dur').textContent=fmt(tot/(15*8),1)+' dias';
+}
+
+// ═══════════════════════════════════════════════════
+// 14. CURVA S
+// ═══════════════════════════════════════════════════
+function renderCurvas(){
+  document.getElementById('content').innerHTML=`
+    <div class="page-title">📈 Curva S (Planejado)</div>
+    <div class="page-sub">Gera a curva S em formato sigmoide para um projeto, com base no HH total, prazo e perfil (cedo/médio/tardio). Exporta como CSV para o MS Project.</div>
+    <div class="grid2">
+      <div class="card">
+        <h3>📥 Entradas</h3>
+        <div class="field"><label>HH total do projeto</label><input id="cs-hh" type="number" step="100" value="12000"></div>
+        <div class="field"><label>Prazo total (semanas)</label><input id="cs-w" type="number" step="1" value="20"></div>
+        <div class="field"><label>Perfil da curva</label>
+          <select id="cs-p">
+            <option value="0.7">Cedo (front-loaded)</option>
+            <option value="1.0" selected>Equilibrado (S clássica)</option>
+            <option value="1.4">Tardio (back-loaded)</option>
+          </select>
+        </div>
+        <button class="btn bp" onclick="calcCurva()">Gerar curva</button>
+        <button class="btn bg" onclick="exportCurva()">📥 CSV</button>
+      </div>
+      <div class="card">
+        <h3>📊 Curva S</h3>
+        <canvas id="cs-cv" width="600" height="280" style="width:100%;max-width:600px;background:var(--bg2);border-radius:6px"></canvas>
+      </div>
+    </div>
+    <div class="card">
+      <h3>📋 Tabela de HH por semana</h3>
+      <table class="lk" id="cs-tb"><thead><tr><th>Semana</th><th>HH semanal</th><th>HH acumulado</th><th>% acumulado</th></tr></thead><tbody></tbody></table>
+    </div>`;
+  calcCurva();
+}
+let _curvaData=[];
+function calcCurva(){
+  const HH=n('cs-hh'),W=n('cs-w'),k=parseFloat(document.getElementById('cs-p').value);
+  _curvaData=[];let acum=0;
+  // Função beta normalizada — produz curva S
+  for(let i=1;i<=W;i++){
+    const x=i/W;const f=Math.pow(x,2*k)/(Math.pow(x,2*k)+Math.pow(1-x,2*k));
+    const prev=i===1?0:Math.pow((i-1)/W,2*k)/(Math.pow((i-1)/W,2*k)+Math.pow(1-(i-1)/W,2*k));
+    const sem=Math.round((f-prev)*HH);
+    acum+=sem;
+    _curvaData.push({sem:i,hh:sem,acum,pct:f*100});
+  }
+  // Desenha
+  const cv=document.getElementById('cs-cv'),ctx=cv.getContext('2d');
+  ctx.clearRect(0,0,cv.width,cv.height);
+  ctx.strokeStyle='#0B3D91';ctx.lineWidth=2;ctx.beginPath();
+  const pad=30,W2=cv.width-pad*2,H=cv.height-pad*2;
+  _curvaData.forEach((d,i)=>{const x=pad+(d.sem/W)*W2,y=cv.height-pad-(d.pct/100)*H;if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);});
+  ctx.stroke();
+  // Eixos
+  ctx.strokeStyle='#d0d8e8';ctx.lineWidth=1;
+  for(let i=0;i<=10;i++){const y=cv.height-pad-(i/10)*H;ctx.beginPath();ctx.moveTo(pad,y);ctx.lineTo(cv.width-pad,y);ctx.stroke();}
+  ctx.fillStyle='#5a6a85';ctx.font='10px monospace';
+  for(let i=0;i<=10;i++){const y=cv.height-pad-(i/10)*H;ctx.fillText((i*10)+'%',5,y+3);}
+  for(let i=0;i<=W;i+=Math.max(1,Math.round(W/8))){const x=pad+(i/W)*W2;ctx.fillText('S'+i,x-6,cv.height-10);}
+  // tabela
+  document.querySelector('#cs-tb tbody').innerHTML=_curvaData.map(d=>`<tr><td>S${d.sem}</td><td>${fmt(d.hh,0)}</td><td>${fmt(d.acum,0)}</td><td>${fmt(d.pct,1)}%</td></tr>`).join('');
+}
+function exportCurva(){
+  if(!_curvaData.length){toast('Gere a curva primeiro','warn');return;}
+  const csv='Semana;HH Semanal;HH Acumulado;% Acumulado\n'+_curvaData.map(d=>`S${d.sem};${d.hh};${d.acum};${d.pct.toFixed(1)}%`).join('\n');
+  const b=new Blob([csv],{type:'text/csv'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='curva_s.csv';a.click();
+}
+
+// ═══════════════════════════════════════════════════
+// 15. CONVERSOR DE UNIDADES
+// ═══════════════════════════════════════════════════
+const CONV={
+  comprimento:{pol:25.4,p:304.8,mm:1,cm:10,m:1000,jardas:914.4},
+  pressao:{bar:1,psi:0.0689476,kpa:0.01,mpa:10,kgf_cm2:0.980665,atm:1.01325,mmHg:0.00133322,inH2O:0.0024884},
+  temperatura:'special',
+  area:{mm2:1,cm2:100,m2:1e6,pol2:645.16,p2:92903},
+  volume:{ml:1,l:1000,m3:1e6,gal_us:3785.41,gal_uk:4546.09,barril:158987,p3:28316.8},
+  massa:{g:1,kg:1000,t:1e6,lb:453.592,oz:28.3495},
+  forca:{N:1,kgf:9.80665,lbf:4.44822,daN:10,kN:1000},
+  torque:{Nm:1,kgfm:9.80665,lbft:1.35582,lbin:0.112985},
+  vazao:{l_min:1,l_s:60,m3_h:16.6667,gpm:3.78541,bpm:158.987},
+  potencia:{W:1,kW:1000,cv:735.499,hp:745.7,kcal_h:1.163,btu_h:0.293}
+};
+function renderConv(){
+  document.getElementById('content').innerHTML=`
+    <div class="page-title">🔁 Conversor de Unidades</div>
+    <div class="page-sub">Converte entre as unidades mais usadas em engenharia mecânica: comprimento, pressão, vazão, torque, força, potência, etc.</div>
+    <div class="grid2">
+      <div class="card">
+        <h3>📐 Comprimento</h3>${convBox('comprimento','mm','pol',1)}
+      </div>
+      <div class="card">
+        <h3>💪 Pressão</h3>${convBox('pressao','bar','psi',1)}
+      </div>
+      <div class="card">
+        <h3>🌡️ Temperatura</h3>
+        <div class="grid3">
+          <div class="field"><label>°C</label><input id="cv-c" type="number" step="0.1" value="25" oninput="convTemp('c')"></div>
+          <div class="field"><label>°F</label><input id="cv-f" type="number" step="0.1" value="77" oninput="convTemp('f')"></div>
+          <div class="field"><label>K</label><input id="cv-k" type="number" step="0.1" value="298.15" oninput="convTemp('k')"></div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>⚖️ Massa</h3>${convBox('massa','kg','lb',1)}
+      </div>
+      <div class="card">
+        <h3>🔄 Vazão</h3>${convBox('vazao','m3_h','gpm',1)}
+      </div>
+      <div class="card">
+        <h3>🔧 Torque</h3>${convBox('torque','Nm','lbft',1)}
+      </div>
+      <div class="card">
+        <h3>⚡ Potência</h3>${convBox('potencia','kW','cv',1)}
+      </div>
+      <div class="card">
+        <h3>💧 Volume</h3>${convBox('volume','m3','gal_us',1)}
+      </div>
+    </div>`;
+}
+function convBox(cat,from,to,val){
+  const units=Object.keys(CONV[cat]);
+  return `<div class="grid2">
+    <div class="field"><label>De</label>
+      <input id="cv-${cat}-v" type="number" step="0.0001" value="${val}" oninput="conv('${cat}')">
+      <select id="cv-${cat}-fu" onchange="conv('${cat}')">${units.map(u=>`<option ${u===from?'selected':''}>${u}</option>`).join('')}</select>
+    </div>
+    <div class="field"><label>Para</label>
+      <input id="cv-${cat}-r" readonly style="background:var(--hbl)">
+      <select id="cv-${cat}-tu" onchange="conv('${cat}')">${units.map(u=>`<option ${u===to?'selected':''}>${u}</option>`).join('')}</select>
+    </div>
+  </div>`;
+}
+function conv(cat){
+  const v=n('cv-'+cat+'-v');
+  const fu=document.getElementById('cv-'+cat+'-fu').value;
+  const tu=document.getElementById('cv-'+cat+'-tu').value;
+  const fb=CONV[cat][fu]*v;
+  const r=fb/CONV[cat][tu];
+  document.getElementById('cv-'+cat+'-r').value=r.toLocaleString('pt-BR',{maximumFractionDigits:6});
+}
+function convTemp(src){
+  let c;
+  if(src==='c'){c=n('cv-c');}
+  else if(src==='f'){c=(n('cv-f')-32)*5/9;}
+  else{c=n('cv-k')-273.15;}
+  if(src!=='c')document.getElementById('cv-c').value=c.toFixed(2);
+  if(src!=='f')document.getElementById('cv-f').value=(c*9/5+32).toFixed(2);
+  if(src!=='k')document.getElementById('cv-k').value=(c+273.15).toFixed(2);
+}
+
+// Inicializa conversores
+function initAllConv(){['comprimento','pressao','massa','vazao','torque','potencia','volume'].forEach(c=>conv(c));}
+
+// ═══════════════════════════════════════════════════
+// 16. PROPRIEDADES DE MATERIAIS
+// ═══════════════════════════════════════════════════
+const MATS=[
+  {esp:'ASTM A106 Gr.B',cat:'Aço carbono',sigma_y:241,sigma_u:415,sa_b313_38:138,sa_b313_200:124,sa_b313_400:91,dens:7850,uso:'Tubulação alta temperatura — vapor, processo'},
+  {esp:'ASTM A53 Gr.B',cat:'Aço carbono',sigma_y:241,sigma_u:415,sa_b313_38:138,sa_b313_200:124,sa_b313_400:91,dens:7850,uso:'Tubulação geral, água, ar comprimido'},
+  {esp:'ASTM A335 P11',cat:'Aço liga 1¼Cr-½Mo',sigma_y:207,sigma_u:415,sa_b313_38:138,sa_b313_200:138,sa_b313_400:138,sa_b313_500:114,dens:7850,uso:'Caldeiras, vapor superaquecido até 580°C'},
+  {esp:'ASTM A335 P22',cat:'Aço liga 2¼Cr-1Mo',sigma_y:207,sigma_u:415,sa_b313_38:138,sa_b313_200:138,sa_b313_400:138,sa_b313_500:138,dens:7850,uso:'Hidrogênio, refinaria, até 595°C'},
+  {esp:'ASTM A312 TP304',cat:'Inox 18Cr-8Ni',sigma_y:205,sigma_u:515,sa_b313_38:138,sa_b313_200:115,sa_b313_400:103,dens:8000,uso:'Processo geral, alimentos'},
+  {esp:'ASTM A312 TP316',cat:'Inox 16Cr-12Ni-2Mo',sigma_y:205,sigma_u:515,sa_b313_38:138,sa_b313_200:115,sa_b313_400:107,dens:8000,uso:'Cloretos, ácidos'},
+  {esp:'ASTM A312 TP321',cat:'Inox estab. Ti',sigma_y:205,sigma_u:515,sa_b313_38:138,sa_b313_200:115,sa_b313_400:107,dens:8000,uso:'Vapor superaquecido, evita sensitização'},
+  {esp:'ASTM A790 S31803',cat:'Duplex 22Cr',sigma_y:450,sigma_u:620,sa_b313_38:172,sa_b313_200:159,dens:7800,uso:'Off-shore, água do mar'},
+  {esp:'ASTM A333 Gr.6',cat:'AC baixa temperatura',sigma_y:241,sigma_u:415,sa_b313_38:138,sa_b313_minus45:138,dens:7850,uso:'GLP, etileno até −45°C'}
+];
+function renderMateriais(){
+  document.getElementById('content').innerHTML=`
+    <div class="page-title">📦 Propriedades de Materiais</div>
+    <div class="page-sub">Banco de dados rápido das especificações mais usadas em tubulação industrial — tensões admissíveis ASME B31.3 por temperatura, limite de escoamento, densidade e aplicação típica.</div>
+    <div class="card">
+      <h3>📋 Especificações</h3>
+      <table class="lk">
+        <thead><tr><th>Especificação</th><th>Categoria</th><th>σy (MPa)</th><th>σu (MPa)</th><th>S @ 38°C</th><th>S @ 200°C</th><th>S @ 400°C</th><th>ρ (kg/m³)</th><th style="font-family:inherit">Aplicação</th></tr></thead>
+        <tbody>
+          ${MATS.map(m=>`<tr>
+            <td><b>${m.esp}</b></td>
+            <td style="font-family:inherit">${m.cat}</td>
+            <td>${m.sigma_y}</td><td>${m.sigma_u}</td>
+            <td>${m.sa_b313_38||'—'}</td>
+            <td>${m.sa_b313_200||'—'}</td>
+            <td>${m.sa_b313_400||'—'}</td>
+            <td>${m.dens}</td>
+            <td style="font-family:inherit;color:var(--hmu);font-size:10.5px">${m.uso}</td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+      <div class="info">⚠️ As tensões admissíveis acima são <i>típicas</i> para Sec. II Part D ASME — sempre verificar a edição vigente do código. Para cálculos críticos, use os valores oficiais da norma.</div>
+    </div>`;
+}
+
+// ═══════════════════════════════════════════════════
+// 17. NORMAS E REFERÊNCIAS
+// ═══════════════════════════════════════════════════
+const REFS=[
+  {n:'ASME B31.1',t:'Power Piping',d:'Tubulação de vapor, água em caldeiras e turbinas'},
+  {n:'ASME B31.3',t:'Process Piping',d:'Tubulação de processo em refinarias, química, farmacêutica'},
+  {n:'ASME B31.4',t:'Pipeline Transportation Systems for Liquids',d:'Dutos de líquidos (oleodutos)'},
+  {n:'ASME B31.8',t:'Gas Transmission and Distribution Piping',d:'Gasodutos'},
+  {n:'ASME Sec. VIII',t:'Rules for Construction of Pressure Vessels',d:'Vasos de pressão (caldeiras, separadores)'},
+  {n:'ASME Sec. IX',t:'Welding and Brazing Qualifications',d:'Qualificação de procedimentos e soldadores (PQR/EPS/WPS)'},
+  {n:'AWS D1.1',t:'Structural Welding Code — Steel',d:'Soldagem estrutural em aço'},
+  {n:'AWS D1.6',t:'Structural Welding Code — Stainless Steel',d:'Soldagem estrutural em inox'},
+  {n:'API 1104',t:'Welding of Pipelines',d:'Soldagem de dutos transcontinentais'},
+  {n:'API 570',t:'Piping Inspection Code',d:'Inspeção, reparo, alteração e re-rating de tubulação'},
+  {n:'NR-13',t:'Caldeiras, Vasos de Pressão e Tubulação (BR)',d:'Norma brasileira de segurança ocupacional'},
+  {n:'NR-33',t:'Trabalho em Espaços Confinados',d:'Aplicável em interior de equipamentos'},
+  {n:'N-115 operador industrial',t:'Montagem de Tubulações Metálicas',d:'Padrão operador industrial para montagem industrial'},
+  {n:'N-133 operador industrial',t:'Soldagem',d:'Padrão operador industrial para serviços de soldagem'},
+  {n:'N-1593 operador industrial',t:'Ensaios Não-Destrutivos',d:'Padrão operador industrial END (RT, UT, LP, PM, VT)'},
+  {n:'ASME B16.5',t:'Pipe Flanges and Flanged Fittings',d:'Flanges 1/2" a 24", classes 150 a 2500'},
+  {n:'ASME B16.9',t:'Factory-Made Wrought Buttwelding Fittings',d:'Curvas, tês, reduções, tampões para solda topo'},
+  {n:'ASME B16.25',t:'Buttwelding Ends',d:'Chanfros de extremidades para solda topo'},
+  {n:'ASME B36.10',t:'Welded and Seamless Wrought Steel Pipe',d:'Schedules de tubo (10, 40, 80, 160, XS, XXS)'},
+  {n:'ASME PCC-1',t:'Guidelines for Pressure Boundary Bolted Flange Joint Assembly',d:'Aperto de flanges (cruzado, sequência)'}
+];
+function renderReferencias(){
+  document.getElementById('content').innerHTML=`
+    <div class="page-title">📚 Normas &amp; Referências</div>
+    <div class="page-sub">Lista das normas mais usadas em engenharia mecânica e de tubulação no Brasil.</div>
+    <div class="card">
+      <h3>📋 Códigos e padrões aplicáveis</h3>
+      <table class="lk">
+        <thead><tr><th>Código</th><th>Título</th><th style="font-family:inherit">Aplicação</th></tr></thead>
+        <tbody>${REFS.map(r=>`<tr><td><b>${r.n}</b></td><td style="font-family:inherit">${r.t}</td><td style="font-family:inherit;color:var(--hmu)">${r.d}</td></tr>`).join('')}</tbody>
+      </table>
+    </div>
+    <div class="card">
+      <h3>🔗 Atalhos rápidos</h3>
+      <div class="grid3" style="gap:8px">
+        <a class="btn bp" target="_blank" href="https://www.gov.br/trabalho-e-emprego/pt-br/assuntos/inspecao-do-trabalho/seguranca-e-saude-no-trabalho/normas-regulamentadoras/nr-13.pdf">📥 NR-13 (PDF oficial MTE)</a>
+        <a class="btn bp" target="_blank" href="https://www.gov.br/trabalho-e-emprego/pt-br/assuntos/inspecao-do-trabalho/seguranca-e-saude-no-trabalho/normas-regulamentadoras">📥 Todas as NRs</a>
+        <a class="btn bp" target="_blank" href="https://www.asme.org/codes-standards">🌐 ASME (oficial)</a>
+        <a class="btn bp" target="_blank" href="https://www.aws.org">🌐 AWS (American Welding Society)</a>
+        <a class="btn bp" target="_blank" href="https://canaltech.petrobras.com.br/">🌐 Cadastro de padrões industriais (cadastro padrões)</a>
+        <a class="btn bp" target="_blank" href="https://www.abrasoldagem.com.br">🌐 ABS — Associação Brasileira de Soldagem</a>
+      </div>
+    </div>`;
+}
+
+// ═══════════════════════════════════════════════════
+// BOOT
+// ═══════════════════════════════════════════════════
+const init=location.hash.replace('#','')||'heat-input';
+go(init);
+</script>
+</body>
+</html>

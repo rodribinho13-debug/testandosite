@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>PROJECT.IA — Teste de login</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+body{font-family:-apple-system,'Segoe UI',sans-serif;background:#0A1628;color:#fff;padding:24px;max-width:560px;margin:0 auto}
+h1{font-size:20px;margin:0 0 6px}
+p{font-size:13px;line-height:1.6;color:#94A3B8}
+.box{background:#13233F;border:1px solid #334155;border-radius:12px;padding:20px;margin-top:14px}
+input,button{width:100%;padding:11px 14px;border-radius:8px;font-size:14px;font-family:inherit;box-sizing:border-box}
+input{background:#1E293B;color:#fff;border:1px solid #334155;margin-bottom:10px;outline:none}
+button{background:#1E40AF;color:#fff;border:none;font-weight:700;cursor:pointer}
+button:hover{background:#2563EB}
+.log{background:#0A1628;border:1px solid #1E293B;border-radius:8px;padding:12px;margin-top:12px;font-family:'Courier New',monospace;font-size:12px;line-height:1.7;max-height:300px;overflow:auto}
+.ok{color:#34D399}.err{color:#FCA5A5}.warn{color:#FCD34D}
+a{color:#60A5FA;text-decoration:none}
+</style>
+</head>
+<body>
+<h1>🧪 Teste isolado de login</h1>
+<p>Esta página tem ZERO módulos extras (sem custom_views, sem saas-modules, sem security). Apenas Supabase puro. Use para isolar onde está o problema.</p>
+
+<div class="box">
+  <input id="em" type="email" placeholder="seu@email.com" value="rodrigojsbrandao@gmail.com">
+  <input id="pw" type="password" placeholder="senha">
+  <button onclick="testLogin()">Testar login</button>
+  <div id="log" class="log">Aguardando teste...</div>
+</div>
+
+<p style="margin-top:18px"><a href="hydrostec_v9.html">← Voltar ao sistema</a> · <a href="reset.html">🔧 Resetar cache</a></p>
+
+<script>
+const SB_URL = 'https://toapdhfouuedaexgqlsv.supabase.co';
+const SB_KEY = 'sb_publishable_qVVBatpB_ppDLR6QcG8QgQ_hVYW0h8Q';
+const sb = supabase.createClient(SB_URL, SB_KEY, {auth:{persistSession:false}});
+const log = document.getElementById('log');
+function w(msg, cls){ const d=document.createElement('div'); if(cls)d.className=cls; d.textContent=new Date().toLocaleTimeString()+' '+msg; log.appendChild(d); log.scrollTop=log.scrollHeight; }
+
+async function testLogin(){
+  log.innerHTML='';
+  const em = document.getElementById('em').value.trim();
+  const pw = document.getElementById('pw').value;
+  w('1. Verificando rede Supabase...');
+  try {
+    const ping = await fetch(SB_URL+'/auth/v1/health', {headers:{'apikey':SB_KEY}});
+    w('Network OK ('+ping.status+')', 'ok');
+  } catch(e){ w('Network FAIL: '+e.message, 'err'); return; }
+
+  w('2. Chamando signInWithPassword...');
+  const t0 = Date.now();
+  try {
+    const {data, error} = await sb.auth.signInWithPassword({email:em, password:pw});
+    const t = Date.now()-t0;
+    if(error){ w('Login FAIL ('+t+'ms): '+error.message, 'err'); return; }
+    w('Login OK ('+t+'ms): user_id='+data.user.id, 'ok');
+    w('email_verified: '+data.user.email_confirmed_at, 'ok');
+    w('access_token: '+(data.session?.access_token||'').slice(0,40)+'...', 'ok');
+
+    w('3. Testando consulta org_members...');
+    const {data:mem, error:e2} = await sb.from('org_members').select('role, organizations(id,name)').limit(1);
+    if(e2){ w('Query FAIL: '+e2.message, 'err'); return; }
+    if(!mem||!mem.length){ w('Query OK mas usuario nao tem organizacao!', 'warn'); return; }
+    w('Query OK: org="'+mem[0].organizations.name+'" role="'+mem[0].role+'"', 'ok');
+
+    w('4. Testando audit_log SELECT (so admin/gerente ve)...');
+    const {data:al, error:e3} = await sb.from('audit_log').select('id').limit(1);
+    if(e3){ w('Audit SELECT bloqueado: '+e3.message, 'warn'); }
+    else w('Audit acessivel ('+al.length+' rows)', 'ok');
+
+    w('5. TUDO OK - login funciona neste teste isolado.', 'ok');
+    w('Se o v9 nao loga mas aqui sim, o problema esta no JS do v9 (provavelmente saas-modules ou custom_views).', 'warn');
+  } catch(e){ w('Exception: '+(e.message||e), 'err'); }
+}
+</script>
+</body>
+</html>

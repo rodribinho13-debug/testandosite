@@ -1,0 +1,6795 @@
+/* PROJECT.IA v9 - bundle principal */
+
+// ═══════════════════════════════════════════════════
+// SUPABASE CONFIG
+// ═══════════════════════════════════════════════════
+const SUPABASE_URL='https://toapdhfouuedaexgqlsv.supabase.co';
+const SUPABASE_KEY='sb_publishable_qVVBatpB_ppDLR6QcG8QgQ_hVYW0h8Q';
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+
+// ═══════════════════════════════════════════════════
+// CAPTURA GLOBAL DE ERROS (debug)
+// ═══════════════════════════════════════════════════
+window.addEventListener('error', function(e){
+  console.error('[Erro JS capturado]', e.message, 'em', e.filename+':'+e.lineno+':'+e.colno);
+  try {
+    let box = document.getElementById('global-err-box');
+    if(!box){
+      box = document.createElement('div');
+      box.id = 'global-err-box';
+      box.style.cssText = 'position:fixed;top:10px;left:50%;transform:translateX(-50%);background:#fef2f2;border:1px solid #ef4444;border-left:4px solid #ef4444;border-radius:8px;padding:12px 16px;max-width:90vw;z-index:99999;font-family:monospace;font-size:11.5px;color:#991b1b;box-shadow:0 8px 24px rgba(239,68,68,.2);cursor:pointer';
+      box.title = 'Clique para fechar';
+      box.onclick = ()=>box.remove();
+      document.body.appendChild(box);
+    }
+    box.innerHTML = '';
+    const strong = document.createElement('strong'); strong.textContent = '⚠ Erro JS: '; box.appendChild(strong);
+    box.appendChild(document.createTextNode(String(e.message||'?')));
+    box.appendChild(document.createElement('br'));
+    const small = document.createElement('small'); small.style.opacity='.7';
+    small.textContent = String(e.filename||'?').split('/').pop()+':'+e.lineno+':'+e.colno+' — clique pra fechar';
+    box.appendChild(small);
+  } catch(_){}
+});
+window.addEventListener('unhandledrejection', function(e){
+  console.error('[Promise rejection]', e.reason);
+});
+
+// ═══════════════════════════════════════════════════
+// PERSONALIZAÇÃO DE CAMPOS POR ORGANIZAÇÃO
+// ═══════════════════════════════════════════════════
+let _fieldCustomizations = {};
+const FIELD_SCHEMA = {
+  // Mapa de Juntas — Qualidade (labels EXATOS do <th> da tabela)
+  quality_joints: [
+    {name:'iso_number', label:'Iso/Rev', type:'text'},
+    {name:'spool_id_ref', label:'Spool', type:'text'},
+    {name:'joint_number', label:'Junta', type:'text', required:true},
+    {name:'diameter_in', label:'Ø', type:'number', step:'0.25'},
+    {name:'schedule', label:'Sch', type:'text'},
+    {name:'material', label:'Material', type:'text'},
+    {name:'data_solda', label:'Data solda', type:'date'},
+    {name:'sinete_raiz', label:'Sinete raiz', type:'text'},
+    {name:'sinete_ench_acab', label:'Sinete ench', type:'text'},
+    {name:'vs_raiz_date', label:'VS Raiz', type:'date'},
+    {name:'vs_date', label:'VS Final', type:'date'},
+    {name:'rx_us_date', label:'RX/US', type:'date'},
+    {name:'lppm_date', label:'LP/PM', type:'date'},
+    {name:'tt_date', label:'TT', type:'date'},
+    {name:'du_date', label:'Dureza', type:'date'},
+    {name:'pmi_date', label:'PMI', type:'date'},
+    {name:'th_date', label:'TH', type:'date'},
+    {name:'reparo', label:'Reparo', type:'checkbox'}
+  ],
+  // Relatorios END
+  quality_reports: [
+    {name:'inspected_at', label:'Data', type:'date'},
+    {name:'ndt_type', label:'Tipo', type:'text'},
+    {name:'joint_number', label:'Junta', type:'text'},
+    {name:'iso_number', label:'Iso', type:'text'},
+    {name:'inspector_name', label:'Inspetor', type:'text'},
+    {name:'inspector_certification', label:'Cert.', type:'text'},
+    {name:'result', label:'Resultado', type:'text'},
+    {name:'coverage_pct', label:'Cobertura', type:'number', step:'0.1'},
+    {name:'notebook_ref', label:'Caderneta', type:'text'},
+    {name:'findings', label:'Achados', type:'textarea', full:true}
+  ],
+  // Comissionamento (Sistemas TH)
+  com: [
+    {name:'code', label:'Código', type:'text', required:true},
+    {name:'system_type', label:'Tipo', type:'text'},
+    {name:'name', label:'Nome', type:'text', full:true},
+    {name:'project_code', label:'Projeto', type:'text'},
+    {name:'pressure_bar', label:'Pressão', type:'number', step:'0.1'},
+    {name:'status', label:'Status', type:'text'}
+  ],
+  // Materiais — campos do catalogo + quantity (virtual, vai pra project_materials)
+  mat: [
+    {name:'code', label:'Código', type:'text', required:true},
+    {name:'description', label:'Descrição', type:'text', full:true},
+    {name:'category', label:'Categoria', type:'text'},
+    {name:'material_type', label:'Material', type:'text'},
+    {name:'diameter_in', label:'Ø', type:'number', step:'0.25'},
+    {name:'pressure_class', label:'Classe', type:'text'},
+    {name:'schedule', label:'Schedule', type:'text'},
+    {name:'quantity', label:'Quantidade', type:'number', step:'0.01'},
+    {name:'unit', label:'Un.', type:'text'},
+    {name:'ncm', label:'NCM', type:'text'},
+    {name:'weight_per_unit', label:'Peso/und', type:'number', step:'0.001'},
+    {name:'unit_price', label:'Preço unit.', type:'number', step:'0.01'},
+    {name:'supplier', label:'Fornecedor', type:'text'},
+    {name:'notes', label:'Observações', type:'textarea', full:true}
+  ],
+  // Equipamentos NR-13
+  equip: [
+    {name:'tag', label:'TAG', type:'text', required:true},
+    {name:'name', label:'Nome', type:'text'},
+    {name:'equipment_type', label:'Tipo', type:'text'},
+    {name:'manufacturer', label:'Fabricante', type:'text'},
+    {name:'pressure_design_bar', label:'P proj.', type:'number', step:'0.1'},
+    {name:'temperature_design_c', label:'T proj.', type:'number', step:'0.1'},
+    {name:'volume_m3', label:'Volume', type:'number', step:'0.01'},
+    {name:'nr13_class', label:'NR-13', type:'text'},
+    {name:'status', label:'Status', type:'text'},
+    {name:'last_inspection_date', label:'Última insp.', type:'date'},
+    {name:'next_inspection_date', label:'Próxima', type:'date'}
+  ],
+  // Manutenção (OS)
+  maint: [
+    {name:'os_number', label:'OS', type:'text', required:true},
+    {name:'title', label:'Título', type:'text', full:true},
+    {name:'os_type', label:'Tipo', type:'text'},
+    {name:'priority', label:'Prioridade', type:'text'},
+    {name:'equipment_tag', label:'Equipamento', type:'text'},
+    {name:'status', label:'Status', type:'text'},
+    {name:'scheduled_start', label:'Início prev.', type:'date'},
+    {name:'scheduled_end', label:'Fim prev.', type:'date'},
+    {name:'planned_hh', label:'HH plan.', type:'number', step:'0.1'}
+  ],
+  // Soldadores
+  sold: [
+    {name:'matricula', label:'Matrícula', type:'text', required:true},
+    {name:'full_name', label:'Nome', type:'text', full:true, required:true},
+    {name:'cpf', label:'CPF', type:'text'},
+    {name:'phone', label:'Telefone', type:'text'},
+    {name:'active', label:'Status', type:'checkbox'}
+  ],
+  // Calibração de Instrumentos
+  cal: [
+    {name:'tag', label:'TAG', type:'text', required:true},
+    {name:'name', label:'Nome', type:'text'},
+    {name:'instrument_type', label:'Tipo', type:'text'},
+    {name:'range', label:'Faixa', type:'text'},
+    {name:'standard', label:'Padrão', type:'text'},
+    {name:'next_calibration', label:'Próxima calibração', type:'date'},
+    {name:'status', label:'Status', type:'text'}
+  ],
+  // Pendências / NCs
+  pend: [
+    {name:'priority', label:'Prioridade', type:'text'},
+    {name:'pending_type', label:'Tipo', type:'text'},
+    {name:'title', label:'Título', type:'text', full:true, required:true},
+    {name:'project_code', label:'Projeto', type:'text'},
+    {name:'due_date', label:'Prazo', type:'date'},
+    {name:'status', label:'Status', type:'text'}
+  ],
+  // RDO / RDC
+  rdo: [
+    {name:'report_date', label:'Data', type:'date', required:true},
+    {name:'shift', label:'Tipo', type:'text'},
+    {name:'project_code', label:'Projeto', type:'text'},
+    {name:'weather', label:'Clima', type:'text'},
+    {name:'workforce_total', label:'Horas', type:'number'},
+    {name:'activities_summary', label:'Resumo', type:'textarea', full:true}
+  ],
+  // Pintura Industrial
+  paint: [
+    {name:'inspection_date', label:'Data', type:'date', required:true},
+    {name:'scheme', label:'Esquema', type:'text'},
+    {name:'inspector_name', label:'Inspetor', type:'text'},
+    {name:'prep_method', label:'Preparação', type:'text'},
+    {name:'dft_um', label:'DFT', type:'number', step:'0.1'},
+    {name:'adhesion_mpa', label:'Aderência', type:'number', step:'0.01'},
+    {name:'dew_point_c', label:'P. Orvalho', type:'number', step:'0.1'},
+    {name:'humidity_pct', label:'Umid.', type:'number', step:'0.1'},
+    {name:'result', label:'Resultado', type:'text'}
+  ],
+  // Andaime
+  scaf: [
+    {name:'card_number', label:'Cartão', type:'text', required:true},
+    {name:'scaffold_type', label:'Tipo', type:'text'},
+    {name:'location', label:'Local', type:'text'},
+    {name:'size', label:'Altura/Área', type:'text'},
+    {name:'max_load_kg', label:'Carga máx', type:'number', step:'0.1'},
+    {name:'status', label:'Status', type:'text'},
+    {name:'released_by', label:'Liberado por', type:'text'},
+    {name:'next_inspection', label:'Próx. inspeção', type:'date'},
+    {name:'expires_at', label:'Vence', type:'date'}
+  ],
+  // Parâmetros HH (Produtividade)
+  prod: [
+    {name:'process', label:'Processo', type:'text', required:true},
+    {name:'material', label:'Material', type:'text'},
+    {name:'diameter_min', label:'Ø min', type:'number', step:'0.25'},
+    {name:'diameter_max', label:'Ø max', type:'number', step:'0.25'},
+    {name:'hh_per_meter', label:'HH/metro', type:'number', step:'0.001'},
+    {name:'hh_per_joint', label:'HH/junta', type:'number', step:'0.001'},
+    {name:'hh_per_support', label:'HH/suporte', type:'number', step:'0.001'},
+    {name:'factor_inox', label:'Fator INOX', type:'number', step:'0.01'},
+    {name:'factor_galv', label:'Fator galv.', type:'number', step:'0.01'},
+    {name:'factor_field', label:'Fator campo', type:'number', step:'0.01'},
+    {name:'type', label:'Tipo', type:'text'}
+  ]
+};
+
+function getFieldLabel(view, fieldName, defaultLabel){
+  const cust = _fieldCustomizations[view] && _fieldCustomizations[view][fieldName];
+  if(cust && cust.label) return cust.label;
+  return defaultLabel;
+}
+function isFieldVisible(view, fieldName){
+  const cust = _fieldCustomizations[view] && _fieldCustomizations[view][fieldName];
+  if(cust && cust.visible === false) return false;
+  return true;
+}
+function getOrderedFields(view){
+  const schema = FIELD_SCHEMA[view] || [];
+  const custs = _fieldCustomizations[view] || {};
+  return schema.map(f=>({
+    ...f,
+    label: getFieldLabel(view, f.name, f.label),
+    visible: isFieldVisible(view, f.name),
+    order: (custs[f.name] && custs[f.name].order!=null) ? custs[f.name].order : 999
+  })).sort((a,b)=>a.order-b.order);
+}
+async function loadFieldCustomizations(){
+  if(!_org) return;
+  try {
+    const {data} = await sb.from('org_field_customizations').select('*').eq('org_id',_org.id);
+    _fieldCustomizations = {};
+    (data||[]).forEach(r=>{
+      if(!_fieldCustomizations[r.view_name]) _fieldCustomizations[r.view_name] = {};
+      _fieldCustomizations[r.view_name][r.field_name] = {
+        label: r.custom_label,
+        visible: r.is_visible,
+        order: r.display_order
+      };
+    });
+  } catch(e){ console.warn('loadFieldCustomizations:', e); }
+}
+
+// ════════════════════════════════════════════════════
+// IMPORTAR EXCEL + IA EM TODAS AS VIEWS
+// ════════════════════════════════════════════════════
+// Mapeamento view -> tabela do Supabase + project_required flag
+const VIEW_TABLE_MAP = {
+  quality_joints:   {table:'joints',                 reqProject:true,  extra:{junta_ativa:true}},
+  quality_reports:  {table:'ndt_inspections',        reqProject:true},
+  com:              {table:'test_systems',           reqProject:true},
+  mat:              {table:'materials_catalog',      reqProject:false},
+  equip:            {table:'equipments',             reqProject:true},
+  maint:            {table:'maint_work_orders',      reqProject:true},
+  sold:             {table:'welders',                reqProject:false},
+  cal:              {table:'instruments',            reqProject:false},
+  pend:             {table:'pendings',               reqProject:true},
+  rdo:              {table:'daily_reports',          reqProject:true},
+  paint:            {table:'painting_inspections',   reqProject:true},
+  scaf:             {table:'scaffolds',              reqProject:true},
+  prod:             {table:'productivity_params',    reqProject:false},
+  civil_concr:      {table:'civil_concrete_pours',   reqProject:true},
+  civil_elem:       {table:'civil_concrete_elements',reqProject:true},
+  elec_panels:      {table:'electrical_panels',      reqProject:true},
+  elec_spda:        {table:'spda_grounding',         reqProject:true},
+  elec_specs:       {table:'cable_specifications',   reqProject:false},
+  hydraulic:        {table:'hydraulic_systems',      reqProject:true}
+};
+
+// Mapeamento view -> {discipline_code, document_type} para chamar Gemini com o prompt certo
+const VIEW_AI_PROMPT = {
+  quality_joints:   {disc:'qualidade',          doc:'mapa_juntas'},
+  quality_reports:  {disc:'qualidade',          doc:'laudo_end'},
+  sold:             {disc:'qualidade',          doc:'soldadores'},
+  cal:              {disc:'instrumentacao_cal', doc:'instrumentos'},
+  com:              {disc:'comissionamento',    doc:'sistemas_th'},
+  mat:              {disc:'tubulacao',          doc:'lista_materiais'},
+  equip:            {disc:'eq_estatico',        doc:'cadastro_equipamento'},
+  maint:            {disc:'manutencao',         doc:'ordem_servico'},
+  pend:             {disc:'qualidade',          doc:'pendencias_nc'},
+  rdo:              {disc:'documentacao',       doc:'rdo_diario'},
+  paint:            {disc:'pintura',            doc:'inspecao_dft'},
+  scaf:             {disc:'andaime',            doc:'cartao_andaime'},
+  prod:             {disc:'tubulacao',          doc:'produtividade_hh'}
+};
+
+// Auto-detecta o mapeamento de coluna do Excel -> campo do sistema
+// Tenta: exato (case-insensitive) > sem acentos > contém substring
+function _normStr(s){
+  return (s||'').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]/g,'');
+}
+function _autoMapColumn(excelHeader, schemaFields){
+  const norm = _normStr(excelHeader);
+  // 1) exato pelo label
+  for(const f of schemaFields){ if(_normStr(f.label) === norm) return f.name; }
+  // 2) exato pelo name
+  for(const f of schemaFields){ if(_normStr(f.name) === norm) return f.name; }
+  // 3) contém substring
+  for(const f of schemaFields){
+    const ln = _normStr(f.label);
+    if(ln && (ln.includes(norm) || norm.includes(ln))) return f.name;
+  }
+  return '';
+}
+
+// ──────────────── IMPORTAR EXCEL ────────────────
+function openImportExcel(view){
+  const mapInfo = VIEW_TABLE_MAP[view];
+  if(!mapInfo){ toast('Esta view nao suporta importar Excel','warn'); return; }
+  if(mapInfo.reqProject && !curProj){ toast('Selecione um projeto primeiro','warn'); return; }
+
+  const viewNames = {quality_joints:'Mapa de Juntas',quality_reports:'Relatorios END',com:'Sistemas TH',mat:'Materiais',equip:'Equipamentos',maint:'Manutencao',sold:'Soldadores',cal:'Instrumentos',pend:'Pendencias',rdo:'RDO',paint:'Pintura',scaf:'Andaime',prod:'Produtividade HH'};
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay open';
+  overlay.id = 'import-excel-overlay';
+  overlay.onclick = (e)=>{ if(e.target===overlay) overlay.remove(); };
+  overlay.innerHTML = '<div class="mbox" style="max-width:820px"><button class="mclose" onclick="document.getElementById(\'import-excel-overlay\').remove()"><i data-lucide="x"></i></button>'
+    + '<div class="mtitle"><i data-lucide="file-spreadsheet" style="color:var(--success)"></i>Importar Excel - '+(viewNames[view]||view)+'</div>'
+    + '<div style="background:var(--success-l);border-left:3px solid var(--success);padding:10px 14px;border-radius:6px;font-size:12px;color:var(--success-h);margin-bottom:14px"><strong>Como funciona:</strong> selecione um arquivo .xlsx/.xls/.csv com a primeira linha contendo os cabecalhos das colunas. O sistema vai sugerir o mapeamento de cada coluna do Excel para um campo do sistema. Voce ajusta o que quiser e clica Importar para cadastrar tudo de uma vez.</div>'
+    + '<div style="border:2px dashed var(--t3);border-radius:12px;padding:30px;text-align:center;cursor:pointer;background:var(--t1)" onclick="document.getElementById(\'imp-xl-file\').click()">'
+    + '<i data-lucide="upload-cloud" style="width:36px;height:36px;color:var(--primary);margin-bottom:8px"></i>'
+    + '<div style="font-size:13.5px;font-weight:600;color:var(--t9)">Clique ou arraste o arquivo Excel/CSV aqui</div>'
+    + '<div style="font-size:11.5px;color:var(--t6);margin-top:4px">.xlsx &middot; .xls &middot; .csv (ate ~5000 linhas)</div>'
+    + '</div>'
+    + '<input type="file" id="imp-xl-file" accept=".xlsx,.xls,.csv" style="display:none" onchange="processImportExcel(this,\''+view+'\')">'
+    + '<div id="imp-xl-content" style="margin-top:16px"></div>'
+    + '<div class="mfooter" id="imp-xl-footer"><button class="btn bg" onclick="document.getElementById(\'import-excel-overlay\').remove()">Fechar</button></div>'
+    + '</div>';
+  document.body.appendChild(overlay);
+  _renderIcons();
+}
+
+let _impXlData = null;
+let _impXlView = null;
+function processImportExcel(input, view){
+  const file = input.files && input.files[0];
+  if(!file) return;
+  _impXlView = view;
+  const reader = new FileReader();
+  reader.onload = function(e){
+    try {
+      const data = new Uint8Array(e.target.result);
+      const wb = XLSX.read(data, {type:'array'});
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(ws, {defval:null});
+      if(!rows.length){ toast('Planilha vazia','warn'); return; }
+      _impXlData = rows;
+      const schema = FIELD_SCHEMA[view] || [];
+      const headers = Object.keys(rows[0]);
+      const preview = rows.slice(0,3);
+
+      const content = document.getElementById('imp-xl-content');
+      content.innerHTML = '<div style="background:var(--t1);border:1px solid var(--t3);border-radius:10px;padding:14px;margin-bottom:14px">'
+        + '<div style="font-size:13px;font-weight:700;color:var(--t9);margin-bottom:8px"><i data-lucide="check-circle-2" style="width:14px;height:14px;display:inline-block;vertical-align:-2px;color:var(--success)"></i> Arquivo lido: <strong>'+rows.length+' linhas</strong> encontradas</div>'
+        + '<div style="font-size:11.5px;color:var(--t6)">Coluna do Excel &rarr; Campo do sistema:</div>'
+        + '<div style="display:grid;grid-template-columns:1fr 14px 1fr;gap:8px 12px;margin-top:10px;align-items:center">'
+        + headers.map(h=>{
+            const auto = _autoMapColumn(h, schema);
+            const opts = '<option value="">-- ignorar --</option>' + schema.map(f=>'<option value="'+f.name+'"'+(f.name===auto?' selected':'')+'>'+san(f.label)+' ('+f.name+')</option>').join('');
+            return '<div style="font-family:JetBrains Mono,monospace;font-size:12px;color:var(--t8);background:var(--t0);padding:6px 10px;border:1px solid var(--t3);border-radius:6px">'+san(h)+'</div>'
+                + '<div style="text-align:center;color:var(--t5)">&rarr;</div>'
+                + '<select data-excel-col="'+san(h)+'" style="padding:6px 10px;border:1px solid var(--t3);border-radius:6px;font-size:12px;font-family:inherit;background:var(--bg)">'+opts+'</select>';
+          }).join('')
+        + '</div></div>'
+        + '<div style="margin-top:14px"><div style="font-size:11.5px;color:var(--t6);margin-bottom:6px">Pré-visualização (3 primeiras linhas):</div>'
+        + '<div class="tbl-wrap" style="max-height:200px;overflow:auto"><table><thead><tr>'+headers.map(h=>'<th>'+san(h)+'</th>').join('')+'</tr></thead><tbody>'
+        + preview.map(r=>'<tr>'+headers.map(h=>'<td style="font-size:11px">'+san(r[h]==null?'':r[h])+'</td>').join('')+'</tr>').join('')
+        + '</tbody></table></div></div>';
+
+      document.getElementById('imp-xl-footer').innerHTML = '<button class="btn bg" onclick="document.getElementById(\'import-excel-overlay\').remove()">Cancelar</button>'
+        + '<button class="btn bp" onclick="confirmImportExcel(\''+view+'\')"><i data-lucide="upload"></i>Importar '+rows.length+' registros</button>';
+      _renderIcons();
+    } catch(err){ toast('Erro lendo Excel: '+(err.message||err),'err'); }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+async function confirmImportExcel(view){
+  if(!_impXlData || !_impXlData.length){ toast('Sem dados pra importar','warn'); return; }
+  const mapInfo = VIEW_TABLE_MAP[view];
+  if(!mapInfo){ toast('View nao mapeada','err'); return; }
+
+  // Lê mapeamento de colunas
+  const selects = document.querySelectorAll('#imp-xl-content select[data-excel-col]');
+  const colMap = {};
+  selects.forEach(s=>{
+    if(s.value) colMap[s.dataset.excelCol] = s.value;
+  });
+  if(!Object.keys(colMap).length){ toast('Mapeie pelo menos uma coluna','warn'); return; }
+
+  // Constroi registros
+  const records = _impXlData.map(row=>{
+    const rec = { org_id: _org.id };
+    if(mapInfo.reqProject) rec.project_id = curProj;
+    if(mapInfo.extra) Object.assign(rec, mapInfo.extra);
+    Object.entries(colMap).forEach(([excelCol, fieldName])=>{
+      let val = row[excelCol];
+      if(val === '' || val == null) return;
+      // Coerção de tipo basica via schema
+      const f = (FIELD_SCHEMA[view]||[]).find(x=>x.name===fieldName);
+      if(f){
+        if(f.type==='number') val = parseFloat(val);
+        if(f.type==='checkbox') val = ['sim','true','1','x','yes'].includes(String(val).toLowerCase());
+        if(f.type==='date'){
+          // Excel pode trazer numero serial ou string
+          if(typeof val === 'number'){
+            const d = new Date(Math.round((val - 25569) * 86400 * 1000));
+            val = d.toISOString().slice(0,10);
+          } else { val = String(val).slice(0,10); }
+        }
+      }
+      rec[fieldName] = val;
+    });
+    return rec;
+  }).filter(r=>Object.keys(r).length > (mapInfo.reqProject?2:1));
+
+  if(!records.length){ toast('Nenhum registro valido','warn'); return; }
+
+  toast('Importando '+records.length+' registros...','warn');
+  try {
+    // Insere em batches de 100
+    let imported = 0;
+    for(let i=0; i<records.length; i+=100){
+      const batch = records.slice(i, i+100);
+      const {error} = await sb.from(mapInfo.table).insert(batch);
+      if(error) throw error;
+      imported += batch.length;
+    }
+    toast(imported+' registros importados!','ok');
+    document.getElementById('import-excel-overlay').remove();
+    _impXlData = null;
+    // Re-renderiza a view
+    if(typeof reRenderViewWithLabels==='function') await reRenderViewWithLabels(view);
+  } catch(e){ toast('Erro: '+(e.message||e),'err'); }
+}
+
+// ──────────────── IMPORTAR VIA IA ────────────────
+function openAIImport(view){
+  const mapInfo = VIEW_TABLE_MAP[view];
+  if(!mapInfo){ toast('Esta view nao suporta IA','warn'); return; }
+  if(mapInfo.reqProject && !curProj){ toast('Selecione um projeto primeiro','warn'); return; }
+
+  const viewNames = {quality_joints:'Mapa de Juntas',quality_reports:'Relatorios END',com:'Sistemas TH',mat:'Materiais',equip:'Equipamentos',maint:'Manutencao',sold:'Soldadores',cal:'Instrumentos',pend:'Pendencias',rdo:'RDO',paint:'Pintura',scaf:'Andaime',prod:'Produtividade HH'};
+
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay open';
+  overlay.id = 'ai-import-overlay';
+  overlay.onclick = (e)=>{ if(e.target===overlay) overlay.remove(); };
+  overlay.innerHTML = '<div class="mbox" style="max-width:680px"><button class="mclose" onclick="document.getElementById(\'ai-import-overlay\').remove()"><i data-lucide="x"></i></button>'
+    + '<div class="mtitle"><i data-lucide="sparkles" style="color:var(--violet)"></i>Importar via IA - '+(viewNames[view]||view)+'</div>'
+    + '<div style="background:var(--violet-l);border-left:3px solid var(--violet);padding:10px 14px;border-radius:6px;font-size:12px;color:#5B21B6;margin-bottom:14px"><strong>Como funciona:</strong> envie um PDF, imagem ou planilha. A IA le o documento, extrai os dados estruturados e mostra uma previa antes de cadastrar. Funciona com fotos de fichas em papel, prints de planilha, lista impressa, etc.</div>'
+    + '<div style="border:2px dashed var(--violet);border-radius:12px;padding:30px;text-align:center;cursor:pointer;background:var(--violet-l)" onclick="document.getElementById(\'ai-imp-file\').click()">'
+    + '<i data-lucide="sparkles" style="width:36px;height:36px;color:var(--violet);margin-bottom:8px"></i>'
+    + '<div style="font-size:13.5px;font-weight:600;color:var(--t9)">Clique ou arraste o documento</div>'
+    + '<div style="font-size:11.5px;color:var(--t6);margin-top:4px">PDF &middot; PNG &middot; JPG &middot; XLSX (ate 20 MB)</div>'
+    + '</div>'
+    + '<div style="margin-top:14px"><label style="font-size:11px;font-weight:600;color:var(--t7);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;display:block"><i data-lucide="message-square-plus" style="width:11px;height:11px;display:inline-block;vertical-align:-1px"></i> Instrucoes extras para a IA (opcional)</label><textarea id="ai-imp-instructions" placeholder="Ex: ignore linhas com diametro menor que 1 polegada / so importe juntas soldadas em 2026 / use o codigo da coluna B como matricula..." style="width:100%;padding:9px 12px;border:1px solid var(--t3);border-radius:8px;font-size:12px;font-family:inherit;background:var(--t0);color:var(--t9);min-height:60px;resize:vertical;outline:none"></textarea><div style="font-size:10.5px;color:var(--t5);margin-top:4px">A IA seguira estas instrucoes alem do prompt padrao. Util para ajustar conforme a particularidade da sua empresa.</div></div>'
+    + '<input type="file" id="ai-imp-file" accept=".pdf,image/*,.xlsx,.xls" style="display:none" onchange="processAIImport(this,\''+view+'\')">'
+    + '<div id="ai-imp-status" style="margin-top:14px"></div>'
+    + '<div id="ai-imp-result" style="margin-top:14px;display:none"></div>'
+    + '<div class="mfooter" id="ai-imp-footer"><button class="btn bg" onclick="document.getElementById(\'ai-import-overlay\').remove()">Fechar</button></div>'
+    + '</div>';
+  document.body.appendChild(overlay);
+  _renderIcons();
+}
+
+let _aiImpData = null;
+async function processAIImport(input, view){
+  const file = input.files && input.files[0];
+  if(!file) return;
+  const statusEl = document.getElementById('ai-imp-status');
+  statusEl.innerHTML = '<div style="background:var(--primary-l);border:1px solid var(--primary);border-radius:8px;padding:11px 14px;font-size:12px;color:var(--primary-h)"><i data-lucide="loader" style="width:14px;height:14px;display:inline-block;vertical-align:-2px;animation:spin 1s linear infinite"></i> Analisando documento com IA... (15-60s)</div>';
+  _renderIcons();
+
+  try {
+    // Detecta XLSX/XLS -> converte pra CSV no frontend (Gemini suporta CSV nativamente, e fica mais barato)
+    let b64, mimeOut;
+    const isExcel = file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                  || file.type === 'application/vnd.ms-excel'
+                  || /\.xlsx?$/i.test(file.name);
+    if(isExcel){
+      // Le XLSX e converte cada sheet pra CSV
+      const buf = await file.arrayBuffer();
+      const wb = XLSX.read(new Uint8Array(buf), {type:'array'});
+      let csvAll = '';
+      wb.SheetNames.forEach(name=>{
+        const csv = XLSX.utils.sheet_to_csv(wb.Sheets[name]);
+        if(csv.trim()) csvAll += '### Sheet: ' + name + ' ###\n' + csv + '\n\n';
+      });
+      if(!csvAll.trim()) { statusEl.innerHTML = '<div style="background:var(--danger-l);color:var(--danger-h);border:1px solid var(--danger);border-radius:8px;padding:11px 14px;font-size:12px">Planilha vazia.</div>'; return; }
+      // Codifica utf-8 -> base64
+      b64 = btoa(unescape(encodeURIComponent(csvAll)));
+      mimeOut = 'text/csv';
+    } else if(file.type === 'text/csv' || /\.csv$/i.test(file.name)){
+      const txt = await file.text();
+      b64 = btoa(unescape(encodeURIComponent(txt)));
+      mimeOut = 'text/csv';
+    } else {
+      // PDF / imagem / texto - le como base64 direto
+      b64 = await new Promise((res,rej)=>{
+        const r = new FileReader();
+        r.onload = ()=>res(r.result.split(',')[1]);
+        r.onerror = rej;
+        r.readAsDataURL(file);
+      });
+      mimeOut = file.type || 'application/octet-stream';
+    }
+
+    // Mapeia view -> discipline/document_type cadastrados em discipline_ai_prompts
+    const aiMap = VIEW_AI_PROMPT[view] || {disc:'qualidade', doc:view};
+    // Le instrucoes extras digitadas pelo usuario
+    const userInstr = (document.getElementById('ai-imp-instructions')?.value || '').trim();
+    const fieldsHint = 'Campos esperados (use exatamente esses nomes nas chaves do JSON): ' + (FIELD_SCHEMA[view]||[]).map(f=>f.name+' ('+f.label+')').join(', ');
+    const combinedInstructions = userInstr ? (fieldsHint + '\n\nINSTRUCOES EXTRAS DO USUARIO:\n' + userInstr) : fieldsHint;
+
+    const {data:{session}} = await sb.auth.getSession();
+    const resp = await fetch(SUPABASE_URL+'/functions/v1/analyze-discipline-doc', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+(session?.access_token||SUPABASE_KEY)},
+      body: JSON.stringify({
+        file: b64,
+        mime: mimeOut,
+        discipline_code: aiMap.disc,
+        document_type: aiMap.doc,
+        project_id: curProj || null,
+        custom_instructions: combinedInstructions,
+        auto_save: false
+      })
+    });
+    const data = await resp.json();
+    if(!resp.ok || data.error){ statusEl.innerHTML = '<div style="background:var(--danger-l);color:var(--danger-h);border:1px solid var(--danger);border-radius:8px;padding:11px 14px;font-size:12px">Erro: '+(data.error||resp.status)+'</div>'; return; }
+
+    // Tenta extrair array de registros — robusto a varios formatos que a IA pode retornar
+    let records = [];
+    const ext = data.extracted || data.result || data;
+    if(Array.isArray(ext)){
+      records = ext;
+    } else if(typeof ext === 'object' && ext){
+      // Procura por uma chave cujo valor seja array (records, items, data, project_materials, materials, equipments, joints, etc)
+      const arrayKeys = Object.keys(ext).filter(k=>Array.isArray(ext[k]));
+      if(arrayKeys.length){
+        // Pega o MAIOR array (mais provavel de ser a lista de registros)
+        let bestKey = arrayKeys[0];
+        for(const k of arrayKeys){ if(ext[k].length > ext[bestKey].length) bestKey = k; }
+        records = ext[bestKey];
+      } else {
+        // Sem array: assume que o proprio objeto eh UM unico registro
+        records = [ext];
+      }
+    }
+    // Filtra: cada record deve ser um objeto (nao primitivo)
+    records = records.filter(r => r && typeof r === 'object' && !Array.isArray(r));
+
+    if(!records.length){ statusEl.innerHTML = '<div style="background:var(--warning-l);color:var(--warning-h);border:1px solid var(--warning);border-radius:8px;padding:11px 14px;font-size:12px">IA não conseguiu extrair registros estruturados. Tente um documento mais claro.</div>'; return; }
+
+    _aiImpData = records;
+    statusEl.innerHTML = '<div style="background:var(--success-l);color:var(--success-h);border:1px solid var(--success);border-radius:8px;padding:11px 14px;font-size:12px"><i data-lucide="check-circle-2" style="width:14px;height:14px;display:inline-block;vertical-align:-2px"></i> IA extraiu <strong>'+records.length+' registros</strong>. Revise abaixo e clique Importar.</div>';
+    _renderIcons();
+
+    // Mostra preview
+    const allKeys = [...new Set(records.flatMap(r=>Object.keys(r)))];
+    const result = document.getElementById('ai-imp-result');
+    result.style.display = 'block';
+    result.innerHTML = '<div style="font-size:11.5px;color:var(--t6);margin-bottom:6px">Pré-visualização (até 10 registros):</div>'
+      + '<div class="tbl-wrap" style="max-height:280px;overflow:auto"><table><thead><tr>'+allKeys.map(k=>'<th>'+san(k)+'</th>').join('')+'</tr></thead><tbody>'
+      + records.slice(0,10).map(r=>'<tr>'+allKeys.map(k=>{
+          let v = r[k];
+          if(v==null || v==='') return '<td style="font-size:11px;color:var(--t5)">—</td>';
+          // Se eh objeto/array, serializa em JSON curto
+          if(typeof v === 'object') v = JSON.stringify(v);
+          return '<td style="font-size:11px">'+san(String(v).slice(0,80))+'</td>';
+        }).join('')+'</tr>').join('')
+      + '</tbody></table></div>';
+
+    document.getElementById('ai-imp-footer').innerHTML = '<button class="btn bg" onclick="document.getElementById(\'ai-import-overlay\').remove()">Cancelar</button>'
+      + '<button class="btn bp" onclick="confirmAIImport(\''+view+'\')"><i data-lucide="check"></i>Importar '+records.length+' registros</button>';
+    _renderIcons();
+  } catch(e){
+    statusEl.innerHTML = '<div style="background:var(--danger-l);color:var(--danger-h);border:1px solid var(--danger);border-radius:8px;padding:11px 14px;font-size:12px" id="__se_box"></div>';
+    const __seBox = document.getElementById('__se_box'); if(__seBox) __seBox.textContent = 'Erro: ' + (e.message||e);
+  }
+}
+
+async function confirmAIImport(view){
+  if(!_aiImpData || !_aiImpData.length){ toast('Sem dados','warn'); return; }
+  const mapInfo = VIEW_TABLE_MAP[view];
+  if(!mapInfo){ toast('View não mapeada','err'); return; }
+
+  toast('Cadastrando '+_aiImpData.length+' registros...','warn');
+
+  // ───────── CASO ESPECIAL: MATERIAIS (catalogo + project_materials) ─────────
+  if(view === 'mat'){
+    try {
+      let catalogAdded = 0;
+      let pmAdded = 0;
+      for(const r of _aiImpData){
+        if(!r.code) continue;
+        // 1) Upsert no materials_catalog (sem quantity)
+        const catalogRec = { org_id: _org.id };
+        ['code','description','category','material_type','diameter_in','pressure_class','schedule','ncm','unit','weight_per_unit','unit_price','supplier','notes'].forEach(k=>{
+          if(r[k]!=null && r[k]!=='') catalogRec[k] = r[k];
+        });
+        // Verifica se ja existe
+        const {data:exist} = await sb.from('materials_catalog').select('id').eq('org_id',_org.id).eq('code',r.code).is('deleted_at',null).maybeSingle();
+        let materialId;
+        if(exist){
+          materialId = exist.id;
+          // Atualiza dados do catalogo
+          await sb.from('materials_catalog').update(catalogRec).eq('id',materialId);
+        } else {
+          const {data:ins, error:e1} = await sb.from('materials_catalog').insert(catalogRec).select('id').single();
+          if(e1){ console.warn('catalog insert:', e1); continue; }
+          materialId = ins.id;
+          catalogAdded++;
+        }
+        // 2) Se ha quantidade e projeto, grava em project_materials
+        const qty = parseFloat(r.quantity);
+        if(qty > 0 && curProj){
+          const {data:pmExist} = await sb.from('project_materials').select('id, qty_planned').eq('project_id',curProj).eq('material_id',materialId).maybeSingle();
+          if(pmExist){
+            // Soma a quantidade existente
+            const novaQty = (parseFloat(pmExist.qty_planned)||0) + qty;
+            await sb.from('project_materials').update({qty_planned: novaQty}).eq('id',pmExist.id);
+          } else {
+            await sb.from('project_materials').insert({org_id:_org.id, project_id:curProj, material_id:materialId, qty_planned: qty});
+          }
+          pmAdded++;
+        }
+      }
+      const msg = catalogAdded+' novos no catálogo · '+pmAdded+' vinculados ao projeto';
+      toast(msg,'ok');
+      document.getElementById('ai-import-overlay').remove();
+      _aiImpData = null;
+      if(typeof reRenderViewWithLabels==='function') await reRenderViewWithLabels(view);
+      return;
+    } catch(e){ toast('Erro: '+(e.message||e),'err'); return; }
+  }
+
+  // ───────── PADRAO: insert direto na tabela ─────────
+  const validFields = new Set((FIELD_SCHEMA[view]||[]).map(f=>f.name));
+  const records = _aiImpData.map(r=>{
+    const rec = { org_id: _org.id };
+    if(mapInfo.reqProject) rec.project_id = curProj;
+    if(mapInfo.extra) Object.assign(rec, mapInfo.extra);
+    Object.entries(r).forEach(([k,v])=>{
+      if(validFields.has(k) && v!=null && v!=='') rec[k] = v;
+    });
+    return rec;
+  }).filter(r=>Object.keys(r).length > (mapInfo.reqProject?2:1));
+
+  if(!records.length){ toast('Nenhum registro com campos válidos','warn'); return; }
+
+  try {
+    let imported = 0;
+    for(let i=0; i<records.length; i+=100){
+      const batch = records.slice(i, i+100);
+      const {error} = await sb.from(mapInfo.table).insert(batch);
+      if(error) throw error;
+      imported += batch.length;
+    }
+    toast(imported+' registros cadastrados pela IA!','ok');
+    document.getElementById('ai-import-overlay').remove();
+    _aiImpData = null;
+    if(typeof reRenderViewWithLabels==='function') await reRenderViewWithLabels(view);
+  } catch(e){ toast('Erro: '+(e.message||e),'err'); }
+}
+
+// Aplica labels customizados em <th> da(s) tabela(s) do container.
+// Match pelo TEXTO ATUAL do th contra o label padrão do schema (case-insensitive).
+// Funciona mesmo quando algumas colunas da tabela não estão no schema.
+function applyFieldLabels(view, container){
+  const schema = FIELD_SCHEMA[view];
+  if(!schema || !container || !container.querySelectorAll) return;
+  // Mapa case-insensitive: label-padrao -> {name, label}
+  const labelMap = {};
+  schema.forEach(f => {
+    const k = (f.label||'').trim().toLowerCase();
+    if(k) labelMap[k] = f;
+  });
+  const tables = container.querySelectorAll('table');
+  tables.forEach(table=>{
+    const ths = table.querySelectorAll('thead th');
+    ths.forEach((th, idx)=>{
+      const currentText = (th.textContent||'').trim();
+      const key = currentText.toLowerCase();
+      const f = labelMap[key];
+      if(!f) return;
+      const customLabel = getFieldLabel(view, f.name, f.label);
+      if(customLabel && customLabel !== currentText){
+        th.textContent = customLabel;
+      }
+      if(!isFieldVisible(view, f.name)){
+        th.style.display = 'none';
+        table.querySelectorAll('tbody tr').forEach(tr=>{
+          const td = tr.children[idx];
+          if(td) td.style.display = 'none';
+        });
+      }
+    });
+  });
+}
+
+function openFieldsCustomization(view){
+  const schema = FIELD_SCHEMA[view];
+  if(!schema){ toast('View nao suporta customizacao ainda','warn'); return; }
+  const fields = getOrderedFields(view);
+  const viewNames = {
+    quality_joints:'Mapa de Juntas',
+    quality_reports:'Relatórios END',
+    com:'Comissionamento (Sistemas TH)',
+    mat:'Materiais',
+    equip:'Equipamentos NR-13',
+    maint:'Manutenção (OS)',
+    sold:'Soldadores · Qualificação',
+    cal:'Calibração de Instrumentos',
+    pend:'Pendências / NCs',
+    rdo:'RDO / RDC',
+    paint:'Pintura Industrial',
+    scaf:'Andaime',
+    prod:'Parâmetros HH'
+  };
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay open';
+  overlay.id = 'fields-cust-overlay';
+  overlay.onclick = (e)=>{ if(e.target===overlay) overlay.remove(); };
+  overlay.innerHTML = '<div class="mbox" style="max-width:680px"><button class="mclose" onclick="document.getElementById(\'fields-cust-overlay\').remove()"><i data-lucide="x"></i></button>'
+    + '<div class="mtitle"><i data-lucide="settings" style="color:var(--primary)"></i>Personalizar colunas — '+(viewNames[view]||view)+'</div>'
+    + '<div style="background:var(--primary-l);border-left:3px solid var(--primary);padding:10px 14px;border-radius:6px;font-size:12px;color:var(--primary-h);margin-bottom:14px">Renomeie campos conforme a terminologia da sua empresa, esconda colunas que você não usa e arraste para reordenar. As mudanças valem para toda a sua organização.</div>'
+    + '<div id="fields-list" style="display:flex;flex-direction:column;gap:8px;max-height:50vh;overflow-y:auto">'
+    + fields.map(f=>'<div class="field-row" data-field="'+f.name+'" draggable="true" style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--t1);border:1px solid var(--t3);border-radius:8px">'
+        + '<i data-lucide="grip-vertical" style="width:16px;height:16px;color:var(--t5);cursor:grab"></i>'
+        + '<label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--t7);font-weight:600;cursor:pointer;user-select:none"><input type="checkbox" '+(f.visible?'checked':'')+' data-name="'+f.name+'" data-prop="visible" style="width:auto;height:16px"> Visível</label>'
+        + '<div style="display:flex;flex-direction:column;gap:2px;flex:1;min-width:0">'
+        + '<span style="font-size:10px;color:var(--t5);text-transform:uppercase;letter-spacing:.5px;font-weight:600">Campo: '+f.name+' ('+f.type+')</span>'
+        + '<input type="text" value="'+san(f.label)+'" data-name="'+f.name+'" data-prop="label" placeholder="Nome a exibir" style="padding:6px 10px;border:1px solid var(--t3);border-radius:6px;font-size:12.5px;font-family:inherit;width:100%">'
+        + '</div></div>').join('')
+    + '</div>'
+    + '<div class="mfooter"><button class="btn bg" onclick="document.getElementById(\'fields-cust-overlay\').remove()">Cancelar</button><button class="btn bo" onclick="resetFieldsCustomization(\''+view+'\')"><i data-lucide="rotate-ccw"></i>Restaurar padrão</button><button class="btn bp" onclick="saveFieldsCustomization(\''+view+'\')"><i data-lucide="check"></i>Salvar</button></div>'
+    + '</div>';
+  document.body.appendChild(overlay);
+  _renderIcons();
+
+  // Drag and drop
+  let draggedEl = null;
+  overlay.querySelectorAll('.field-row').forEach(row=>{
+    row.addEventListener('dragstart', ()=>{ draggedEl = row; row.style.opacity='.4'; });
+    row.addEventListener('dragend', ()=>{ row.style.opacity='1'; draggedEl = null; });
+    row.addEventListener('dragover', e=>e.preventDefault());
+    row.addEventListener('drop', e=>{
+      e.preventDefault();
+      if(draggedEl && draggedEl !== row){
+        const list = document.getElementById('fields-list');
+        const rows = [...list.children];
+        const dIdx = rows.indexOf(draggedEl);
+        const tIdx = rows.indexOf(row);
+        if(dIdx < tIdx) list.insertBefore(draggedEl, row.nextSibling);
+        else list.insertBefore(draggedEl, row);
+      }
+    });
+  });
+}
+
+async function saveFieldsCustomization(view){
+  const overlay = document.getElementById('fields-cust-overlay');
+  if(!overlay) return;
+  const rows = overlay.querySelectorAll('.field-row');
+  const updates = [];
+  rows.forEach((row, idx)=>{
+    const labelInput = row.querySelector('input[data-prop="label"]');
+    const visibleInput = row.querySelector('input[data-prop="visible"]');
+    updates.push({
+      org_id: _org.id,
+      view_name: view,
+      field_name: row.dataset.field,
+      custom_label: labelInput.value.trim() || null,
+      is_visible: visibleInput.checked,
+      display_order: idx,
+      updated_at: new Date().toISOString()
+    });
+  });
+  try {
+    const {error} = await sb.from('org_field_customizations').upsert(updates, {onConflict:'org_id,view_name,field_name'});
+    if(error) throw error;
+    toast('Colunas personalizadas','ok');
+    overlay.remove();
+    await loadFieldCustomizations();
+    await reRenderViewWithLabels(view);
+  } catch(e){ toast('Erro: '+(e.message||e),'err'); }
+}
+async function resetFieldsCustomization(view){
+  const _ok = await (window.PIAConfirm ? window.PIAConfirm.warning('Restaurar campos?', 'Restaurar todos os campos desta view ao padrão? Suas customizações serão apagadas.', 'Restaurar') : Promise.resolve(confirm('Restaurar campos??'))); if(!_ok) return;
+  const {error} = await sb.from('org_field_customizations').delete().eq('org_id',_org.id).eq('view_name',view);
+  if(error){ toast('Erro: '+error.message,'err'); return; }
+  toast('Restaurado ao padrão','ok');
+  document.getElementById('fields-cust-overlay')?.remove();
+  await loadFieldCustomizations();
+  await reRenderViewWithLabels(view);
+}
+// Re-renderiza a view e DEPOIS aplica os labels customizados (com pequeno delay)
+async function reRenderViewWithLabels(view){
+  // Primeiro recarrega o cache de dados do banco (loadExtra cobre quase tudo)
+  try {
+    if(typeof loadExtra==='function') await loadExtra();
+    // Views especiais que precisam reload extra
+    if((view==='quality_joints' || view==='quality_reports') && typeof loadCore==='function') await loadCore();
+    if((view==='isos' || view==='projects' || view==='mat' || view==='panel') && typeof loadAll==='function') await loadAll();
+  } catch(e){ console.warn('reRenderViewWithLabels loadExtra:', e); }
+
+  const viewToFn = {quality_joints:rQualityJoints, quality_reports:rQualityReports, com:rCom, mat:rMat, equip:rEquip, maint:rMaint, sold:rSold, cal:rCal, pend:rPend, rdo:rRdo, paint:rPaint, scaf:rScaf, prod:rProd};
+  if(viewToFn[view]){
+    const r = viewToFn[view]();
+    if(r && typeof r.then === 'function') await r;
+  }
+  // Mapa view -> id do container
+  const mapView = {panel:'vpanel',projects:'vp',isos:'vi',map:'vmap',pend:'vpend',rdo:'vrdo',mat:'vmat',sold:'vsold',com:'vcom',imp:'vimp',gantt:'vgantt',int:'vint',prod:'vprod',dash:'vdash',team:'vteam',plan:'vplan',equip:'vequip',maint:'vmaint',paint:'vpaint',scaf:'vscaf',cal:'vcal',quality_joints:'vquality_joints',quality_reports:'vquality_reports'};
+  const containerId = mapView[view];
+  if(!containerId) return;
+  // Espera o DOM atualizar
+  setTimeout(()=>{
+    const container = document.getElementById(containerId);
+    if(container) applyFieldLabels(view, container);
+  }, 100);
+  setTimeout(()=>{
+    const container = document.getElementById(containerId);
+    if(container) applyFieldLabels(view, container);
+  }, 400);
+}
+
+// ═══════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════
+
+// ═══════════════════════════════════════════════════
+// HELPER GLOBAL: remove modais dinâmicos residuais
+// ═══════════════════════════════════════════════════
+function closeAllDynamicOverlays(){
+  const ids = ['invite-overlay','perms-overlay','equip-overlay','insp-overlay','ut-overlay','mos-overlay','paint-overlay','scaf-overlay','cal-overlay','eqai-overlay','p6-overlay','pdf-iso-overlay','notif-panel'];
+  document.querySelectorAll('.overlay').forEach(o=>{
+    if(o.id && ids.includes(o.id)) o.remove();
+  });
+}
+
+var _user=null,_org=null;
+var projects=[],sheets=[];
+// PERF/QA fix: expor pra módulos externos (ia-chat, budget, rdo, analytics)
+try{ Object.defineProperty(window,'projects',{get:()=>projects,configurable:true}); Object.defineProperty(window,'sheets',{get:()=>sheets,configurable:true}); }catch(_){}
+let curView='panel',curProj=null;
+let editIso=null,editProj=null,expFmt='xlsx';
+
+// ═══════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════
+function san(s){const d=document.createElement('div');d.appendChild(document.createTextNode(String(s??'')));return d.innerHTML.replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+function toast(msg,tipo='ok'){const el=document.createElement('div');el.className='toast '+tipo;el.textContent=msg;document.getElementById('toasts').appendChild(el);setTimeout(()=>el.remove(),4500);}
+function fPct(e){const f=e.fab||{};return Math.round((f.pre||0)*.3+(f.sol||0)*.5+(f.end||0)*.2)}
+function mPct(e){const m=e.mon||{};return Math.round((m.pre||0)*.3+(m.sol||0)*.5+(m.end||0)*.2)}
+function cl(v){return Math.min(100,Math.max(0,parseFloat(v)||0))}
+function fmtD(s){if(!s)return'—';const p=s.split('-');return p.length===3?`${p[2]}/${p[1]}/${p[0]}`:s}
+function pSheets(pid){return sheets.filter(x=>x.projId===pid)}
+function cm(id){document.getElementById(id).classList.remove('open')}
+
+// ═══════════════════════════════════════════════════
+// AUTH
+// ═══════════════════════════════════════════════════
+function aTab(t){
+  if(typeof closeAllDynamicOverlays==='function')closeAllDynamicOverlays();document.getElementById('tab-si').classList.toggle('active',t==='si');document.getElementById('tab-su').classList.toggle('active',t==='su');document.getElementById('f-si').style.display=t==='si'?'flex':'none';document.getElementById('f-su').style.display=t==='su'?'flex':'none';}
+async function doSI(){
+  const btn=document.getElementById('btn-si');
+  btn.disabled=true;btn.textContent='Entrando…';
+  const em=document.getElementById('si-em').value.trim();
+  const pw=document.getElementById('si-pw').value;
+  // Login
+  let result;
+  try { result = await sb.auth.signInWithPassword({email:em,password:pw}); }
+  catch(e){ alert('Erro de rede: '+(e.message||e)); btn.disabled=false; btn.textContent='Entrar'; return; }
+  if(result.error){ alert('Falha no login: '+result.error.message); btn.disabled=false; btn.textContent='Entrar'; return; }
+  // Login OK - tenta carregar app
+  try { await initApp(); }
+  catch(e){
+    alert('Login feito, mas tela falhou: '+(e.message||e)+'\n\nO usuario foi autenticado mas algo na inicializacao quebrou. Veja console (F12) para detalhes.');
+    console.error('[initApp] falhou:', e);
+  }
+  btn.disabled=false;btn.textContent='Entrar';
+}
+async function doSU(){
+  const btn=document.getElementById('btn-su');btn.disabled=true;btn.textContent='Criando…';
+  const email=document.getElementById('su-em').value.trim();
+  const orgName=document.getElementById('su-org').value.trim();
+  const {error}=await sb.auth.signUp({email:email,password:document.getElementById('su-pw').value,options:{data:{org_name:orgName}}});
+  btn.disabled=false;btn.textContent='Criar conta';
+  if(error){toast('Falha: '+error.message,'err');return;}
+  // Enfileira email de boas-vindas (RPC publica)
+  try{
+    await sb.rpc('fn_enqueue_email',{
+      p_to_email: email,
+      p_subject: 'Bem-vindo ao PROJECT.IA',
+      p_body_html: '<h2 style="color:#0F172A;font-size:20px;margin:0 0 12px">Olá!</h2><p>Sua conta no PROJECT.IA foi criada com sucesso.</p><p>Organização: <strong>'+orgName+'</strong></p><p>Próximos passos:</p><ol><li>Faça login no sistema</li><li>Crie seu primeiro projeto</li><li>Escolha as disciplinas (Mecânica, Civil, Elétrica...)</li><li>Suba seu primeiro isométrico e veja a IA cadastrar materiais automaticamente</li></ol><p style="margin-top:20px"><a href="'+location.origin+'/hydrostec_v9.html" style="background:#1E40AF;color:#fff;padding:10px 18px;border-radius:8px;text-decoration:none;font-weight:600">Acessar plataforma</a></p>',
+      p_template_code: 'signup'
+    });
+  }catch(_){}
+  toast('Conta criada! Faça login.','ok');aTab('si');
+  document.getElementById('si-em').value=email;
+}
+
+// Handler #reset-password vindo de email
+if(location.hash === '#reset-password'){
+  setTimeout(()=>{
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(10,22,40,.55);backdrop-filter:blur(4px);z-index:9999;display:flex;align-items:center;justify-content:center;padding:24px';
+    overlay.innerHTML = '<div style="background:#fff;border-radius:14px;padding:28px;max-width:440px;width:100%;box-shadow:0 24px 60px rgba(10,22,40,.2)"><div style="font-size:18px;font-weight:800;color:#0F172A;margin-bottom:6px">Definir nova senha</div><div style="font-size:12.5px;color:#64748B;margin-bottom:16px">Digite sua nova senha (mínimo 8 caracteres).</div><input id="rp-pw" type="password" placeholder="Nova senha" style="width:100%;padding:10px 12px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;margin-bottom:10px"><input id="rp-cf" type="password" placeholder="Confirme" style="width:100%;padding:10px 12px;border:1px solid #E2E8F0;border-radius:8px;font-size:13px;outline:none;margin-bottom:14px"><button id="rp-save" style="width:100%;background:#1E40AF;color:#fff;border:none;padding:11px;border-radius:10px;cursor:pointer;font-size:13px;font-weight:600">Salvar nova senha</button><div id="rp-msg" style="margin-top:10px;font-size:12px;text-align:center"></div></div>';
+    document.body.appendChild(overlay);
+    overlay.querySelector('#rp-save').onclick = async ()=>{
+      const pw = overlay.querySelector('#rp-pw').value;
+      const cf = overlay.querySelector('#rp-cf').value;
+      const msg = overlay.querySelector('#rp-msg');
+      if(pw.length<8){ msg.innerHTML='<span style="color:#991B1B">Mínimo 8 caracteres</span>'; return; }
+      if(pw!==cf){ msg.innerHTML='<span style="color:#991B1B">Senhas não conferem</span>'; return; }
+      const {error}=await sb.auth.updateUser({password:pw});
+      if(error){ msg.innerHTML='<span style="color:#991B1B" id="__msg_err"></span>'; const ___me = document.getElementById('__msg_err'); if(___me) ___me.textContent = String(error.message); return; }
+      msg.innerHTML='<span style="color:#065F46;font-weight:600">Senha alterada! Faça login.</span>';
+      setTimeout(()=>{ overlay.remove(); location.hash=''; },2000);
+    };
+  }, 500);
+}
+async function doLogout(){await sb.auth.signOut();location.reload();}
+
+// ═══════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════
+function _renderIcons(){
+  if(typeof lucide !== 'undefined' && lucide.createIcons){
+    try{ lucide.createIcons({attrs:{'stroke-width':1.75}}); }catch(e){}
+  }
+}
+function toggleTheme(){
+  const cur = document.documentElement.getAttribute('data-theme') || 'light';
+  const nxt = cur === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', nxt);
+  localStorage.setItem('projectia-theme', nxt);
+  const ico = document.getElementById('ico-theme');
+  if(ico){ ico.setAttribute('data-lucide', nxt === 'dark' ? 'moon' : 'sun'); _renderIcons(); }
+}
+// Sincroniza ícone de tema no boot
+(function syncThemeIcon(){
+  const cur = localStorage.getItem('projectia-theme') || 'light';
+  const ico = document.getElementById('ico-theme');
+  if(ico){ ico.setAttribute('data-lucide', cur === 'dark' ? 'moon' : 'sun'); }
+})();
+
+async function initApp(){
+  if(typeof closeAllDynamicOverlays==='function')closeAllDynamicOverlays();
+  _renderIcons();
+  // PERF: usa getSession (sincrono no cache local) em vez de getUser (round-trip pro server)
+  // Fallback pra getUser somente se nao tiver session em cache
+  let user = null;
+  const sess = await sb.auth.getSession();
+  if(sess?.data?.session?.user) user = sess.data.session.user;
+  else { const r = await sb.auth.getUser(); user = r?.data?.user || null; }
+  if(!user){document.getElementById('screen-auth').style.display='flex';document.getElementById('app').style.display='none';return;}
+  _user=user;
+  try { window._user=_user; window.sb=sb; window.SUPABASE_URL=SUPABASE_URL; window.SUPABASE_KEY=SUPABASE_KEY; } catch(_){}
+  const {data:mem,error}=await sb.from('org_members').select('role, organizations(id, name, plan, max_iso_month)').limit(1);
+  if(error||!mem||!mem.length){toast('Sem organização. Faça logout e crie uma conta.','err');return;}
+  const o=mem[0].organizations;
+  _org={id:o.id,name:o.name,plan:o.plan,maxIso:o.max_iso_month,role:mem[0].role};
+  document.getElementById('user-email').textContent=user.email;
+  document.getElementById('org-name').textContent=_org.name+' ('+_org.plan+')';
+  document.getElementById('screen-auth').style.display='none';
+  document.getElementById('app').style.display='block';
+  // Expoe contexto para modulos externos (ia-chat.js, custom_views.js, etc)
+  try { window.sb=sb; window._user=_user; window._org=_org; window.SUPABASE_URL=SUPABASE_URL; window.SUPABASE_KEY=SUPABASE_KEY; } catch(_){}
+  // PERF: loadAll = critico pro panel; loadExtra/loadUsage/loadFieldCustomizations sao tela secundaria => dispara em background
+  await loadAll();
+  try { window.projects=projects; window.sheets=sheets; window.curProj=curProj; } catch(_){}
+  goV('panel');
+  // Background: nao bloqueia UI
+  Promise.all([loadExtra(), loadUsage(), loadFieldCustomizations()]).catch(e => console.warn('[boot bg]', e));
+  // Detecta atalhos no hash
+  const hash=(location.hash||'').replace('#','');
+  if(hash==='team'||hash==='plan'||hash==='dash-projetos'||hash==='projects'){setTimeout(()=>goV(hash==='dash-projetos'?'projects':hash),300);}
+}
+
+// Widget de uso mensal (mostra "3 de 5 isométricos gratuitos usados")
+let _usage={used:0,max:5,plan:'trial'};
+async function loadUsage(){
+  const period=new Date().toISOString().slice(0,7)+'-01';
+  const {data}=await sb.from('usage_counters').select('iso_processed').eq('org_id',_org.id).eq('period',period).maybeSingle();
+  _usage={used:data?.iso_processed||0,max:_org.maxIso||5,plan:_org.plan};
+  renderUsageBadge();
+}
+function renderUsageBadge(){
+  const el=document.getElementById('hdr-acts');if(!el)return;
+  const pct=_usage.max?Math.min(100,Math.round(_usage.used/_usage.max*100)):0;
+  const danger=pct>=80,warn=pct>=60;
+  const color=danger?'#c0392b':warn?'#b85c00':'#1a8c4e';
+  const remaining=Math.max(0,_usage.max-_usage.used);
+  // Adiciona o widget de uso ao lado dos botões de ação se ainda não estiver
+  const existing=document.getElementById('usage-badge');
+  const badge=`<div id="usage-badge" title="Uso de IA no mês atual" style="background:rgba(255,255,255,.12);border:0.5px solid rgba(255,255,255,.25);border-radius:6px;padding:5px 11px;font-size:10.5px;color:#fff;display:flex;align-items:center;gap:6px">
+    <span>🤖</span>
+    <div>
+      <div style="font-weight:600">${_usage.used}/${_usage.max} iso/mês</div>
+      <div style="width:80px;height:3px;background:rgba(0,0,0,.25);border-radius:2px;overflow:hidden;margin-top:2px"><div style="height:100%;width:${pct}%;background:${color}"></div></div>
+    </div>
+    ${remaining<=5&&_usage.plan==='trial'?'<a href="#" onclick="goV(\'int\');return false" style="color:#fff;text-decoration:underline;font-size:9.5px;margin-left:4px">Upgrade</a>':''}
+  </div>`;
+  if(existing)existing.outerHTML=badge;
+  else el.insertAdjacentHTML('afterbegin',badge);
+}
+
+// ═══════════════════════════════════════════════════
+// LOAD DATA (Supabase)
+// ═══════════════════════════════════════════════════
+async function loadAll(){
+  const [rp,rs]=await Promise.all([
+    sb.from('projects').select('*').is('deleted_at',null).order('created_at',{ascending:false}),
+    sb.from('isometric_sheets').select('*').is('deleted_at',null).order('created_at',{ascending:false})
+  ]);
+  if(rp.error){toast('Projetos: '+rp.error.message,'err');projects=[];}
+  else projects=(rp.data||[]).map(p=>({id:p.id,name:p.name,code:p.code,resp:p.manager_user_id||'',plant:p.client_name||'',desc:p.notes||''}));
+  if(rs.error){toast('Folhas: '+rs.error.message,'err');sheets=[];}
+  else sheets=(rs.data||[]).map(s=>({
+    id:s.id,projId:s.project_id,
+    num:s.iso_number,sheet:s.sheet_number,total:s.total_sheets,
+    line:s.line,area:s.area,fluid:s.fluid_class,nr13:s.nr13,
+    iso_term:s.thermal_insulation,temp:s.operating_temp,insp:s.inspection_class,
+    paint:s.paint_status,pdf:s.pdf_storage_path,
+    fab:{pre:s.fab_pre||0,sol:s.fab_sol||0,end:s.fab_end||0,si:s.fab_start||'',sf:s.fab_finish||''},
+    mon:{pre:s.mon_pre||0,sol:s.mon_sol||0,end:s.mon_end||0,si:s.mon_start||'',sf:s.mon_finish||'',th:s.hydro_test||'Pendente',trq:s.torque||'Pendente'}
+  }));
+}
+
+// ═══════════════════════════════════════════════════
+// NAV
+// ═══════════════════════════════════════════════════
+function goV(v,pid){
+  curView=v;if(pid!==undefined)curProj=pid;
+  const views=['vpanel','vp','vi','vmap','vpend','vrdo','vmat','vsold','vcom','vimp','vgantt','vint','vprod','vdash','vteam','vplan','vequip','vmaint','vpaint','vscaf','vcal','vcivil_concr','vcivil_elem','vcivil_sinapi','velec_panels','velec_spda','velec_specs','vhydraulic','vquality_joints','vquality_reports'];
+  const mapView={panel:'vpanel',projects:'vp',isos:'vi',map:'vmap',pend:'vpend',rdo:'vrdo',mat:'vmat',sold:'vsold',com:'vcom',imp:'vimp',gantt:'vgantt',int:'vint',prod:'vprod',dash:'vdash',team:'vteam',plan:'vplan',equip:'vequip',maint:'vmaint',paint:'vpaint',scaf:'vscaf',cal:'vcal',civil_concr:'vcivil_concr',civil_elem:'vcivil_elem',civil_sinapi:'vcivil_sinapi',elec_panels:'velec_panels',elec_spda:'velec_spda',elec_specs:'velec_specs',hydraulic:'vhydraulic',quality_joints:'vquality_joints',quality_reports:'vquality_reports'};
+  views.forEach(id=>{const el=document.getElementById(id);if(el)el.style.display=mapView[v]===id?'block':'none';});
+  const tabMap={panel:'panel',projects:'proj',isos:'isos',map:'map',pend:'pend',rdo:'rdo',mat:'mat',sold:'sold',com:'com',imp:'imp',gantt:'gantt',int:'int',prod:'prod',dash:'dash',team:'team',plan:'plan',equip:'equip',maint:'maint',paint:'paint',scaf:'scaf',cal:'cal',civil_concr:'civil-concr',civil_elem:'civil-elem',civil_sinapi:'civil-sinapi',elec_panels:'elec-pnl',elec_spda:'elec-spda',elec_specs:'elec-specs',hydraulic:'hyd',quality_joints:'quality-joints',quality_reports:'quality-reports'};
+  ['panel','proj','isos','map','pend','rdo','mat','sold','com','imp','gantt','int','prod','dash','team','plan','equip','maint','paint','scaf','cal','civil-concr','civil-elem','civil-sinapi','elec-pnl','elec-spda','elec-specs','hyd','quality-joints','quality-reports'].forEach(t=>{const el=document.getElementById('tab-'+t);if(el)el.classList.toggle('active',t===tabMap[v]);});
+  const _tbp = document.getElementById('tb-p'); if(_tbp) _tbp.textContent = projects.length;
+  const _tbi = document.getElementById('tb-i'); if(_tbi) _tbi.textContent = (curProj?pSheets(curProj):sheets).length;
+  const renderers={panel:rPanel,projects:rProj,isos:rIsos,map:rMap,pend:rPend,rdo:rRdo,mat:rMat,sold:rSold,com:rCom,imp:rImp,gantt:rGantt,int:rInt,prod:rProd,dash:rDash,team:rTeam,plan:rPlan,equip:rEquip,maint:rMaint,paint:rPaint,scaf:rScaf,cal:rCal,civil_concr:rCivilConcr,civil_elem:rCivilElem,civil_sinapi:rCivilSinapi,elec_panels:rElecPanels,elec_spda:rElecSpda,elec_specs:rElecSpecs,hydraulic:rHydraulic,quality_joints:rQualityJoints,quality_reports:rQualityReports};
+  if(renderers[v])renderers[v]();
+  rHdr();
+  _renderIcons();
+  // Aplica labels customizados (ordem dos <th> deve bater com FIELD_SCHEMA[v])
+  setTimeout(()=>{
+    const containerId = mapView[v];
+    if(!containerId) return;
+    const container = document.getElementById(containerId);
+    if(container) applyFieldLabels(v, container);
+  }, 200);
+}
+// Abre uma view específica do HUB Planejador (cables, eletroduct, joints, supports, em, materials, etc.)
+// Pega sessão direto do localStorage (SÍNCRONO — preserva user gesture do click)
+function _getSessionSync(){
+  try {
+    for(const k of Object.keys(localStorage)){
+      if(k.startsWith('sb-') && k.endsWith('-auth-token')){
+        const v = localStorage.getItem(k);
+        if(!v) continue;
+        const data = JSON.parse(v);
+        if(data && data.access_token && data.refresh_token) return data;
+      }
+    }
+  } catch(_){}
+  return null;
+}
+function _appendAuthToUrl(url){
+  const s = _getSessionSync();
+  if(s){
+    const sep = url.includes('?') ? '&' : '?';
+    return url + sep + '_at=' + encodeURIComponent(s.access_token) + '&_rt=' + encodeURIComponent(s.refresh_token);
+  }
+  return url;
+}
+
+function openPlannerView(viewName){
+  let url = 'hydrostec_planejador.html';
+  if(curProj){
+    const p = projects.find(x=>x.id===curProj);
+    const name = p ? p.name : '';
+    url += '?project=' + encodeURIComponent(curProj) + (name?'&name='+encodeURIComponent(name):'');
+  } else if(projects.length === 1){
+    const p = projects[0];
+    url += '?project='+encodeURIComponent(p.id)+'&name='+encodeURIComponent(p.name);
+  } else {
+    toast('Escolha um projeto primeiro (clique em "Abrir →" num projeto)','warn');
+    goV('projects');
+    return;
+  }
+  url = _appendAuthToUrl(url);
+  if(viewName) url += '#' + viewName;
+  window.open(url, '_blank');
+}
+
+// Abre HUB Planejador. Roteia pelo seletor multi-disciplina.
+function openPlannerForCurrentProject(){
+  let pid, name;
+  if(curProj){
+    const p = projects.find(x=>x.id===curProj);
+    pid = curProj; name = p ? p.name : '';
+  } else if(projects.length === 1){
+    pid = projects[0].id; name = projects[0].name;
+  } else {
+    toast('Escolha um projeto primeiro (clique em "Abrir →" num projeto)','warn');
+    goV('projects');
+    return;
+  }
+  // Roteia pelo seletor multi-disciplina (com cards Civil/Eletrica/Pintura/Caldeiraria)
+  openProjectInPlanner(pid, name);
+}
+
+// PAINEL GERAL — visão de TODOS os projetos
+async function rPanel(){
+  const el = document.getElementById('vpanel');
+  if(!el){return;}
+  // Datas úteis pra deltas
+  const now = new Date();
+  const sevenDaysAgo = new Date(now.getTime() - 7*86400000).toISOString();
+  const thirtyDaysAgo = new Date(now.getTime() - 30*86400000).toISOString();
+
+  // IDs dos projetos ATIVOS (não soft-deletados) — essencial pra evitar contagem de órfãos
+  const activeProjectIds = projects.map(p=>p.id);
+  const inP = (q)=> activeProjectIds.length ? q.in('project_id', activeProjectIds) : q.eq('project_id','00000000-0000-0000-0000-000000000000');
+
+  // Carrega contadores totais + deltas em paralelo (todos filtrados por projetos ativos)
+  const [sh,jt,sup,em,ca,el2,mt,pn,pnCrit,shWeek,sh30,pnWeek] = await Promise.all([
+    inP(sb.from('isometric_sheets').select('id',{count:'exact',head:true}).eq('org_id',_org.id).is('deleted_at',null)),
+    inP(sb.from('joints').select('id',{count:'exact',head:true}).eq('org_id',_org.id).eq('junta_ativa',true)),
+    inP(sb.from('supports').select('id',{count:'exact',head:true}).eq('org_id',_org.id).is('deleted_at',null)),
+    inP(sb.from('structural_em_records').select('id',{count:'exact',head:true}).eq('org_id',_org.id).is('deleted_at',null)),
+    inP(sb.from('electrical_cables').select('id',{count:'exact',head:true}).eq('org_id',_org.id).is('deleted_at',null)),
+    inP(sb.from('eletroduct_runs').select('id',{count:'exact',head:true}).eq('org_id',_org.id).is('deleted_at',null)),
+    inP(sb.from('project_materials').select('id',{count:'exact',head:true}).eq('org_id',_org.id)),
+    inP(sb.from('pendings').select('id',{count:'exact',head:true}).eq('org_id',_org.id).in('status',['aberta','em_andamento'])),
+    inP(sb.from('pendings').select('id',{count:'exact',head:true}).eq('org_id',_org.id).in('status',['aberta','em_andamento']).eq('priority','critica')),
+    inP(sb.from('isometric_sheets').select('id',{count:'exact',head:true}).eq('org_id',_org.id).is('deleted_at',null).gte('created_at', sevenDaysAgo)),
+    inP(sb.from('isometric_sheets').select('id',{count:'exact',head:true}).eq('org_id',_org.id).is('deleted_at',null).gte('created_at', thirtyDaysAgo)),
+    inP(sb.from('pendings').select('id',{count:'exact',head:true}).eq('org_id',_org.id).gte('created_at', sevenDaysAgo))
+  ]);
+  const totalProj = projects.length;
+  const totalSheets = sheets.length;
+  const projWithSheets = projects.filter(p=>pSheets(p.id).length>0).length;
+  // Avanço médio + previsão (extrapolando dos últimos 30 dias)
+  let avgFab=0, avgMon=0;
+  if(sheets.length){
+    avgFab = Math.round(sheets.reduce((s,x)=>s+fPct(x),0)/sheets.length);
+    avgMon = Math.round(sheets.reduce((s,x)=>s+mPct(x),0)/sheets.length);
+  }
+  // Deltas
+  const sheetsWeek = shWeek.count || 0;
+  const sheets30d = sh30.count || 0;
+  const pnWk = pnWeek.count || 0;
+  const critPct = pn.count ? Math.round((pnCrit.count||0)/pn.count*100) : 0;
+
+  // Helper para renderizar delta ▲▼
+  const delta = (val, type) => {
+    if(val == null || val === '') return '';
+    const positive = type === 'up' ? val > 0 : val < 0;
+    const negative = type === 'up' ? val < 0 : val > 0;
+    const col = positive ? 'var(--success)' : (negative ? 'var(--danger)' : 'var(--t6)');
+    const ic = val > 0 ? 'trending-up' : val < 0 ? 'trending-down' : 'minus';
+    const sig = val > 0 ? '+' : '';
+    return `<span style="display:inline-flex;align-items:center;gap:3px;color:${col};font-weight:600;font-size:11px;font-family:'JetBrains Mono',monospace"><i data-lucide="${ic}" style="width:12px;height:12px"></i>${sig}${val}</span>`;
+  };
+
+  el.innerHTML = `
+    <div style="padding:24px 22px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;flex-wrap:wrap;gap:12px">
+        <div>
+          <div style="font-size:11px;color:var(--t6);text-transform:uppercase;letter-spacing:.8px;font-weight:600;margin-bottom:4px">Painel Geral</div>
+          <div style="font-size:28px;font-weight:800;color:var(--t9);letter-spacing:-.8px">${san(_org.name||'PROJECT.IA')}</div>
+          <div style="font-size:13px;color:var(--t6);margin-top:4px">Visão consolidada de toda a organização — para detalhes por projeto, clique em "Abrir →".</div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="bp" onclick="oProj(null)"><i data-lucide="folder-plus" style="width:14px;height:14px"></i>Novo Projeto</button>
+          <button class="bg" onclick="goV('projects')"><i data-lucide="grid-3x3" style="width:14px;height:14px"></i>Ver projetos</button>
+        </div>
+      </div>
+
+      <!-- KPIs principais com delta -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:22px">
+        ${[
+          {k:'Projetos',v:totalProj,ic:'folder-kanban',col:'var(--primary)',sub:`${projWithSheets} c/ folhas`,deltaHtml:''},
+          {k:'Folhas/Isos',v:totalSheets,ic:'file-text',col:'var(--violet)',sub:`em ${totalProj} projeto${totalProj!==1?'s':''}`,deltaHtml:sheetsWeek?delta(sheetsWeek,'up')+' <span style="color:var(--t6);font-size:11px">esta semana</span>':''},
+          {k:'Avanço Fab',v:avgFab+'%',ic:'hammer',col:'#F59E0B',sub:'média ponderada',deltaHtml:`<span style="color:var(--t6);font-size:11px">END+Sol+Pré</span>`},
+          {k:'Avanço Mont',v:avgMon+'%',ic:'check-check',col:'var(--success)',sub:'média ponderada',deltaHtml:`<span style="color:var(--t6);font-size:11px">${sheets30d} folhas em 30d</span>`},
+          {k:'Pendências',v:pn.count||0,ic:'alert-triangle',col:'var(--danger)',sub:`${pnCrit.count||0} crítica${(pnCrit.count||0)!==1?'s':''}`,deltaHtml:pnWk?delta(pnWk,'down')+' <span style="color:var(--t6);font-size:11px">novas/sem</span>':''}
+        ].map(c=>`
+          <div style="background:var(--t0);border:1px solid var(--t3);border-radius:12px;padding:16px;box-shadow:var(--sh-1);transition:all .15s" onmouseover="this.style.boxShadow='var(--sh-2)';this.style.borderColor='var(--t4)'" onmouseout="this.style.boxShadow='var(--sh-1)';this.style.borderColor='var(--t3)'">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+              <div style="width:32px;height:32px;border-radius:8px;background:${c.col}22;color:${c.col};display:flex;align-items:center;justify-content:center"><i data-lucide="${c.ic}" style="width:16px;height:16px"></i></div>
+              <div style="font-size:10.5px;text-transform:uppercase;color:var(--t6);font-weight:600;letter-spacing:.5px">${c.k}</div>
+            </div>
+            <div style="font-size:28px;font-weight:800;color:var(--t9);font-family:'JetBrains Mono',monospace;letter-spacing:-.5px;line-height:1;margin-bottom:6px">${c.v}</div>
+            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;min-height:18px">
+              ${c.deltaHtml || `<span style="font-size:11px;color:var(--t6)">${c.sub}</span>`}
+            </div>
+          </div>`).join('')}
+      </div>
+
+      <!-- KPIs disciplinas -->
+      <div style="font-size:11px;color:var(--t6);text-transform:uppercase;letter-spacing:.8px;font-weight:600;margin-bottom:10px">Disciplinas (totais da organização)</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:24px">
+        ${[
+          {k:'Juntas',v:jt.count||0,ic:'wrench',col:'var(--violet)'},
+          {k:'Suportes',v:sup.count||0,ic:'anchor',col:'var(--accent)'},
+          {k:'Estruturas EM',v:em.count||0,ic:'component',col:'#F59E0B'},
+          {k:'Cabos',v:ca.count||0,ic:'cable',col:'#0EA5E9'},
+          {k:'Eletrodutos',v:el2.count||0,ic:'route',col:'#10B981'},
+          {k:'Materiais',v:mt.count||0,ic:'package',col:'#EF4444'}
+        ].map(c=>`
+          <div style="background:var(--t0);border:1px solid var(--t3);border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:10px">
+            <div style="width:28px;height:28px;border-radius:7px;background:${c.col}22;color:${c.col};display:flex;align-items:center;justify-content:center"><i data-lucide="${c.ic}" style="width:14px;height:14px"></i></div>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:9.5px;text-transform:uppercase;color:var(--t6);font-weight:600;letter-spacing:.4px">${c.k}</div>
+              <div style="font-size:18px;font-weight:700;color:var(--t9);font-family:'JetBrains Mono',monospace">${c.v}</div>
+            </div>
+          </div>`).join('')}
+      </div>
+
+      <!-- Lista de projetos resumida -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <div style="font-size:11px;color:var(--t6);text-transform:uppercase;letter-spacing:.8px;font-weight:600">Projetos ativos</div>
+        ${totalProj>0?`<button class="bg" onclick="goV('projects')" style="font-size:11.5px"><i data-lucide="arrow-right" style="width:12px;height:12px"></i>Ver todos</button>`:''}
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px">
+        ${totalProj === 0 ? `
+          <div style="grid-column:1/-1;text-align:center;padding:40px;background:var(--t1);border:1px dashed var(--t3);border-radius:12px;color:var(--t6)">
+            <i data-lucide="folder-search" style="width:36px;height:36px;color:var(--t5);margin-bottom:8px"></i>
+            <div style="font-size:14px;font-weight:600;color:var(--t8);margin-bottom:4px">Nenhum projeto ainda</div>
+            <div style="font-size:12.5px;margin-bottom:14px">Crie seu primeiro projeto para começar.</div>
+            <button class="bp" onclick="oProj(null)"><i data-lucide="folder-plus" style="width:14px;height:14px"></i>Criar projeto</button>
+          </div>
+        ` : projects.slice(0,6).map(p=>{
+          const ps=pSheets(p.id);
+          const n=ps.length;
+          const af=n?Math.round(ps.reduce((s,e)=>s+fPct(e),0)/n):0;
+          const am=n?Math.round(ps.reduce((s,e)=>s+mPct(e),0)/n):0;
+          return `<div style="background:var(--t0);border:1px solid var(--t3);border-radius:12px;padding:14px;transition:all .15s" onmouseover="this.style.borderColor='var(--t4)';this.style.boxShadow='var(--sh-2)'" onmouseout="this.style.borderColor='var(--t3)';this.style.boxShadow='none'">
+            <div style="font-size:14px;font-weight:700;color:var(--t9);margin-bottom:2px;letter-spacing:-.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${san(p.name)}</div>
+            <div style="font-size:11px;color:var(--t6);font-family:'JetBrains Mono',monospace;margin-bottom:10px">${san(p.code||'—')}${p.plant?' · '+san(p.plant):''}</div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">
+              <span class="badge b-info">${n} folha${n!==1?'s':''}</span>
+              <span class="badge b-pen">Fab ${af}%</span>
+              <span class="badge b-py">Mon ${am}%</span>
+            </div>
+            <button class="bp" onclick="openProjectInPlanner('${p.id}','${san(p.name).replace(/'/g,"&apos;")}')" style="width:100%;justify-content:center"><i data-lucide="arrow-right" style="width:14px;height:14px"></i>Abrir no HUB</button>
+          </div>`;
+        }).join('')}
+        ${totalProj>6?`<div style="grid-column:1/-1;text-align:center;padding:10px"><button class="bg" onclick="goV('projects')">Ver mais ${totalProj-6} projetos →</button></div>`:''}
+      </div>
+    </div>`;
+  _renderIcons();
+}
+
+function rHdr(){
+  const el=document.getElementById('hdr-acts');
+  const ic = (n)=>`<i data-lucide="${n}"></i>`;
+  const cfg={
+    panel:'',
+    projects:`<button class="btn bp" onclick="oProj(null)">${ic('folder-plus')}Novo Projeto</button>`,
+    isos:`<button class="btn bg" onclick="document.getElementById('exp-modal').classList.add('open')">${ic('download')}Exportar</button><button class="btn bp" onclick="oIso(null)">${ic('plus')}Nova Folha</button>`,
+
+    mat:`<button class="btn bp" onclick="oMat()">${ic('plus')}Novo Material</button>${window.PIAExcelMenu ? window.PIAExcelMenu({ id:'mat', onImport:"openImportExcel('mat')", onExport:"mtExportXLSX()" }) : `<button class="btn bg" onclick="openImportExcel('mat')">${ic('file-spreadsheet')}Importar Excel</button>`}<button class="btn bia" onclick="openAIImport('mat')" title="Importar via IA">${ic('sparkles')}IA</button><button class="btn bo" onclick="openFieldsCustomization('mat')" title="Personalizar colunas">${ic('settings')}Personalizar</button>`,
+    sold:`<button class="btn bp" onclick="oSold()">${ic('plus')}Novo Soldador</button><button class="btn bg" onclick="openImportExcel('sold')" title="Importar planilha Excel">${ic('file-spreadsheet')}Importar Excel</button><button class="btn bia" onclick="openAIImport('sold')" title="Importar via IA">${ic('sparkles')}IA</button><button class="btn bo" onclick="openFieldsCustomization('sold')" title="Personalizar colunas">${ic('settings')}Personalizar</button>`,
+    com:`<button class="btn bp" onclick="oCom()">${ic('plus')}Novo Sistema</button><button class="btn bg" onclick="openImportExcel('com')" title="Importar planilha Excel">${ic('file-spreadsheet')}Importar Excel</button><button class="btn bia" onclick="openAIImport('com')" title="Importar via IA">${ic('sparkles')}IA</button><button class="btn bo" onclick="openFieldsCustomization('com')" title="Personalizar colunas">${ic('settings')}Personalizar</button>`,
+    map:'',imp:'',int:'',dash:'',
+    gantt:`<button class="btn bg" onclick="openP6ImportModal()">${ic('upload')}Importar P6</button><button class="btn bg" onclick="exportP6()">${ic('file-output')}Exportar P6</button><button class="btn bp" onclick="exportProject()">${ic('file-spreadsheet')}MS Project</button>`,
+    pend:`<button class="btn bp" onclick="oPend()">${ic('plus')}Nova Pendência</button><button class="btn bg" onclick="openImportExcel('pend')" title="Importar planilha Excel">${ic('file-spreadsheet')}Importar Excel</button><button class="btn bia" onclick="openAIImport('pend')" title="Importar via IA">${ic('sparkles')}IA</button><button class="btn bo" onclick="openFieldsCustomization('pend')" title="Personalizar colunas">${ic('settings')}Personalizar</button>`,
+    rdo:`<button class="btn bp" onclick="oRdo()">${ic('plus')}Novo Relatório</button><button class="btn bg" onclick="openImportExcel('rdo')" title="Importar planilha Excel">${ic('file-spreadsheet')}Importar Excel</button><button class="btn bia" onclick="openAIImport('rdo')" title="Importar via IA">${ic('sparkles')}IA</button><button class="btn bo" onclick="openFieldsCustomization('rdo')" title="Personalizar colunas">${ic('settings')}Personalizar</button>`,
+    prod:`<button class="btn bg" onclick="seedDefaultParams()">${ic('rotate-ccw')}Restaurar padrões</button><button class="btn bp" onclick="oProd(null)">${ic('plus')}Novo parâmetro</button><button class="btn bg" onclick="openImportExcel('prod')" title="Importar planilha Excel">${ic('file-spreadsheet')}Importar Excel</button><button class="btn bia" onclick="openAIImport('prod')" title="Importar via IA">${ic('sparkles')}IA</button><button class="btn bo" onclick="openFieldsCustomization('prod')" title="Personalizar colunas">${ic('settings')}Personalizar</button>`,
+    equip:`<button class="btn bia" onclick="openEquipAIModal()">${ic('sparkles')}Cadastrar via IA</button><button class="btn bp" onclick="oEquip(null)">${ic('plus')}Novo Equipamento</button><button class="btn bg" onclick="openImportExcel('equip')" title="Importar planilha Excel">${ic('file-spreadsheet')}Importar Excel</button><button class="btn bia" onclick="openAIImport('equip')" title="Importar via IA">${ic('sparkles')}IA</button><button class="btn bo" onclick="openFieldsCustomization('equip')" title="Personalizar colunas">${ic('settings')}Personalizar</button>`,
+    maint:`<button class="btn ba" onclick="oMaintOS(null,'corretiva_emergencial')">${ic('siren')}Corretiva</button><button class="btn bp" onclick="oMaintOS(null,'preventiva')">${ic('plus')}Nova OS</button><button class="btn bg" onclick="openImportExcel('maint')" title="Importar planilha Excel">${ic('file-spreadsheet')}Importar Excel</button><button class="btn bia" onclick="openAIImport('maint')" title="Importar via IA">${ic('sparkles')}IA</button><button class="btn bo" onclick="openFieldsCustomization('maint')" title="Personalizar colunas">${ic('settings')}Personalizar</button>`,
+    quality_joints:`<button class="btn bp" onclick="oJoint(null)">${ic('plus')}Nova Junta</button>${window.PIAExcelMenu ? window.PIAExcelMenu({ id:'qj', onImport:"openImportExcel('quality_joints')", onExport:"exportQualityJointsXLSX()" }) : `<button class="btn bg" onclick="openImportExcel('quality_joints')">${ic('file-spreadsheet')}Importar Excel</button>`}<button class="btn bia" onclick="openAIImport('quality_joints')" title="Importar via IA">${ic('sparkles')}IA</button><button class="btn bo" onclick="openFieldsCustomization('quality_joints')" title="Personalizar colunas">${ic('settings')}Personalizar</button>`,
+    quality_reports:`<button class="btn bp" onclick="oNdt(null)">${ic('plus')}Novo Laudo END</button><button class="btn bg" onclick="openImportExcel('quality_reports')" title="Importar planilha Excel">${ic('file-spreadsheet')}Importar Excel</button><button class="btn bia" onclick="openAIImport('quality_reports')" title="Importar via IA">${ic('sparkles')}IA</button><button class="btn bo" onclick="openFieldsCustomization('quality_reports')" title="Personalizar colunas">${ic('settings')}Personalizar</button>`,
+    paint:`<button class="btn bp" onclick="oPaintInsp(null)">${ic('plus')}Nova Inspeção</button><button class="btn bg" onclick="openImportExcel('paint')" title="Importar planilha Excel">${ic('file-spreadsheet')}Importar Excel</button><button class="btn bia" onclick="openAIImport('paint')" title="Importar via IA">${ic('sparkles')}IA</button><button class="btn bo" onclick="openFieldsCustomization('paint')" title="Personalizar colunas">${ic('settings')}Personalizar</button>`,
+    scaf:`<button class="btn bp" onclick="oScaf(null)">${ic('plus')}Novo Cartão</button><button class="btn bg" onclick="openImportExcel('scaf')" title="Importar planilha Excel">${ic('file-spreadsheet')}Importar Excel</button><button class="btn bia" onclick="openAIImport('scaf')" title="Importar via IA">${ic('sparkles')}IA</button><button class="btn bo" onclick="openFieldsCustomization('scaf')" title="Personalizar colunas">${ic('settings')}Personalizar</button>`,
+    cal:`<button class="btn bp" onclick="oCal(null)">${ic('plus')}Nova Calibração</button><button class="btn bg" onclick="openImportExcel('cal')" title="Importar planilha Excel">${ic('file-spreadsheet')}Importar Excel</button><button class="btn bia" onclick="openAIImport('cal')" title="Importar via IA">${ic('sparkles')}IA</button><button class="btn bo" onclick="openFieldsCustomization('cal')" title="Personalizar colunas">${ic('settings')}Personalizar</button>`
+  };
+  el.innerHTML=cfg[curView]||'';
+  _renderIcons();
+}
+
+// ═══════════════════════════════════════════════════
+// PROJECTS VIEW
+// ═══════════════════════════════════════════════════
+function rProj(){
+  const q=(document.getElementById('ps-inp')?document.getElementById('ps-inp').value:'').toLowerCase();
+  const list=projects.filter(p=>!q||p.name.toLowerCase().includes(q)||(p.code||'').toLowerCase().includes(q));
+  document.getElementById('vp').innerHTML=`
+    <div class="proj-toolbar">
+      <div style="display:flex;align-items:center;gap:8px;color:var(--t6);flex:1">
+        <i data-lucide="search" style="width:16px;height:16px;color:var(--t5)"></i>
+        <input style="padding:7px 11px;border:1px solid var(--t3);border-radius:7px;font-size:12.5px;background:var(--t0);color:var(--t8);outline:none;width:260px;font-family:inherit;font-weight:500" id="ps-inp" placeholder="Buscar projeto..." value="${q}" oninput="rProj()">
+      </div>
+      <span style="font-size:12px;color:var(--t6);font-weight:500">${projects.length} projeto${projects.length!==1?'s':''}</span>
+    </div>
+    <div class="proj-grid">
+      ${!list.length?`<div class="no-proj">${projects.length?'Nenhum resultado.':'Nenhum projeto cadastrado. Clique em + Novo Projeto.'}</div>`:''}
+      ${list.map(p=>{
+        const ps=pSheets(p.id),n=ps.length;
+        const af=n?Math.round(ps.reduce((s,e)=>s+fPct(e),0)/n):0;
+        const am=n?Math.round(ps.reduce((s,e)=>s+mPct(e),0)/n):0;
+        return`<div class="pcard ${curProj===p.id?'sel':''}">
+          <div class="pc-name">${san(p.name)}</div>
+          <div class="pc-code">${san(p.code||'—')}${p.plant?' · '+san(p.plant):''}</div>
+          <div class="pc-stats">
+            <span class="pst"><i data-lucide="file-text" style="width:12px;height:12px;display:inline-block;vertical-align:-2px;margin-right:3px"></i>${n} folha${n!==1?'s':''}</span>
+            <span class="pst">Fab ${af}%</span>
+            <span class="pst">Mon ${am}%</span>
+            ${p.material_supplied_by_client?'<span class="pst" style="background:var(--violet-l);color:#5B21B6"><i data-lucide="hand-coins" style="width:11px;height:11px;display:inline-block;vertical-align:-2px;margin-right:3px"></i>Material fornecido</span>':''}
+            ${p.contract_type==='mao_obra_apenas'?'<span class="pst" style="background:var(--accent-l);color:#0C5DA8"><i data-lucide="hammer" style="width:11px;height:11px;display:inline-block;vertical-align:-2px;margin-right:3px"></i>Só HH</span>':''}
+          </div>
+          ${p.desc?`<div style="font-size:11px;color:var(--t6);margin-bottom:10px;line-height:1.5">${san(p.desc)}</div>`:''}
+          <div class="pc-acts">
+            <button class="sm-p" onclick="openProjectInPlanner('${p.id}','${san(p.name).replace(/'/g,"&apos;")}')"><i data-lucide="arrow-right"></i>Abrir</button>
+            <button class="sm-e" onclick="oProj('${p.id}')" title="Editar projeto"><i data-lucide="pencil"></i></button>
+            <button class="sm-d" onclick="delProj('${p.id}','${san(p.name)}')" title="Excluir"><i data-lucide="trash-2"></i></button>
+          </div>
+        </div>`;
+      }).join('')}
+      <div class="pnew" onclick="oProj(null)">
+        <i data-lucide="folder-plus" style="width:32px;height:32px;color:var(--t5)"></i>
+        <span style="font-size:13px;color:var(--t6);font-weight:600;margin-top:6px">Novo Projeto</span>
+      </div>
+    </div>`;
+  _renderIcons();
+}
+
+// ═══════════════════════════════════════════════════
+// ISO VIEW
+// ═══════════════════════════════════════════════════
+function rIsos(){
+  const proj=projects.find(p=>p.id===curProj);
+  const list=curProj?pSheets(curProj):sheets;
+  const n=list.length,af=n?Math.round(list.reduce((s,e)=>s+fPct(e),0)/n):0;
+  const am=n?Math.round(list.reduce((s,e)=>s+mPct(e),0)/n):0;
+  const py=list.filter(e=>e.paint==='Pintado').length;
+  const thOk=list.filter(e=>(e.mon||{}).th==='Sim').length;
+  const trqOk=list.filter(e=>(e.mon||{}).trq==='Sim').length;
+  const areas=[...new Set(list.map(e=>e.area).filter(Boolean))].sort();
+
+  document.getElementById('vi').innerHTML=`
+    <div class="bc-row">
+      <button class="bcl" onclick="goV('projects')"><i data-lucide="folder-kanban" style="width:14px;height:14px;display:inline-block;vertical-align:-2px;margin-right:4px"></i>Projetos</button>
+      <span style="color:var(--hbr)">›</span>
+      <span style="font-weight:500">${proj?san(proj.name):'Todos'}</span>
+      ${proj?`<span style="color:var(--hbr)">·</span><span style="font-family:monospace;font-size:9.5px;color:var(--hmu)">${san(proj.code)}</span>`:''}
+    </div>
+    <div class="sumbar">
+      <div class="sc"><div class="slbl">Folhas</div><div class="sval">${n}</div></div>
+      <div class="sc"><div class="slbl">Fabricação</div><div class="sval" style="color:var(--hbm)">${af}%</div><div class="spb"><div class="spbi" style="background:var(--hbm);width:${af}%"></div></div></div>
+      <div class="sc"><div class="slbl">Montagem</div><div class="sval" style="color:var(--hc)">${am}%</div><div class="spb"><div class="spbi" style="background:var(--hc);width:${am}%"></div></div></div>
+      <div class="sc"><div class="slbl">Pintura</div><div class="sval" style="color:var(--hs)">${py}/${n}</div><div class="spb"><div class="spbi" style="background:var(--hs);width:${n?Math.round(py/n*100):0}%"></div></div></div>
+      <div class="sc"><div class="slbl">T.H./Torque ✔</div><div class="sval" style="color:var(--hw)">${thOk}/${trqOk}</div></div>
+    </div>
+    <div class="fbar">
+      🔍 <input type="text" id="f-q" style="min-width:155px" placeholder="Isométrico, folha ou linha..." oninput="ft()">
+      <select id="f-area" onchange="ft()"><option value="">Todas áreas</option>${areas.map(a=>`<option>${san(a)}</option>`).join('')}</select>
+      <select id="f-nr13" onchange="ft()"><option value="">NR-13</option><option>Sim</option><option>Não</option></select>
+      <select id="f-paint" onchange="ft()"><option value="">Pintura</option><option>Pintado</option><option>Não Pintado</option></select>
+      <select id="f-th" onchange="ft()"><option value="">T.H.</option><option>Sim</option><option>Não</option><option>Pendente</option></select>
+      <button class="bg" onclick="cf()"><i data-lucide="x"></i>Limpar</button>
+      <span id="fc" style="font-size:10px;color:var(--hmu)"></span>
+    </div>
+    <div class="tbl-wrap">
+      <table><thead><tr>
+        <th>Isométrico</th><th>Folha</th><th>Linha</th><th>Área</th>
+        <th>Fl.</th><th>NR-13</th><th>Iso.T.</th><th>T.Op.</th><th>Cl.Insp.</th>
+        <th style="min-width:150px">Fabricação</th>
+        <th>Pintura</th>
+        <th style="min-width:150px">Montagem</th>
+        <th>T.H.</th><th>Torque</th><th></th>
+      </tr></thead>
+      <tbody id="tbody"></tbody></table>
+    </div>`;
+  ft();
+}
+
+function ft(){
+  const list=curProj?pSheets(curProj):sheets;
+  const q=(document.getElementById('f-q')||{value:''}).value.toLowerCase();
+  const fa=(document.getElementById('f-area')||{value:''}).value;
+  const fn=(document.getElementById('f-nr13')||{value:''}).value;
+  const fp=(document.getElementById('f-paint')||{value:''}).value;
+  const fth=(document.getElementById('f-th')||{value:''}).value;
+  const res=list.filter(e=>{
+    if(q&&!(e.num||'').toLowerCase().includes(q)&&!(e.sheet||'').includes(q)&&!(e.line||'').toLowerCase().includes(q))return false;
+    if(fa&&e.area!==fa)return false;
+    if(fn&&e.nr13!==fn)return false;
+    if(fp&&e.paint!==fp)return false;
+    if(fth&&(e.mon||{}).th!==fth)return false;
+    return true;
+  });
+  const cnt=document.getElementById('fc');
+  if(cnt)cnt.textContent=res.length<list.length?`${res.length} de ${list.length}`:`${list.length} folha${list.length!==1?'s':''}`;
+  rRows(res);
+}
+function cf(){['f-q','f-area','f-nr13','f-paint','f-th'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''});ft()}
+
+function pmini(obj,type){
+  const pct=Math.round((obj.pre||0)*.3+(obj.sol||0)*.5+(obj.end||0)*.2);
+  const avCls=type==='fab'?'avf':'avm';
+  const di=fmtD(obj.si),df=fmtD(obj.sf);
+  const dr=(di!=='—'||df!=='—')?`<div class="date-info">📅 ${di} → ${df}</div>`:'';
+  return`<div class="pm">
+    <div class="pmr"><span class="pml">Pré</span><div class="pmb"><div class="pmbi pi0" style="width:${obj.pre||0}%"></div></div><span class="pmpct">${obj.pre||0}%</span></div>
+    <div class="pmr"><span class="pml">Sol</span><div class="pmb"><div class="pmbi pi1" style="width:${obj.sol||0}%"></div></div><span class="pmpct">${obj.sol||0}%</span></div>
+    <div class="pmr"><span class="pml">END</span><div class="pmb"><div class="pmbi pi2" style="width:${obj.end||0}%"></div></div><span class="pmpct">${obj.end||0}%</span></div>
+    <div class="${avCls}">Avanço: ${pct}%</div>${dr}</div>`;
+}
+function thB(v,id){
+  const cls=v==='Sim'?'b-sim':v==='Não'?'b-nao':'b-pen';
+  const lbl=v==='Sim'?'Aprovado':v==='Não'?'Reprovado':'Pendente';
+  const click = id ? `onclick="tgTH('${id}')" title="Clique para alternar (Pendente → Aprovado → Reprovado)" style="cursor:pointer"` : '';
+  return `<span class="badge ${cls}" ${click}>${lbl}</span>`;
+}
+function trqB(v,id){
+  const cls=v==='Sim'?'b-sim':v==='Não'?'b-nao':'b-pen';
+  const lbl=v==='Sim'?'OK':v==='Não'?'Pendente':'Pendente';
+  const click = id ? `onclick="tgTrq('${id}')" title="Clique para alternar (Pendente → OK → Pendente)" style="cursor:pointer"` : '';
+  return `<span class="badge ${cls}" ${click}>${lbl}</span>`;
+}
+
+function rRows(list){
+  const body=document.getElementById('tbody');if(!body)return;
+  if(!list.length){
+    if(sheets.length){
+      body.innerHTML=`<tr><td colspan="14"><div class="empty-st">Nenhum resultado com esses filtros.</div></td></tr>`;
+    } else {
+      body.innerHTML=`<tr><td colspan="14" style="padding:0">
+        <div style="text-align:center;padding:50px 22px;background:var(--t1);border-radius:12px;margin:18px 22px">
+          <div style="width:64px;height:64px;border-radius:16px;background:var(--primary-l);display:inline-flex;align-items:center;justify-content:center;margin-bottom:14px"><i data-lucide="file-plus" style="width:32px;height:32px;color:var(--primary)"></i></div>
+          <div style="font-size:18px;font-weight:700;color:var(--t9);margin-bottom:6px;letter-spacing:-.3px">Nenhuma folha cadastrada ainda</div>
+          <div style="font-size:13px;color:var(--t6);max-width:520px;margin:0 auto 22px;line-height:1.6">Você tem 3 formas rápidas de começar: subir uma planilha Excel existente, deixar a IA ler um PDF do isométrico, ou cadastrar manualmente.</div>
+          <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+            <button class="bp" onclick="goV('imp')"><i data-lucide="file-spreadsheet"></i>Importar Excel</button>
+            <button class="btn bia" onclick="openDisciplineAIModal&&openDisciplineAIModal('tubulacao')"><i data-lucide="sparkles"></i>Subir PDF pra IA</button>
+            <button class="bo" onclick="oIso(null)"><i data-lucide="plus"></i>Cadastrar manualmente</button>
+          </div>
+        </div>
+      </td></tr>`;
+      _renderIcons();
+    }
+    return;
+  }
+  body.innerHTML=list.map(e=>{
+    const fab=e.fab||{pre:0,sol:0,end:0};
+    const mon=e.mon||{pre:0,sol:0,end:0,th:'Pendente',trq:'Pendente'};
+    return`<tr>
+      <td><div class="mono" style="font-weight:600;color:var(--primary-h);font-size:12px;cursor:pointer;display:inline-flex;align-items:center;gap:5px" onclick="openIsoPDF('${e.id}')" title="${e.pdf?'Ver PDF anexado':'Anexar PDF'}"><span style="text-decoration:underline;text-decoration-style:dotted">${san(e.num)}</span><i data-lucide="${e.pdf?'file-check-2':'paperclip'}" style="width:13px;height:13px;color:${e.pdf?'var(--success)':'var(--t5)'}"></i></div><div style="font-size:10.5px;color:var(--t6);margin-top:2px">${e.total||1} folha${(e.total||1)!==1?'s':''}</div></td>
+      <td><span class="badge" style="background:var(--hb);color:#fff;font-family:monospace">${san(e.sheet||'—')}</span></td>
+      <td><span class="mono" style="font-size:9.5px">${san(e.line||'—')}</span></td>
+      <td><strong class="mono" style="font-size:10px">${san(e.area||'—')}</strong></td>
+      <td><span class="badge b-fl">${san(e.fluid||'—')}</span></td>
+      <td><span class="badge ${e.nr13==='Sim'?'b-ny':'b-nn'}">${san(e.nr13||'—')}</span></td>
+      <td style="font-size:10px">${san(e.iso_term||'—')}</td>
+      <td style="font-size:10px;white-space:nowrap">${san(e.temp||'—')}</td>
+      <td><span class="badge b-in">Cl.${san(e.insp||'—')}</span></td>
+      <td style="background:rgba(21,88,204,.03)">
+        <div class="ie-wrap">
+          ${pmini(fab,'fab')}
+          <button class="lock-btn" onclick="oIE(event,'fab','${e.id}')"><i data-lucide="edit-3"></i>Atualizar</button>
+          <div class="ie-panel" id="ie-fab-${e.id}">
+            <div class="ie-ttl"><i data-lucide="hammer" style="width:12px;height:12px;display:inline-block;vertical-align:-2px;margin-right:4px"></i>Fabricação</div>
+            <div class="ie-row"><span class="ie-lbl">Pré-Fab (30%)</span><input class="ie-inp" type="number" id="ifp-${e.id}" min="0" max="100" value="${fab.pre||0}"></div>
+            <div class="ie-row"><span class="ie-lbl">Soldagem (50%)</span><input class="ie-inp" type="number" id="ifs-${e.id}" min="0" max="100" value="${fab.sol||0}"></div>
+            <div class="ie-row"><span class="ie-lbl">END (20%)</span><input class="ie-inp" type="number" id="ife-${e.id}" min="0" max="100" value="${fab.end||0}"></div>
+            <hr class="ie-hr">
+            <div class="ie-row"><span class="ie-lbl">Início Fab</span><input class="ie-date" type="date" id="ifi-${e.id}" value="${fab.si||''}"></div>
+            <div class="ie-row"><span class="ie-lbl">Término Fab</span><input class="ie-date" type="date" id="iff-${e.id}" value="${fab.sf||''}"></div>
+            <div class="ie-foot"><button class="bg" onclick="cIE('fab','${e.id}')">Cancelar</button><button class="bp" style="padding:4px 10px;font-size:10.5px" onclick="sIE('fab','${e.id}')">Salvar</button></div>
+          </div>
+        </div>
+      </td>
+      <td><span class="badge ${e.paint==='Pintado'?'b-py':'b-pn'}" style="cursor:pointer" onclick="tgPaint('${e.id}')" title="Clique para alternar">${san(e.paint||'—')}</span></td>
+      <td style="background:rgba(0,168,232,.03)">
+        <div class="ie-wrap">
+          ${pmini(mon,'mon')}
+          <button class="lock-btn" onclick="oIE(event,'mon','${e.id}')"><i data-lucide="edit-3"></i>Atualizar</button>
+          <div class="ie-panel" id="ie-mon-${e.id}">
+            <div class="ie-ttl"><i data-lucide="construction" style="width:12px;height:12px;display:inline-block;vertical-align:-2px;margin-right:4px"></i>Montagem</div>
+            <div class="ie-row"><span class="ie-lbl">Pré-Mont (30%)</span><input class="ie-inp" type="number" id="imp-${e.id}" min="0" max="100" value="${mon.pre||0}"></div>
+            <div class="ie-row"><span class="ie-lbl">Soldagem (50%)</span><input class="ie-inp" type="number" id="ims-${e.id}" min="0" max="100" value="${mon.sol||0}"></div>
+            <div class="ie-row"><span class="ie-lbl">END (20%)</span><input class="ie-inp" type="number" id="ime-${e.id}" min="0" max="100" value="${mon.end||0}"></div>
+            <hr class="ie-hr">
+            <div class="ie-row"><span class="ie-lbl">Início Mont</span><input class="ie-date" type="date" id="imi-${e.id}" value="${mon.si||''}"></div>
+            <div class="ie-row"><span class="ie-lbl">Término Mont</span><input class="ie-date" type="date" id="imf-${e.id}" value="${mon.sf||''}"></div>
+            <hr class="ie-hr">
+            <div class="ie-row"><span class="ie-lbl">T.H.</span><select class="ie-sel" id="imth-${e.id}"><option ${mon.th==='Pendente'?'selected':''} value="Pendente">Pendente</option><option ${mon.th==='Sim'?'selected':''} value="Sim">Aprovado</option><option ${mon.th==='Não'?'selected':''} value="Não">Reprovado</option></select></div>
+            <div class="ie-row"><span class="ie-lbl">Torque</span><select class="ie-sel" id="imtrq-${e.id}"><option ${mon.trq==='Pendente'?'selected':''} value="Pendente">Pendente</option><option ${mon.trq==='Sim'?'selected':''} value="Sim">OK</option><option ${mon.trq==='Não'?'selected':''} value="Não">Pendente</option></select></div>
+            <div class="ie-foot"><button class="bg" onclick="cIE('mon','${e.id}')">Cancelar</button><button class="bp" style="padding:4px 10px;font-size:10.5px" onclick="sIE('mon','${e.id}')">Salvar</button></div>
+          </div>
+        </div>
+      </td>
+      <td>${thB(mon.th, e.id)}</td>
+      <td>${trqB(mon.trq, e.id)}</td>
+      <td><div class="act-col">
+        <button class="sm-e" onclick='oIso(${JSON.stringify(e.id)})'><i data-lucide="pencil"></i>Editar</button>
+        ${e.pdf?`<button class="sm-e" onclick='downloadPdf(${JSON.stringify(e.pdf)})' title="Baixar PDF"><i data-lucide="file-down"></i>PDF</button>`:''}
+        <button class="sm-d" onclick='delIso(${JSON.stringify(e.id)},${JSON.stringify(e.num||"")})'><i data-lucide="trash-2"></i>Excluir</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+  _renderIcons();
+}
+
+async function downloadPdf(path){
+  // Faz download REAL (sem abrir aba). Busca o blob e força salvar.
+  try {
+    toast('Baixando PDF...','warn');
+    const {data:blob, error} = await sb.storage.from('isometrics').download(path);
+    if(error){toast('Erro: '+error.message,'err');return;}
+    const filename = (path.split('/').pop() || 'isometrico.pdf');
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 250);
+    toast('PDF salvo','ok');
+  } catch(e){
+    toast('Erro ao baixar: '+(e.message||e),'err');
+  }
+}
+
+// Mapeamento disciplina_code -> arquivo HUB + metadados
+const HUB_FILES = {
+  tubulacao:   {file:'hydrostec_planejador.html',           name:'Mecânica / Tubulação',  icon:'wrench',   color:'#1E40AF', desc:'Folhas, juntas, suportes, materiais, HH'},
+  civil:       {file:'hydrostec_planejador_civil.html',     name:'Civil / Concreto',      icon:'hard-hat', color:'#92400E', desc:'Concretagens, elementos, ensaios CP'},
+  eletrica:    {file:'hydrostec_planejador_eletrica.html',  name:'Elétrica',              icon:'zap',      color:'#CA8A04', desc:'Cabos, eletrodutos, painéis, SPDA'},
+  pintura:     {file:'hydrostec_planejador_pintura.html',   name:'Pintura Industrial',    icon:'paintbrush',color:'#BE185D',desc:'Inspeções DFT, esquemas Petrobras'},
+  caldeiraria: {file:'hydrostec_planejador_caldeiraria.html',name:'Caldeiraria',         icon:'hammer',   color:'#F97316', desc:'Estruturas metálicas, perfis, CE'}
+};
+
+// Disciplinas exibidas no seletor do v9 (cards visuais como no HUB)
+const V9_DISCIPLINES = [
+  { code:'civil',       name:'Engenharia Civil',       icon:'hard-hat',     color:'#92400E', desc:'Concretagens, estruturas de concreto, composições SINAPI',          firstView:'civil_concr',  tabs:['Concretagens','Estruturas Concreto','Composições SINAPI'] },
+  { code:'eletrica',    name:'Engenharia Elétrica',    icon:'zap',          color:'#CA8A04', desc:'Cabos, eletrodutos, painéis CCM/CDC, SPDA/aterramento',             firstView:'elec_panels',  tabs:['Cabos (HUB)','Eletrodutos (HUB)','Quadros Elétricos','SPDA / Aterramento','Specs Cabos'] },
+  { code:'mecanica',    name:'Engenharia Mecânica',    icon:'cylinder',     color:'#1E40AF', desc:'Equipamentos NR-13, manutenção, pintura industrial, andaimes',     firstView:'equip',        tabs:['Equipamentos NR-13','Manutenção','Pintura Industrial','Andaime'] },
+  { code:'hidraulica',  name:'Hidráulica / Sanitária', icon:'droplets',     color:'#0EA5E9', desc:'Sistemas hidráulicos prediais e industriais',                       firstView:'hydraulic',    tabs:['Sistemas Hidráulicos'] },
+  { code:'qualidade',   name:'Qualidade & END',        icon:'shield-check', color:'#10B981', desc:'Mapa de juntas, relatórios END, soldadores, calibração de instrumentos', firstView:'quality_joints', tabs:['Mapa de Juntas','Relatórios END','Soldadores','Calibração','Pendências/NCs','Comissionamento'] },
+  { code:'materiais',   name:'Materiais & Orçamento',  icon:'package',      color:'#7C3AED', desc:'Catálogo de materiais multi-disciplinar',                            firstView:'mat',          tabs:['Catálogo de materiais'] },
+  { code:'analise',     name:'Análise & BI',           icon:'bar-chart-3',  color:'#06B6D4', desc:'Dashboard executivo, integrações, Power BI',                        firstView:'dash',         tabs:['Dashboard','Integrações'] }
+];
+
+function openV9DisciplinePicker(){
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay-v9disc';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(10,22,40,.55);backdrop-filter:blur(4px);z-index:9000;display:flex;align-items:center;justify-content:center;padding:24px';
+  overlay.onclick = (e)=>{ if(e.target===overlay) overlay.remove(); };
+  const cards = V9_DISCIPLINES.map(d=>{
+    const tabsList = d.tabs.slice(0,3).join(' &middot; ') + (d.tabs.length>3 ? ' &middot; +'+(d.tabs.length-3) : '');
+    return '<div onclick="goV(\''+d.firstView+'\');document.querySelector(\'.overlay-v9disc\').remove()" style="background:#fff;border:2px solid #E2E8F0;border-radius:14px;padding:18px;cursor:pointer;transition:all .15s" onmouseover="this.style.borderColor=\''+d.color+'\';this.style.transform=\'translateY(-3px)\';this.style.boxShadow=\'0 12px 28px rgba(10,22,40,.10)\'" onmouseout="this.style.borderColor=\'#E2E8F0\';this.style.transform=\'\';this.style.boxShadow=\'\'">'
+      +'<div style="display:flex;align-items:center;gap:12px;margin-bottom:10px"><div style="width:44px;height:44px;border-radius:11px;background:'+d.color+'15;display:flex;align-items:center;justify-content:center;flex-shrink:0"><i data-lucide="'+d.icon+'" style="width:22px;height:22px;color:'+d.color+';stroke-width:2"></i></div>'
+      +'<div style="flex:1"><div style="font-size:14.5px;font-weight:700;color:#0F172A;letter-spacing:-.2px">'+san(d.name)+'</div><div style="font-size:11px;color:#94A3B8;margin-top:2px;font-weight:500">'+d.tabs.length+' '+(d.tabs.length===1?'aba':'abas')+'</div></div></div>'
+      +'<div style="font-size:12px;color:#64748B;line-height:1.55;margin-bottom:10px">'+san(d.desc)+'</div>'
+      +'<div style="font-size:11px;color:#94A3B8;border-top:1px solid #F1F5F9;padding-top:9px;font-family:JetBrains Mono,monospace">'+tabsList+'</div>'
+      +'</div>';
+  }).join('');
+  overlay.innerHTML = '<div style="background:#fff;border-radius:16px;padding:26px;max-width:900px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 24px 60px rgba(10,22,40,.2)">'
+    +'<div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:6px"><div><div style="font-size:18px;font-weight:800;color:#0F172A;letter-spacing:-.3px">Escolha a disciplina</div><div style="font-size:12.5px;color:#64748B;margin-top:3px">Cada disciplina agrupa as ferramentas, cadastros e relatórios da sua área de engenharia.</div></div><button onclick="this.closest(\'.overlay-v9disc\').remove()" style="background:transparent;border:none;cursor:pointer;color:#64748B;width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center"><i data-lucide="x" style="width:16px;height:16px"></i></button></div>'
+    +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;margin-top:18px">'+cards+'</div>'
+    +'<div style="margin-top:18px;padding-top:14px;border-top:1px solid #E2E8F0;display:flex;justify-content:space-between;align-items:center;font-size:11.5px;color:#64748B"><span>Procura o HUB do Planejador? Use o botão <strong>HUB Planejador</strong> na sidebar.</span><button onclick="this.closest(\'.overlay-v9disc\').remove();goV(\'projects\')" style="background:#F1F5F9;border:1px solid #E2E8F0;padding:7px 13px;border-radius:8px;font-size:12px;cursor:pointer;font-weight:600;color:#334155">Ver projetos</button></div>'
+    +'</div>';
+  document.body.appendChild(overlay);
+  if(typeof lucide!=='undefined') lucide.createIcons();
+}
+
+// Abre o HUB Planejador. Sempre mostra seletor com todos os HUBs disponiveis.
+async function openProjectInPlanner(projectId, projectName){
+  curProj = projectId;
+  // Sincroniza window._curProject pra IA Chat e outros modulos
+  try { const _pn=projectName||(projects.find(x=>x.id===projectId)||{}).name||''; window._curProject={id:projectId,name:_pn}; window.curProj=projectId; } catch(_){}
+  try { localStorage.setItem('projectia-cur-project', projectId); } catch(e){}
+  try { localStorage.setItem('projectia-cur-project-name', projectName||''); } catch(e){}
+
+  // Busca disciplinas ativas neste projeto (apenas pra marcar quais sao do projeto)
+  const {data:discs} = await sb.from('project_disciplines').select('discipline_code').eq('project_id',projectId).eq('enabled',true);
+  const activeSet = new Set((discs||[]).map(d=>d.discipline_code));
+
+  // Mostra seletor com TODOS os HUBs disponiveis (admin escolhe qual abrir)
+  // Disciplinas ativas no projeto aparecem destacadas
+  openHubPicker(projectId, projectName, Object.keys(HUB_FILES), activeSet);
+}
+
+function openHubFile(discCode, projectId, projectName){
+  const hub = HUB_FILES[discCode] || HUB_FILES.tubulacao;
+  let url = hub.file + '?project=' + encodeURIComponent(projectId) + (projectName ? '&name='+encodeURIComponent(projectName) : '');
+  url = _appendAuthToUrl(url);
+  window.open(url, '_blank');
+}
+
+function openHubPicker(projectId, projectName, allDiscs, activeSet){
+  activeSet = activeSet || new Set(allDiscs);
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(10,22,40,.55);backdrop-filter:blur(4px);z-index:9000;display:flex;align-items:center;justify-content:center;padding:24px';
+  overlay.onclick = (e)=>{ if(e.target===overlay) overlay.remove(); };
+  const safeName = (projectName||'').replace(/'/g,"&apos;");
+  const cards = allDiscs.map(c=>{
+    const h = HUB_FILES[c];
+    const active = activeSet.has(c);
+    const badge = active
+      ? '<span style="background:#ECFDF5;color:#065F46;border:1px solid #6EE7B7;padding:2px 8px;border-radius:12px;font-size:10px;font-weight:700;letter-spacing:.3px">ATIVA</span>'
+      : '<span style="background:#F1F5F9;color:#64748B;border:1px solid #E2E8F0;padding:2px 8px;border-radius:12px;font-size:10px;font-weight:600">DISPONIVEL</span>';
+    return '<div onclick="openHubFile(\''+c+'\',\''+projectId+'\',\''+safeName+'\');this.closest(\'.overlay-picker\').remove()" style="background:#fff;border:2px solid '+(active?h.color+'40':'#E2E8F0')+';border-radius:14px;padding:18px;cursor:pointer;transition:all .15s;'+(active?'':'opacity:.78')+'" onmouseover="this.style.borderColor=\''+h.color+'\';this.style.transform=\'translateY(-3px)\';this.style.opacity=\'1\'" onmouseout="this.style.borderColor=\''+(active?h.color+'40':'#E2E8F0')+'\';this.style.transform=\'\';this.style.opacity=\''+(active?'1':'.78')+'\'">'
+      +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px"><div style="display:flex;align-items:center;gap:12px"><div style="width:42px;height:42px;border-radius:10px;background:'+h.color+'15;display:flex;align-items:center;justify-content:center"><i data-lucide="'+h.icon+'" style="width:22px;height:22px;color:'+h.color+'"></i></div>'
+      +'<div><div style="font-size:14px;font-weight:700;color:#0F172A">'+h.name+'</div></div></div>'+badge+'</div>'
+      +'<div style="font-size:12px;color:#64748B;line-height:1.5">'+h.desc+'</div></div>';
+  }).join('');
+  overlay.className = 'overlay-picker';
+  const nActive = allDiscs.filter(c=>activeSet.has(c)).length;
+  overlay.innerHTML = '<div style="background:#fff;border-radius:16px;padding:26px;max-width:760px;width:100%;max-height:88vh;overflow-y:auto;box-shadow:0 24px 60px rgba(10,22,40,.2)">'
+    +'<div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:6px"><div><div style="font-size:18px;font-weight:800;color:#0F172A">Escolha o HUB</div><div style="font-size:12.5px;color:#64748B;margin-top:3px">Projeto: <strong>'+san(projectName||'-')+'</strong></div></div><button onclick="this.closest(\'.overlay-picker\').remove()" style="background:transparent;border:none;cursor:pointer;color:#64748B;width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center"><i data-lucide="x" style="width:16px;height:16px"></i></button></div>'
+    +'<div style="font-size:12px;color:#64748B;margin:14px 0 18px"><strong>'+nActive+' de '+allDiscs.length+'</strong> disciplinas ativas neste projeto. Clique em qualquer card abaixo para abrir o HUB correspondente.</div>'
+    +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px">'+cards+'</div>'
+    +'<div style="margin-top:18px;padding-top:14px;border-top:1px solid #E2E8F0;display:flex;justify-content:space-between;align-items:center;gap:8px"><div style="font-size:11.5px;color:#64748B">Configurar quais disciplinas o projeto usa</div><button onclick="this.closest(\'.overlay-picker\').remove();openProjectDisciplinesManager(\''+projectId+'\',\''+safeName+'\')" style="background:#1E40AF;color:#fff;border:none;padding:8px 14px;border-radius:8px;font-size:12px;cursor:pointer;font-weight:600;display:inline-flex;align-items:center;gap:6px"><i data-lucide="settings-2" style="width:13px;height:13px;stroke:#fff"></i>Gerenciar disciplinas</button></div>'
+    +'</div>';
+  document.body.appendChild(overlay);
+  if(typeof lucide!=='undefined') lucide.createIcons();
+}
+
+// Modal pra ativar/desativar disciplinas em um projeto
+async function openProjectDisciplinesManager(projectId, projectName){
+  const {data:allDiscs} = await sb.from('disciplines').select('code,name,icon').order('name');
+  const {data:active} = await sb.from('project_disciplines').select('discipline_code').eq('project_id',projectId);
+  const activeSet = new Set((active||[]).map(d=>d.discipline_code));
+
+  // So mostra disciplinas que tem HUB
+  const available = (allDiscs||[]).filter(d=>HUB_FILES[d.code]);
+
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay-discmgr';
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(10,22,40,.55);backdrop-filter:blur(4px);z-index:9000;display:flex;align-items:center;justify-content:center;padding:24px';
+  overlay.onclick=(e)=>{if(e.target===overlay)overlay.remove();};
+  const checks = available.map(d=>{
+    const h = HUB_FILES[d.code];
+    const checked = activeSet.has(d.code);
+    return '<label style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:#fff;border:2px solid '+(checked?h.color:'#E2E8F0')+';border-radius:10px;cursor:pointer;transition:all .15s"><input type="checkbox" data-disc="'+d.code+'" '+(checked?'checked':'')+' style="width:18px;height:18px;cursor:pointer;accent-color:'+h.color+'"><div style="flex:1"><div style="font-size:13px;font-weight:700;color:#0F172A">'+(d.icon||'')+' '+san(d.name)+'</div><div style="font-size:11.5px;color:#64748B;margin-top:2px">'+h.desc+'</div></div></label>';
+  }).join('');
+
+  overlay.innerHTML='<div style="background:#fff;border-radius:16px;padding:28px;max-width:640px;width:100%;max-height:88vh;overflow-y:auto;box-shadow:0 24px 60px rgba(10,22,40,.2)">'
+    +'<div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:6px"><div><div style="font-size:18px;font-weight:800;color:#0F172A">Disciplinas do Projeto</div><div style="font-size:12.5px;color:#64748B;margin-top:3px">'+san(projectName||'-')+'</div></div><button onclick="this.closest(\'.overlay-discmgr\').remove()" style="background:transparent;border:none;cursor:pointer;color:#64748B;width:32px;height:32px;border-radius:8px"><i data-lucide="x" style="width:16px;height:16px"></i></button></div>'
+    +'<div style="font-size:12px;color:#64748B;margin:14px 0 18px">Marque as disciplinas que se aplicam a este projeto. Cada disciplina ativa habilita um HUB especializado com views, prompts IA e calculadoras proprias da area.</div>'
+    +'<div style="display:flex;flex-direction:column;gap:8px">'+checks+'</div>'
+    +'<div style="margin-top:18px;padding-top:14px;border-top:1px solid #E2E8F0;display:flex;gap:8px;justify-content:flex-end">'
+    +'<button onclick="this.closest(\'.overlay-discmgr\').remove()" style="background:transparent;border:1px solid #E2E8F0;padding:8px 14px;border-radius:8px;font-size:12.5px;cursor:pointer;color:#334155;font-weight:600">Cancelar</button>'
+    +'<button id="saveDiscBtn" style="background:#1E40AF;color:#fff;border:none;padding:8px 16px;border-radius:8px;font-size:12.5px;cursor:pointer;font-weight:600">Salvar e abrir HUB</button>'
+    +'</div></div>';
+  document.body.appendChild(overlay);
+  if(typeof lucide!=='undefined') lucide.createIcons();
+
+  overlay.querySelector('#saveDiscBtn').onclick=async()=>{
+    const checks = overlay.querySelectorAll('[data-disc]');
+    const wanted = new Set();
+    checks.forEach(c=>{if(c.checked)wanted.add(c.dataset.disc);});
+    // Insert novas
+    for(const c of wanted){
+      if(!activeSet.has(c)){
+        await sb.from('project_disciplines').insert({org_id:_org.id, project_id:projectId, discipline_code:c, enabled:true});
+      }
+    }
+    // Remove desmarcadas
+    for(const c of activeSet){
+      if(!wanted.has(c)){
+        await sb.from('project_disciplines').delete().eq('project_id',projectId).eq('discipline_code',c);
+      }
+    }
+    overlay.remove();
+    toast('Disciplinas atualizadas','ok');
+    if(wanted.size===1){ openHubFile([...wanted][0], projectId, projectName); }
+    else if(wanted.size>1){ openHubPicker(projectId, projectName, [...wanted]); }
+  };
+}
+
+// Abre PDF do iso. Se não tem, abre seletor pra anexar
+async function openIsoPDF(id){
+  const iso = sheets.find(x=>x.id===id);
+  if(!iso){toast('Folha não encontrada','err');return;}
+  if(iso.pdf){
+    // PDF anexado — abre signed URL
+    const {data,error}=await sb.storage.from('isometrics').createSignedUrl(iso.pdf,300);
+    if(error){toast('Erro ao abrir PDF: '+error.message,'err');return;}
+    window.open(data.signedUrl,'_blank');
+    return;
+  }
+  // Sem PDF — oferece anexar
+  const _ok = await (window.PIAConfirm ? window.PIAConfirm.warning('Anexar PDF?', 'Esta folha não tem PDF anexado. Deseja anexar agora?', 'Anexar') : Promise.resolve(confirm('Anexar PDF??'))); if(!_ok) return;
+  const inp = document.createElement('input');
+  inp.type = 'file';
+  inp.accept = 'application/pdf';
+  inp.onchange = async (ev)=>{
+    const f = ev.target.files[0];
+    if(!f) return;
+    if(f.size > 20*1024*1024){toast('PDF muito grande (max 20MB)','err');return;}
+    toast('📤 Enviando PDF...','warn');
+    const path = `${_org.id}/${iso.id}/${Date.now()}_${f.name.replace(/[^a-zA-Z0-9._-]/g,'_')}`;
+    const {error:eUp} = await sb.storage.from('isometrics').upload(path, f, {upsert:false});
+    if(eUp){toast('Erro upload: '+eUp.message,'err');return;}
+    const {error:eDb} = await sb.from('isometric_sheets').update({pdf:path}).eq('id',id);
+    if(eDb){toast('Erro ao registrar: '+eDb.message,'err');return;}
+    toast('✔ PDF anexado','ok');
+    if(typeof loadAll==='function') await loadAll();
+    if(curView==='isos' && typeof rIsos==='function') rIsos();
+  };
+  inp.click();
+}
+
+// ═══════════════════════════════════════════════════
+// INLINE EDIT
+// ═══════════════════════════════════════════════════
+function oIE(ev,t,id){
+  ev.stopPropagation();
+  document.querySelectorAll('.ie-panel.open').forEach(p=>{if(p.id!==`ie-${t}-${id}`)p.classList.remove('open')});
+  document.getElementById(`ie-${t}-${id}`).classList.toggle('open');
+}
+function cIE(t,id){document.getElementById(`ie-${t}-${id}`).classList.remove('open')}
+
+async function sIE(t,id){
+  const e=sheets.find(x=>x.id===id);if(!e)return;
+  let payload;
+  if(t==='fab'){
+    const pre=cl(document.getElementById(`ifp-${id}`).value);
+    const sol=cl(document.getElementById(`ifs-${id}`).value);
+    const end=cl(document.getElementById(`ife-${id}`).value);
+    const si=document.getElementById(`ifi-${id}`).value||null;
+    const sf=document.getElementById(`iff-${id}`).value||null;
+    payload={fab_pre:pre,fab_sol:sol,fab_end:end,fab_start:si,fab_finish:sf};
+    e.fab={pre,sol,end,si:si||'',sf:sf||''};
+  } else {
+    const pre=cl(document.getElementById(`imp-${id}`).value);
+    const sol=cl(document.getElementById(`ims-${id}`).value);
+    const end=cl(document.getElementById(`ime-${id}`).value);
+    const si=document.getElementById(`imi-${id}`).value||null;
+    const sf=document.getElementById(`imf-${id}`).value||null;
+    const th=document.getElementById(`imth-${id}`).value;
+    const trq=document.getElementById(`imtrq-${id}`).value;
+    payload={mon_pre:pre,mon_sol:sol,mon_end:end,mon_start:si,mon_finish:sf,hydro_test:th,torque:trq};
+    e.mon={pre,sol,end,si:si||'',sf:sf||'',th,trq};
+  }
+  const {error}=await sb.from('isometric_sheets').update(payload).eq('id',id);
+  if(error){toast('Erro: '+error.message,'err');return;}
+  toast('Salvo','ok');rIsos();
+}
+
+document.addEventListener('click',(ev)=>{if(!ev.target.closest('.ie-wrap'))document.querySelectorAll('.ie-panel.open').forEach(p=>p.classList.remove('open'))});
+
+async function tgPaint(id){
+  const e=sheets.find(x=>x.id===id);if(!e)return;
+  const newVal=e.paint==='Pintado'?'Não Pintado':'Pintado';
+  const {error}=await sb.from('isometric_sheets').update({paint_status:newVal}).eq('id',id);
+  if(error){toast('Erro: '+error.message,'err');return;}
+  e.paint=newVal;rIsos();
+}
+
+// Alterna T.H. em ciclo: Pendente → Sim (Aprovado) → Não (Reprovado) → Pendente
+async function tgTH(id){
+  const e=sheets.find(x=>x.id===id);if(!e)return;
+  const cur = (e.mon||{}).th || 'Pendente';
+  const next = cur==='Pendente'?'Sim': cur==='Sim'?'Não':'Pendente';
+  const {error}=await sb.from('isometric_sheets').update({hydro_test:next}).eq('id',id);
+  if(error){toast('Erro: '+error.message,'err');return;}
+  if(!e.mon) e.mon = {pre:0,sol:0,end:0};
+  e.mon.th = next;
+  rIsos();
+  toast('T.H.: '+(next==='Sim'?'Aprovado': next==='Não'?'Reprovado':'Pendente'),'ok');
+}
+
+// Alterna Torque em ciclo: Pendente → Sim (OK) → Pendente
+async function tgTrq(id){
+  const e=sheets.find(x=>x.id===id);if(!e)return;
+  const cur = (e.mon||{}).trq || 'Pendente';
+  const next = cur==='Sim'?'Pendente':'Sim';
+  const {error}=await sb.from('isometric_sheets').update({torque:next}).eq('id',id);
+  if(error){toast('Erro: '+error.message,'err');return;}
+  if(!e.mon) e.mon = {pre:0,sol:0,end:0};
+  e.mon.trq = next;
+  rIsos();
+  toast('Torque: '+(next==='Sim'?'OK':'Pendente'),'ok');
+}
+
+// ═══════════════════════════════════════════════════
+// 🏗️ ENGENHARIA CIVIL — Concretagens, Estruturas, SINAPI
+// ═══════════════════════════════════════════════════
+let _civilPours=[], _civilElems=[], _civilSinapi=[];
+async function rCivilConcr(){
+  const el=document.getElementById('vcivil_concr');
+  const {data} = await sb.from('civil_concrete_pours').select('*, projects(name,code)').eq('org_id',_org.id).order('pour_date',{ascending:false}).limit(500);
+  _civilPours = data || [];
+  const list = curProj ? _civilPours.filter(x=>x.project_id===curProj) : _civilPours;
+  const totalVol = list.reduce((s,p)=>s+(+p.volume_m3||0),0);
+  el.innerHTML = `
+    <div class="bc-row"><i data-lucide="layers-3" style="width:14px;height:14px;color:var(--primary)"></i><span style="font-weight:600;color:var(--t9)">Concretagens · Engenharia Civil</span><span style="margin-left:auto;font-size:11px;color:var(--t6)">${list.length} fichas · ${totalVol.toLocaleString('pt-BR',{maximumFractionDigits:2})} m³ no total</span></div>
+    <div style="padding:18px 22px">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:18px">
+        <div class="kpi" style="background:var(--t0);border:1px solid var(--t3);border-radius:10px;padding:14px"><div style="font-size:11px;color:var(--t6);text-transform:uppercase;letter-spacing:.5px;font-weight:600">Fichas registradas</div><div style="font-size:26px;font-weight:800;color:var(--t9);font-family:'JetBrains Mono',monospace;margin-top:4px">${list.length}</div></div>
+        <div class="kpi" style="background:var(--t0);border:1px solid var(--t3);border-radius:10px;padding:14px"><div style="font-size:11px;color:var(--t6);text-transform:uppercase;letter-spacing:.5px;font-weight:600">Volume total</div><div style="font-size:26px;font-weight:800;color:var(--primary);font-family:'JetBrains Mono',monospace;margin-top:4px">${totalVol.toLocaleString('pt-BR',{maximumFractionDigits:2})} m³</div></div>
+        <div class="kpi" style="background:var(--t0);border:1px solid var(--t3);border-radius:10px;padding:14px"><div style="font-size:11px;color:var(--t6);text-transform:uppercase;letter-spacing:.5px;font-weight:600">FCK médio</div><div style="font-size:26px;font-weight:800;color:var(--accent);font-family:'JetBrains Mono',monospace;margin-top:4px">${list.length?Math.round(list.reduce((s,p)=>s+(+p.fck_required_mpa||0),0)/list.length):0} MPa</div></div>
+        <div class="kpi" style="background:var(--t0);border:1px solid var(--t3);border-radius:10px;padding:14px"><div style="font-size:11px;color:var(--t6);text-transform:uppercase;letter-spacing:.5px;font-weight:600">Últimos 30d</div><div style="font-size:26px;font-weight:800;color:var(--success);font-family:'JetBrains Mono',monospace;margin-top:4px">${list.filter(p=>(new Date()-new Date(p.pour_date))<30*86400000).length}</div></div>
+      </div>
+      <div style="background:var(--primary-l);border:1px solid var(--primary);border-radius:10px;padding:14px;margin-bottom:18px;display:flex;align-items:center;gap:12px">
+        <i data-lucide="sparkles" style="width:24px;height:24px;color:var(--primary)"></i>
+        <div style="flex:1"><strong style="color:var(--primary-h)">Use a IA Civil:</strong> suba uma ficha de concretagem em PDF e a plataforma extrai pour_number, volume, FCK, slump, fornecedor, caminhão, engenheiro responsável automaticamente.</div>
+        <button class="btn bia" onclick="openDisciplineAIModal&&openDisciplineAIModal('civil')"><i data-lucide="sparkles"></i>Subir PDF</button>
+      </div>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>Nº Ficha</th><th>Data</th><th>Elemento</th><th>Projeto</th><th>Volume (m³)</th><th>FCK</th><th>Slump</th><th>Caminhão</th></tr></thead>
+        <tbody>${list.length?list.map(p=>`<tr>
+          <td class="mono"><strong>${san(p.pour_number||'—')}</strong></td>
+          <td class="mono">${p.pour_date?new Date(p.pour_date).toLocaleDateString('pt-BR'):'—'}</td>
+          <td>${san(p.element_type||'—')}${p.element_tag?' · '+san(p.element_tag):''}</td>
+          <td><span class="badge b-info">${san(p.projects?.code||'—')}</span></td>
+          <td class="mono" style="font-weight:700;color:var(--primary)">${(+p.volume_m3||0).toFixed(2)}</td>
+          <td class="mono">${p.fck_required_mpa||'—'} MPa</td>
+          <td class="mono">${p.slump_actual_cm?p.slump_actual_cm+' cm':'—'}</td>
+          <td class="mono" style="font-size:11px">${san(p.truck_number||'—')}</td>
+        </tr>`).join(''):'<tr><td colspan="8"><div style="text-align:center;padding:60px 22px"><i data-lucide="layers-3" style="width:48px;height:48px;color:var(--t4);margin-bottom:12px"></i><div style="font-size:16px;font-weight:700;color:var(--t8);margin-bottom:6px">Nenhuma concretagem registrada</div><div style="font-size:12.5px;color:var(--t6);margin-bottom:18px">Cadastre subindo um PDF da ficha pela IA, ou manualmente.</div><button class="btn bia" onclick="openDisciplineAIModal&&openDisciplineAIModal(\'civil\')"><i data-lucide="sparkles"></i>Cadastrar via IA</button></div></td></tr>'}</tbody>
+      </table></div>
+    </div>`;
+  _renderIcons();
+}
+
+async function rCivilElem(){
+  const el=document.getElementById('vcivil_elem');
+  const {data} = await sb.from('civil_concrete_elements').select('*').eq('org_id',_org.id).is('deleted_at',null).limit(1000);
+  _civilElems = data || [];
+  const list = curProj ? _civilElems.filter(x=>x.project_id===curProj) : _civilElems;
+  const tot = list.length;
+  const totVol = list.reduce((s,x)=>s+(+x.volume_m3||0),0);
+  const totSteel = list.reduce((s,x)=>s+(+x.steel_weight_kg||0),0);
+  const totForm = list.reduce((s,x)=>s+(+x.form_area_m2||0),0);
+  const groups = {viga:0,pilar:0,laje:0,sapata:0,bloco_coroamento:0,muro_arrimo:0,escada:0};
+  list.forEach(x=>{if(groups[x.element_type]!=null) groups[x.element_type]++});
+  el.innerHTML = `
+    <div class="bc-row"><i data-lucide="square-stack" style="width:14px;height:14px;color:var(--primary)"></i><span style="font-weight:600;color:var(--t9)">Estruturas de Concreto · Civil</span><span style="margin-left:auto;font-size:11px;color:var(--t6)">${tot} elementos · ${totVol.toFixed(1)} m³ · ${totSteel.toFixed(0)} kg aço</span></div>
+    <div style="padding:18px 22px">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:18px">
+        ${Object.entries({Vigas:groups.viga,Pilares:groups.pilar,Lajes:groups.laje,Sapatas:groups.sapata,'Blocos':groups.bloco_coroamento,'Muros':groups.muro_arrimo,Escadas:groups.escada}).map(([k,v])=>`<div style="background:var(--t0);border:1px solid var(--t3);border-radius:10px;padding:12px;text-align:center"><div style="font-size:10px;text-transform:uppercase;color:var(--t6);font-weight:600">${k}</div><div style="font-size:22px;font-weight:800;color:var(--t9);font-family:'JetBrains Mono',monospace">${v}</div></div>`).join('')}
+      </div>
+      <div style="background:var(--primary-l);border:1px solid var(--primary);border-radius:10px;padding:14px;margin-bottom:18px;display:flex;align-items:center;gap:12px">
+        <i data-lucide="sparkles" style="width:24px;height:24px;color:var(--primary)"></i>
+        <div style="flex:1"><strong style="color:var(--primary-h)">IA Civil:</strong> mande um PDF do projeto estrutural (planta de fôrma, prancha de armação) e a IA cadastra vigas, pilares, lajes com volume e peso de aço.</div>
+        <button class="btn bia" onclick="openDisciplineAIModal&&openDisciplineAIModal('civil')"><i data-lucide="sparkles"></i>Subir projeto</button>
+      </div>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>TAG</th><th>Tipo</th><th>Pavimento</th><th>Dimensões</th><th>Volume (m³)</th><th>Aço (kg)</th><th>FCK</th><th>Status</th></tr></thead>
+        <tbody>${tot?list.map(e=>`<tr>
+          <td class="mono"><strong>${san(e.tag)}</strong></td>
+          <td><span class="badge b-info">${san(e.element_type)}</span></td>
+          <td>${san(e.level_floor||'—')}</td>
+          <td class="mono" style="font-size:11px">${san(e.dimensions_mm||'—')}</td>
+          <td class="mono">${(+e.volume_m3||0).toFixed(2)}</td>
+          <td class="mono">${(+e.steel_weight_kg||0).toFixed(0)}</td>
+          <td class="mono">${e.fck_mpa||'—'} MPa</td>
+          <td><span class="badge ${e.status==='concretado'||e.status==='desformado'?'b-sim':'b-pen'}">${san(e.status||'projetado')}</span></td>
+        </tr>`).join(''):'<tr><td colspan="8"><div class="empty-st">Nenhum elemento estrutural cadastrado.</div></td></tr>'}</tbody>
+      </table></div>
+    </div>`;
+  _renderIcons();
+}
+
+async function rCivilSinapi(){
+  const el=document.getElementById('vcivil_sinapi');
+  const {data} = await sb.from('civil_insumos_catalog').select('*').order('category').order('code');
+  _civilSinapi = data || [];
+  const cats = [...new Set(_civilSinapi.map(x=>x.category))];
+  el.innerHTML = `
+    <div class="bc-row"><i data-lucide="book-open-check" style="width:14px;height:14px;color:var(--primary)"></i><span style="font-weight:600;color:var(--t9)">Composições SINAPI · Civil</span><span style="margin-left:auto;font-size:11px;color:var(--t6)">${_civilSinapi.length} composições · ${cats.length} categorias</span></div>
+    <div style="padding:18px 22px">
+      <div style="background:var(--accent-l);border:1px solid var(--accent);border-radius:10px;padding:14px;margin-bottom:18px;font-size:13px;color:#0C5DA8">
+        <strong>📚 Banco de composições SINAPI 2025</strong> — concreto FCK 20/25/30/40/50 MPa (R$/m³ + HH), aço CA-50 cortado/dobrado, alvenaria cerâmica e bloco de concreto, formas de madeira/compensado, escoramento, revestimento cerâmico/porcelanato, impermeabilização. Use como referência de custo e HH no seu orçamento.
+      </div>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>Código</th><th>Categoria</th><th>Descrição</th><th>Un.</th><th>HH/un</th><th>R$ Material</th><th>R$ Total</th><th>Equipe</th></tr></thead>
+        <tbody>${_civilSinapi.map(c=>`<tr>
+          <td class="mono"><strong>${san(c.code)}</strong></td>
+          <td><span class="badge b-info">${san(c.category)}</span></td>
+          <td>${san(c.description)}</td>
+          <td class="mono">${san(c.unit)}</td>
+          <td class="mono">${(+c.hh_per_unit||0).toFixed(3)}</td>
+          <td class="mono" style="color:var(--t6)">${c.material_cost_brl?'R$ '+(+c.material_cost_brl).toFixed(2):'—'}</td>
+          <td class="mono" style="color:var(--success);font-weight:700">${c.total_cost_brl?'R$ '+(+c.total_cost_brl).toFixed(2):'—'}</td>
+          <td style="font-size:11px;color:var(--t6)">${san(c.team_composition||'—')}</td>
+        </tr>`).join('')}</tbody>
+      </table></div>
+    </div>`;
+  _renderIcons();
+}
+
+// ═══════════════════════════════════════════════════
+// ⚡ ENGENHARIA ELÉTRICA — Quadros, SPDA, Specs
+// ═══════════════════════════════════════════════════
+let _elecPanels=[], _elecSpda=[], _cableSpecs=[];
+async function rElecPanels(){
+  const el=document.getElementById('velec_panels');
+  const {data} = await sb.from('electrical_panels').select('*').eq('org_id',_org.id).is('deleted_at',null).limit(500);
+  _elecPanels = data || [];
+  const list = curProj ? _elecPanels.filter(x=>x.project_id===curProj) : _elecPanels;
+  el.innerHTML = `
+    <div class="bc-row"><i data-lucide="square-power" style="width:14px;height:14px;color:var(--primary)"></i><span style="font-weight:600;color:var(--t9)">Quadros Elétricos · Elétrica</span><span style="margin-left:auto;font-size:11px;color:var(--t6)">${list.length} quadros</span></div>
+    <div style="padding:18px 22px">
+      <div style="background:var(--primary-l);border:1px solid var(--primary);border-radius:10px;padding:14px;margin-bottom:18px;display:flex;align-items:center;gap:12px">
+        <i data-lucide="sparkles" style="width:24px;height:24px;color:var(--primary)"></i>
+        <div style="flex:1"><strong style="color:var(--primary-h)">IA Elétrica:</strong> Suba o diagrama unifilar ou lista de quadros — a IA cadastra QGBT, QDC, CCM com tensão, corrente, Icc, IP automaticamente.</div>
+        <button class="btn bia" onclick="openDisciplineAIModal&&openDisciplineAIModal('eletrica')"><i data-lucide="sparkles"></i>Subir PDF</button>
+      </div>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>TAG</th><th>Tipo</th><th>Tensão</th><th>Corrente</th><th>Icc (kA)</th><th>IP</th><th>Localização</th><th>Fabricante</th><th>Status</th></tr></thead>
+        <tbody>${list.length?list.map(p=>`<tr>
+          <td class="mono"><strong>${san(p.tag)}</strong></td>
+          <td><span class="badge b-info">${san(p.panel_type||'—')}</span></td>
+          <td class="mono">${p.voltage_v||'—'} V</td>
+          <td class="mono">${p.current_a||'—'} A</td>
+          <td class="mono">${p.short_circuit_ka||'—'}</td>
+          <td class="mono">${san(p.ip_rating||'—')}</td>
+          <td style="font-size:11px">${san(p.location||'—')}</td>
+          <td style="font-size:11px">${san(p.manufacturer||'—')}</td>
+          <td><span class="badge ${p.status==='energizado'?'b-sim':'b-pen'}">${san(p.status||'projetado')}</span></td>
+        </tr>`).join(''):`<tr><td colspan="9"><div style="text-align:center;padding:60px 22px"><i data-lucide="square-power" style="width:48px;height:48px;color:var(--t4);margin-bottom:12px"></i><div style="font-size:16px;font-weight:700;color:var(--t8);margin-bottom:6px">Nenhum quadro elétrico cadastrado</div><div style="font-size:12.5px;color:var(--t6);margin-bottom:18px">Suba o unifilar pra IA cadastrar automaticamente.</div><button class="btn bia" onclick="openDisciplineAIModal&&openDisciplineAIModal('eletrica')"><i data-lucide="sparkles"></i>Cadastrar via IA</button></div></td></tr>`}</tbody>
+      </table></div>
+    </div>`;
+  _renderIcons();
+}
+
+async function rElecSpda(){
+  const el=document.getElementById('velec_spda');
+  const {data} = await sb.from('electrical_grounding').select('*').eq('org_id',_org.id).limit(500);
+  const list = curProj ? (data||[]).filter(x=>x.project_id===curProj) : (data||[]);
+  el.innerHTML = `
+    <div class="bc-row"><i data-lucide="zap" style="width:14px;height:14px;color:var(--warning)"></i><span style="font-weight:600;color:var(--t9)">SPDA / Aterramento · NBR 5419/5410</span><span style="margin-left:auto;font-size:11px;color:var(--t6)">${list.length} sistemas</span></div>
+    <div style="padding:18px 22px">
+      <div style="background:var(--accent-l);border:1px solid var(--accent);border-radius:10px;padding:14px;margin-bottom:18px;font-size:13px;color:#0C5DA8">
+        <strong>📐 SPDA + medição de aterramento</strong> — registre tipo de captor (Franklin/Faraday/Esfera Rolante), resistência medida (≤ 10Ω desejável), resistividade do solo, qtd. de captores/descidas/hastes e data de medição.
+      </div>
+      <div style="background:var(--primary-l);border:1px solid var(--primary);border-radius:10px;padding:14px;margin-bottom:18px;display:flex;align-items:center;gap:12px">
+        <i data-lucide="sparkles" style="width:24px;height:24px;color:var(--primary)"></i>
+        <div style="flex:1"><strong style="color:var(--primary-h)">IA Elétrica:</strong> Suba laudo SPDA — a IA extrai tipo de proteção, resistência medida, qtd. de pontos e instrumento usado.</div>
+        <button class="btn bia" onclick="openDisciplineAIModal&&openDisciplineAIModal('eletrica')"><i data-lucide="sparkles"></i>Subir laudo</button>
+      </div>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>Sistema</th><th>Tipo SPDA</th><th>R medida (Ω)</th><th>ρ solo (Ω·m)</th><th>Data</th><th>Instrumento</th></tr></thead>
+        <tbody>${list.length?list.map(g=>`<tr>
+          <td class="mono">${san(g.tag||g.id?.slice(0,8)||'—')}</td>
+          <td><span class="badge b-info">${san(g.spda_type||'—')}</span></td>
+          <td class="mono" style="color:${(+g.resistance_ohms||100)<=10?'var(--success)':'var(--danger)'};font-weight:700">${g.resistance_ohms?(+g.resistance_ohms).toFixed(2):'—'}</td>
+          <td class="mono">${g.soil_resistivity_ohm_m||'—'}</td>
+          <td class="mono">${g.measurement_date?new Date(g.measurement_date).toLocaleDateString('pt-BR'):'—'}</td>
+          <td style="font-size:11px">${san(g.measurement_instrument||'—')}</td>
+        </tr>`).join(''):'<tr><td colspan="6"><div class="empty-st">Nenhum sistema SPDA cadastrado. Use a IA pra extrair de um laudo.</div></td></tr>'}</tbody>
+      </table></div>
+    </div>`;
+  _renderIcons();
+}
+
+async function rElecSpecs(){
+  const el=document.getElementById('velec_specs');
+  const {data} = await sb.from('cable_specs_catalog').select('*').order('cable_type').order('cross_section_mm2');
+  _cableSpecs = data || [];
+  el.innerHTML = `
+    <div class="bc-row"><i data-lucide="cable" style="width:14px;height:14px;color:var(--accent)"></i><span style="font-weight:600;color:var(--t9)">Especificações de Cabos · Prysmian / Nexans</span><span style="margin-left:auto;font-size:11px;color:var(--t6)">${_cableSpecs.length} cabos no banco</span></div>
+    <div style="padding:18px 22px">
+      <div style="background:var(--accent-l);border:1px solid var(--accent);border-radius:10px;padding:14px;margin-bottom:18px;font-size:13px;color:#0C5DA8">
+        <strong>📚 Catálogo técnico</strong> — ampacidade no ar e enterrado, resistência (Ω/km), reatância, peso, diâmetro externo. Use pra dimensionar cabo por corrente máxima e queda de tensão.
+      </div>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>Tipo</th><th>Bitola (mm²)</th><th>Cond.</th><th>Tensão</th><th>I ar (A)</th><th>I solo (A)</th><th>R (Ω/km)</th><th>Peso (kg/km)</th><th>Ø ext (mm)</th><th>Fabricante</th></tr></thead>
+        <tbody>${_cableSpecs.map(c=>`<tr>
+          <td><span class="badge b-info">${san(c.cable_type||'—')}</span></td>
+          <td class="mono"><strong>${c.cross_section_mm2}</strong></td>
+          <td class="mono">${c.conductor_count||1}c</td>
+          <td class="mono" style="font-size:11px">${san(c.voltage_rating||'—')}</td>
+          <td class="mono" style="color:var(--primary);font-weight:700">${c.ampacity_air_a||'—'}</td>
+          <td class="mono" style="color:var(--accent)">${c.ampacity_ground_a||'—'}</td>
+          <td class="mono">${c.resistance_ohm_km||'—'}</td>
+          <td class="mono">${c.weight_kg_km||'—'}</td>
+          <td class="mono">${c.outer_diameter_mm||'—'}</td>
+          <td style="font-size:11px">${san(c.manufacturer||'—')}</td>
+        </tr>`).join('')}</tbody>
+      </table></div>
+    </div>`;
+  _renderIcons();
+}
+
+// ═══════════════════════════════════════════════════
+// 💧 HIDRÁULICA & SANITÁRIA — sistemas
+// ═══════════════════════════════════════════════════
+let _hydList=[];
+async function rHydraulic(){
+  const el=document.getElementById('vhydraulic');
+  const {data} = await sb.from('hydraulic_systems').select('*').eq('org_id',_org.id).is('deleted_at',null).limit(500);
+  _hydList = data || [];
+  const list = curProj ? _hydList.filter(x=>x.project_id===curProj) : _hydList;
+  const byType = {agua_fria:0,agua_quente:0,esgoto:0,pluvial:0,gas:0,combate_incendio:0};
+  list.forEach(x=>{if(byType[x.system_type]!=null) byType[x.system_type]++});
+  const totalM = list.reduce((s,x)=>s+(+x.length_m||0),0);
+  el.innerHTML = `
+    <div class="bc-row"><i data-lucide="droplets" style="width:14px;height:14px;color:var(--accent)"></i><span style="font-weight:600;color:var(--t9)">Hidráulica &amp; Sanitária · NBR 5626/8160</span><span style="margin-left:auto;font-size:11px;color:var(--t6)">${list.length} sistemas · ${totalM.toFixed(0)} m totais</span></div>
+    <div style="padding:18px 22px">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:18px">
+        ${Object.entries({'Água Fria':byType.agua_fria,'Água Quente':byType.agua_quente,'Esgoto':byType.esgoto,'Pluvial':byType.pluvial,'Gás':byType.gas,'Combate Inc.':byType.combate_incendio}).map(([k,v])=>`<div style="background:var(--t0);border:1px solid var(--t3);border-radius:10px;padding:12px;text-align:center"><div style="font-size:10px;text-transform:uppercase;color:var(--t6);font-weight:600">${k}</div><div style="font-size:22px;font-weight:800;color:var(--t9);font-family:'JetBrains Mono',monospace">${v}</div></div>`).join('')}
+      </div>
+      <div style="background:var(--primary-l);border:1px solid var(--primary);border-radius:10px;padding:14px;margin-bottom:18px;display:flex;align-items:center;gap:12px">
+        <i data-lucide="sparkles" style="width:24px;height:24px;color:var(--primary)"></i>
+        <div style="flex:1"><strong style="color:var(--primary-h)">IA Hidráulica:</strong> Suba o projeto hidrossanitário (PDF) — a IA extrai trechos de água fria/quente/esgoto/pluvial/gás com diâmetro, material e comprimento.</div>
+        <button class="btn bia" onclick="openDisciplineAIModal&&openDisciplineAIModal('hidraulica')"><i data-lucide="sparkles"></i>Subir projeto</button>
+      </div>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>TAG</th><th>Sistema</th><th>Material</th><th>Ø (mm)</th><th>Compr. (m)</th><th>Conexões</th><th>Teste P (bar)</th><th>Resultado</th></tr></thead>
+        <tbody>${list.length?list.map(h=>`<tr>
+          <td class="mono"><strong>${san(h.tag)}</strong></td>
+          <td><span class="badge b-info">${san(h.system_type||'—')}</span></td>
+          <td>${san(h.material||'—')}</td>
+          <td class="mono">${h.diameter_mm||'—'}</td>
+          <td class="mono">${(+h.length_m||0).toFixed(1)}</td>
+          <td class="mono">${h.fittings_count||'—'}</td>
+          <td class="mono">${h.test_pressure_bar||'—'}</td>
+          <td><span class="badge ${h.test_result==='aprovado'?'b-sim':h.test_result==='reprovado'?'b-nao':'b-pen'}">${san(h.test_result||'pendente')}</span></td>
+        </tr>`).join(''):'<tr><td colspan="8"><div class="empty-st">Nenhum sistema hidráulico cadastrado.</div></td></tr>'}</tbody>
+      </table></div>
+    </div>`;
+  _renderIcons();
+}
+
+// ═══════════════════════════════════════════════════
+// ✅ QUALIDADE — Controle de Juntas + Relatórios END
+// ═══════════════════════════════════════════════════
+let _qualityJoints=[], _ndtReports=[];
+
+async function rQualityJoints(){
+  const el=document.getElementById('vquality_joints');
+  let q = sb.from('joints').select('*, projects(name,code)').eq('org_id',_org.id).eq('junta_ativa',true);
+  if(curProj) q = q.eq('project_id',curProj);
+  const {data} = await q.order('data_solda',{ascending:false}).limit(2000);
+  _qualityJoints = data || [];
+  const list = _qualityJoints;
+  const tot = list.length;
+  const soldadas = list.filter(j=>j.data_solda).length;
+  const rt_ok = list.filter(j=>j.rx_us_rel).length;
+  const th_ok = list.filter(j=>j.th_date).length;
+  const reparo = list.filter(j=>j.reparo).length;
+  const aprovadas = list.filter(j=>j.rx_us_rel||j.vs_date).length;
+
+  el.innerHTML = `
+    <div class="bc-row"><i data-lucide="combine" style="width:14px;height:14px;color:var(--primary)"></i><span style="font-weight:600;color:var(--t9)">Mapa de Juntas · Qualidade</span><span style="margin-left:auto;font-size:11px;color:var(--t6)">${tot} juntas ativas${curProj?' · projeto atual':' · todos projetos'}</span></div>
+    <div style="padding:18px 22px">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:16px">
+        <div class="kpi" style="background:var(--t0);border:1px solid var(--t3);border-radius:10px;padding:12px;text-align:center"><div style="font-size:10px;text-transform:uppercase;color:var(--t6);font-weight:600">Juntas ativas</div><div style="font-size:24px;font-weight:800;color:var(--t9);font-family:'JetBrains Mono',monospace">${tot}</div></div>
+        <div class="kpi" style="background:var(--t0);border:1px solid var(--t3);border-radius:10px;padding:12px;text-align:center"><div style="font-size:10px;text-transform:uppercase;color:var(--t6);font-weight:600">Soldadas</div><div style="font-size:24px;font-weight:800;color:var(--primary);font-family:'JetBrains Mono',monospace">${soldadas}</div></div>
+        <div class="kpi" style="background:var(--t0);border:1px solid var(--t3);border-radius:10px;padding:12px;text-align:center"><div style="font-size:10px;text-transform:uppercase;color:var(--t6);font-weight:600">RT/UT OK</div><div style="font-size:24px;font-weight:800;color:var(--accent);font-family:'JetBrains Mono',monospace">${rt_ok}</div></div>
+        <div class="kpi" style="background:var(--t0);border:1px solid var(--t3);border-radius:10px;padding:12px;text-align:center"><div style="font-size:10px;text-transform:uppercase;color:var(--t6);font-weight:600">TH realizadas</div><div style="font-size:24px;font-weight:800;color:var(--success);font-family:'JetBrains Mono',monospace">${th_ok}</div></div>
+        <div class="kpi" style="background:var(--t0);border:1px solid var(--t3);border-radius:10px;padding:12px;text-align:center"><div style="font-size:10px;text-transform:uppercase;color:var(--t6);font-weight:600">END aprovadas</div><div style="font-size:24px;font-weight:800;color:var(--success);font-family:'JetBrains Mono',monospace">${aprovadas}</div></div>
+        <div class="kpi" style="background:var(--t0);border:1px solid var(--t3);border-radius:10px;padding:12px;text-align:center"><div style="font-size:10px;text-transform:uppercase;color:var(--t6);font-weight:600">Em reparo</div><div style="font-size:24px;font-weight:800;color:${reparo?'var(--danger)':'var(--t5)'};font-family:'JetBrains Mono',monospace">${reparo}</div></div>
+      </div>
+
+      <div style="background:var(--primary-l);border:1px solid var(--primary);border-radius:10px;padding:12px 14px;margin-bottom:14px;display:flex;align-items:center;gap:12px;color:var(--primary-h);font-size:12px">
+        <i data-lucide="notebook-pen" style="width:20px;height:20px;flex-shrink:0"></i>
+        <div style="flex:1"><strong>Caderneta de inspeção:</strong> o inspetor cadastra cada junta com sinete do soldador, datas de END (VS · LP/PM · RT/UT · TH · Dureza · PMI) e status de reparo. Aqui você gerencia todo o Mapa de Juntas.</div>
+      </div>
+
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px">
+        <input id="qj-q" placeholder="Buscar junta, spool, isométrico..." oninput="fQualityJoints()" style="min-width:220px;flex:1;max-width:340px;padding:7px 10px;border:1px solid var(--t3);border-radius:8px;background:var(--bg);color:var(--t9);font-size:12px">
+        <select id="qj-stat" onchange="fQualityJoints()" style="padding:7px 10px;border:1px solid var(--t3);border-radius:8px;background:var(--bg);color:var(--t9);font-size:12px">
+          <option value="">Todos status</option>
+          <option value="soldada">Soldadas</option>
+          <option value="pendente">Pendentes solda</option>
+          <option value="rt">RT/UT OK</option>
+          <option value="th">TH realizado</option>
+          <option value="reparo">Em reparo</option>
+        </select>
+        <button class="bp" onclick="oJoint(null)"><i data-lucide="plus" style="width:14px;height:14px"></i>Nova junta</button>
+        <button class="bo" onclick="openFieldsCustomization('quality_joints')" title="Personalizar colunas"><i data-lucide="settings" style="width:14px;height:14px"></i>Personalizar</button>
+        
+        <span id="qj-count" style="margin-left:auto;font-size:11px;color:var(--t6)"></span>
+      </div>
+
+      <div class="tbl-wrap"><table>
+        <thead><tr>
+          <th>Iso/Rev</th><th>Spool</th><th>Junta</th><th>Ø</th><th>Sch</th><th>Material</th>
+          <th>Data solda</th><th>Sinete raiz</th><th>Sinete ench</th>
+          <th>VS Raiz</th><th>VS Final</th><th>RX/US</th><th>LP/PM</th><th>TT</th><th>Dureza</th><th>PMI</th><th>TH</th><th>Reparo</th><th>Ações</th>
+        </tr></thead>
+        <tbody id="qj-tb"></tbody>
+      </table></div>
+    </div>`;
+  fQualityJoints();
+  _renderIcons();
+}
+
+function fQualityJoints(){
+  const q = (document.getElementById('qj-q')?.value||'').toLowerCase();
+  const st = document.getElementById('qj-stat')?.value||'';
+  let list = _qualityJoints;
+  if(q){
+    list = list.filter(j =>
+      (j.iso_number||'').toLowerCase().includes(q) ||
+      (j.spool_id_ref||'').toLowerCase().includes(q) ||
+      (j.joint_number||j.junta||'').toString().toLowerCase().includes(q)
+    );
+  }
+  if(st==='soldada') list = list.filter(j=>j.data_solda);
+  if(st==='pendente') list = list.filter(j=>!j.data_solda);
+  if(st==='rt') list = list.filter(j=>j.rx_us_rel);
+  if(st==='th') list = list.filter(j=>j.th_date);
+  if(st==='reparo') list = list.filter(j=>j.reparo);
+
+  const cnt = document.getElementById('qj-count');
+  if(cnt) cnt.textContent = `${list.length} de ${_qualityJoints.length}`;
+
+  const tb = document.getElementById('qj-tb');
+  if(!tb) return;
+  if(!list.length){
+    tb.innerHTML = `<tr><td colspan="19"><div style="text-align:center;padding:50px 22px"><i data-lucide="combine" style="width:48px;height:48px;color:var(--t4);margin-bottom:12px"></i><div style="font-size:15px;font-weight:700;color:var(--t8);margin-bottom:6px">Nenhuma junta cadastrada</div><div style="font-size:12px;color:var(--t6);margin-bottom:16px">Clique em "Nova junta" para cadastrar a primeira junta da caderneta.</div><button class="bp" onclick="oJoint(null)"><i data-lucide="plus" style="width:14px;height:14px"></i>Nova junta</button></div></td></tr>`;
+    _renderIcons();
+    return;
+  }
+  const fmtDt = d => d ? new Date(d).toLocaleDateString('pt-BR') : '—';
+  tb.innerHTML = list.slice(0,500).map(j=>{
+    const repBadge = j.reparo ? '<span class="badge b-nao">REPARO</span>' : '—';
+    return `<tr>
+      <td class="mono"><strong>${san((j.iso_number||'').slice(-12)||'—')}</strong><br><small style="color:var(--t6)">Rev ${san(j.revision||'0')}</small></td>
+      <td>${san(j.spool_id_ref||'—')}</td>
+      <td class="mono"><strong>${san(j.joint_number||j.junta||'—')}</strong></td>
+      <td class="mono">${j.diameter_in||'—'}"</td>
+      <td class="mono">${san(j.schedule||'—')}</td>
+      <td style="font-size:11px">${san((j.material||'').slice(0,15)||'—')}</td>
+      <td class="mono" style="font-size:11px">${fmtDt(j.data_solda)}</td>
+      <td class="mono">${san(j.sinete_raiz||'—')}</td>
+      <td class="mono">${san(j.sinete_ench_acab||'—')}</td>
+      <td>${j.vs_raiz_date ? '<span class="badge b-sim">'+fmtDt(j.vs_raiz_date)+'</span>' : '—'}</td>
+      <td>${j.vs_date ? '<span class="badge b-sim">'+fmtDt(j.vs_date)+'</span>' : '—'}</td>
+      <td>${j.rx_us_rel ? '<span class="badge b-info" title="'+san(j.rx_us_rel)+'">'+fmtDt(j.rx_us_date)+'</span>' : '—'}</td>
+      <td>${j.lppm_rel ? '<span class="badge b-info">'+fmtDt(j.lppm_date)+'</span>' : '—'}</td>
+      <td>${j.tt_date ? '<span class="badge b-pen">'+fmtDt(j.tt_date)+'</span>' : '—'}</td>
+      <td>${j.du_date ? '<span class="badge b-sim">'+fmtDt(j.du_date)+'</span>' : '—'}</td>
+      <td>${j.pmi_date ? '<span class="badge b-sim">'+fmtDt(j.pmi_date)+'</span>' : '—'}</td>
+      <td>${j.th_date ? '<span class="badge b-sim">'+fmtDt(j.th_date)+'</span>' : '—'}</td>
+      <td>${repBadge}</td>
+      <td style="white-space:nowrap"><button class="b-edit" onclick='oJoint(${JSON.stringify(j.id)})' title="Editar"><i data-lucide="pencil" style="width:14px;height:14px"></i></button><button class="b-del" onclick='dJoint(${JSON.stringify(j.id)},${JSON.stringify(j.joint_number||j.junta||"")})' title="Excluir"><i data-lucide="trash-2" style="width:14px;height:14px"></i></button></td>
+    </tr>`;
+  }).join('');
+  _renderIcons();
+}
+
+// Modal de cadastro/edição de Junta
+async function oJoint(id){
+  const j = id ? _qualityJoints.find(x=>x.id===id) : {};
+  if(id && !j){toast('Junta não encontrada','err');return;}
+
+  // Lista de projetos pra escolher se sem curProj
+  let projOpts = '';
+  if(!curProj && !id){
+    projOpts = `<div class="field"><label>Projeto *</label><select id="jo-proj"><option value="">— Selecione —</option>${projects.map(p=>`<option value="${p.id}">${san(p.code)} · ${san(p.name)}</option>`).join('')}</select></div>`;
+  }
+
+  const v = (k,d='') => (j[k]!=null && j[k]!=='') ? san(j[k]) : (d||'');
+  const dv = k => j[k] ? String(j[k]).slice(0,10) : '';
+  const html = `<div class="overlay open" id="joint-modal" onclick="if(event.target===this)document.getElementById('joint-modal').remove()">
+    <div class="mbox" style="max-width:920px">
+      <button class="mclose" onclick="document.getElementById('joint-modal').remove()" title="Fechar"><i data-lucide="x"></i></button>
+      <div class="mtitle"><i data-lucide="${id?'pencil':'plus'}" style="width:18px;height:18px;color:var(--primary)"></i>${id ? 'Editar Junta '+(j.joint_number||j.junta||'') : 'Nova Junta'}</div>
+      <div class="fg">
+        ${projOpts}
+        <div class="field full"><label>Isométrico *</label><input id="jo-iso" value="${v('iso_number')}" placeholder="Ex: ISO-MX-2401-001"></div>
+        <div class="field"><label>Revisão</label><input id="jo-rev" value="${v('revision')}"></div>
+        <div class="field"><label>Spool</label><input id="jo-spool" value="${v('spool_id_ref')}"></div>
+        <div class="field"><label>Junta *</label><input id="jo-num" value="${v('joint_number')||v('junta')}"></div>
+        <div class="field"><label>Diâmetro (")</label><input type="number" step="0.25" id="jo-diam" value="${j.diameter_in||''}"></div>
+        <div class="field"><label>Schedule</label><input id="jo-sch" value="${v('schedule')}"></div>
+        <div class="field"><label>Material</label><input id="jo-mat" value="${v('material')}" placeholder="Ex: A106 Gr.B"></div>
+        <div class="field"><label>Espessura (mm)</label><input type="number" step="0.1" id="jo-esp" value="${j.espessura_mm||''}"></div>
+        <div class="field"><label>Tipo junta</label><select id="jo-tipo"><option value="">—</option>${['BW','SW','FW','TW'].map(t=>`<option value="${t}"${j.joint_type===t?' selected':''}>${t}</option>`).join('')}</select></div>
+
+        <div class="field full" style="grid-column:1/-1;border-top:1px solid var(--t3);padding-top:10px;margin-top:6px"><strong style="font-size:11px;text-transform:uppercase;color:var(--t6);letter-spacing:.5px">Solda</strong></div>
+        <div class="field"><label>Data solda</label><input type="date" id="jo-ds" value="${dv('data_solda')}"></div>
+        <div class="field"><label>Sinete raiz (soldador)</label><input id="jo-sr" value="${v('sinete_raiz')}"></div>
+        <div class="field"><label>Sinete ench/acab</label><input id="jo-se" value="${v('sinete_ench_acab')}"></div>
+
+        <div class="field full" style="grid-column:1/-1;border-top:1px solid var(--t3);padding-top:10px;margin-top:6px"><strong style="font-size:11px;text-transform:uppercase;color:var(--t6);letter-spacing:.5px">Ensaios Visuais</strong></div>
+        <div class="field"><label>VA (visual antes)</label><input type="date" id="jo-va" value="${dv('va_date')}"></div>
+        <div class="field"><label>VS Raiz</label><input type="date" id="jo-vsr" value="${dv('vs_raiz_date')}"></div>
+        <div class="field"><label>VS Final</label><input type="date" id="jo-vs" value="${dv('vs_date')}"></div>
+
+        <div class="field full" style="grid-column:1/-1;border-top:1px solid var(--t3);padding-top:10px;margin-top:6px"><strong style="font-size:11px;text-transform:uppercase;color:var(--t6);letter-spacing:.5px">LP/PM · RX/US</strong></div>
+        <div class="field"><label>LP/PM Raiz</label><input type="date" id="jo-lpr" value="${dv('lppm_raiz_date')}"></div>
+        <div class="field"><label>LP/PM Final</label><input type="date" id="jo-lp" value="${dv('lppm_date')}"></div>
+        <div class="field"><label>LP/PM Relatório</label><input id="jo-lprel" value="${v('lppm_rel')}"></div>
+        <div class="field"><label>RX/US Data</label><input type="date" id="jo-rx" value="${dv('rx_us_date')}"></div>
+        <div class="field"><label>RX/US Relatório</label><input id="jo-rxrel" value="${v('rx_us_rel')}"></div>
+
+        <div class="field full" style="grid-column:1/-1;border-top:1px solid var(--t3);padding-top:10px;margin-top:6px"><strong style="font-size:11px;text-transform:uppercase;color:var(--t6);letter-spacing:.5px">Tratamento Térmico · Dureza · PMI · TH</strong></div>
+        <div class="field"><label>TT (trat. térmico)</label><input type="date" id="jo-tt" value="${dv('tt_date')}"></div>
+        <div class="field"><label>DU (dureza)</label><input type="date" id="jo-du" value="${dv('du_date')}"></div>
+        <div class="field"><label>PMI</label><input type="date" id="jo-pmi" value="${dv('pmi_date')}"></div>
+        <div class="field"><label>TH (teste hidro)</label><input type="date" id="jo-th" value="${dv('th_date')}"></div>
+        <div class="field"><label>TH Relatório</label><input id="jo-threl" value="${v('th_rel')}"></div>
+
+        <div class="field full" style="grid-column:1/-1;border-top:1px solid var(--t3);padding-top:10px;margin-top:6px"><strong style="font-size:11px;text-transform:uppercase;color:var(--t6);letter-spacing:.5px">Reparo e Códigos</strong></div>
+        <div class="field"><label style="display:flex;align-items:center;gap:8px"><input type="checkbox" id="jo-rep" style="width:auto;height:18px"${j.reparo?' checked':''}><span>Em reparo?</span></label></div>
+        <div class="field"><label>Cód. material 1</label><input id="jo-cm1" value="${v('codigo_material_1')}"></div>
+        <div class="field"><label>Cód. material 2</label><input id="jo-cm2" value="${v('codigo_material_2')}"></div>
+      </div>
+      <div class="mfooter"><button class="bg" onclick="document.getElementById('joint-modal').remove()">Cancelar</button><button class="bp" onclick="saveJoint(${id?JSON.stringify(id):'null'})"><i data-lucide="check" style="width:14px;height:14px"></i>${id?'Salvar':'Criar Junta'}</button></div>
+    </div>
+  </div>`;
+  document.body.insertAdjacentHTML('beforeend', html);
+  _renderIcons();
+}
+
+async function saveJoint(id){
+  const num = (id?'(id)':null);
+  const iso = document.getElementById('jo-iso').value.trim();
+  const jn = document.getElementById('jo-num').value.trim();
+  if(!id && !iso){toast('Isométrico obrigatório','warn');return;}
+  if(!jn){toast('Número da junta obrigatório','warn');return;}
+
+  const projEl = document.getElementById('jo-proj');
+  const proj_id = id ? null : (projEl ? projEl.value : (curProj||null));
+  if(!id && !curProj && !proj_id){toast('Selecione um projeto','warn');return;}
+
+  const payload = {
+    iso_number: iso || null,
+    revision: document.getElementById('jo-rev').value.trim() || null,
+    spool_id_ref: document.getElementById('jo-spool').value.trim() || null,
+    joint_number: jn,
+    diameter_in: parseFloat(document.getElementById('jo-diam').value)||null,
+    schedule: document.getElementById('jo-sch').value.trim() || null,
+    material: document.getElementById('jo-mat').value.trim() || null,
+    espessura_mm: parseFloat(document.getElementById('jo-esp').value)||null,
+    joint_type: document.getElementById('jo-tipo').value || null,
+    data_solda: document.getElementById('jo-ds').value || null,
+    sinete_raiz: document.getElementById('jo-sr').value.trim() || null,
+    sinete_ench_acab: document.getElementById('jo-se').value.trim() || null,
+    va_date: document.getElementById('jo-va').value || null,
+    vs_raiz_date: document.getElementById('jo-vsr').value || null,
+    vs_date: document.getElementById('jo-vs').value || null,
+    lppm_raiz_date: document.getElementById('jo-lpr').value || null,
+    lppm_date: document.getElementById('jo-lp').value || null,
+    lppm_rel: document.getElementById('jo-lprel').value.trim() || null,
+    rx_us_date: document.getElementById('jo-rx').value || null,
+    rx_us_rel: document.getElementById('jo-rxrel').value.trim() || null,
+    tt_date: document.getElementById('jo-tt').value || null,
+    du_date: document.getElementById('jo-du').value || null,
+    pmi_date: document.getElementById('jo-pmi').value || null,
+    th_date: document.getElementById('jo-th').value || null,
+    th_rel: document.getElementById('jo-threl').value.trim() || null,
+    reparo: document.getElementById('jo-rep').checked,
+    codigo_material_1: document.getElementById('jo-cm1').value.trim() || null,
+    codigo_material_2: document.getElementById('jo-cm2').value.trim() || null
+  };
+
+  let op;
+  if(id){
+    op = sb.from('joints').update(payload).eq('id', id);
+  } else {
+    payload.org_id = _org.id;
+    payload.junta_ativa = true;
+    payload.project_id = proj_id || curProj;
+    op = sb.from('joints').insert(payload);
+  }
+  const {error} = await op;
+  if(error){toast('Erro: '+error.message,'err');return;}
+  toast(id?'Junta atualizada':'Junta criada','ok');
+  document.getElementById('joint-modal').remove();
+  rQualityJoints();
+}
+
+async function dJoint(id, name){
+  const _ok = await (window.PIAConfirm ? window.PIAConfirm.danger('Excluir junta?', 'Excluir junta '+(name||'')+'? Esta ação pode ser revertida pelo administrador.', 'Excluir') : Promise.resolve(confirm('Excluir junta??'))); if(!_ok) return;
+  const {error} = await sb.from('joints').update({junta_ativa:false}).eq('id',id);
+  if(error){toast('Erro: '+error.message,'err');return;}
+  toast('Junta excluída','ok');
+  rQualityJoints();
+}
+
+function exportQualityJointsXLSX(){
+  const list = _qualityJoints;
+  if(!list.length){toast('Sem juntas para exportar','warn');return;}
+  const rows = list.map(j=>({
+    'Iso': j.iso_number, 'Rev': j.revision, 'Spool': j.spool_id_ref, 'Junta': j.joint_number||j.junta,
+    'Diametro': j.diameter_in, 'Schedule': j.schedule, 'Material': j.material,
+    'Espessura': j.espessura_mm, 'Tipo': j.joint_type,
+    'Data Solda': j.data_solda, 'Sinete Raiz': j.sinete_raiz, 'Sinete Ench/Acab': j.sinete_ench_acab,
+    'VA': j.va_date, 'VS Raiz': j.vs_raiz_date, 'VS Final': j.vs_date,
+    'LP/PM Raiz': j.lppm_raiz_date, 'LP/PM Final': j.lppm_date, 'LP/PM Rel': j.lppm_rel,
+    'RX/US Data': j.rx_us_date, 'RX/US Rel': j.rx_us_rel,
+    'TT': j.tt_date, 'DU': j.du_date, 'PMI': j.pmi_date,
+    'TH Data': j.th_date, 'TH Rel': j.th_rel,
+    'Reparo': j.reparo?'SIM':'NAO',
+    'Cod Mat 1': j.codigo_material_1, 'Cod Mat 2': j.codigo_material_2
+  }));
+  const ws = XLSX.utils.json_to_sheet(rows);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Mapa Juntas');
+  XLSX.writeFile(wb, 'mapa_juntas_qualidade_'+new Date().toISOString().slice(0,10)+'.xlsx');
+  toast('Exportado','ok');
+}
+
+async function rQualityReports(){
+  const el=document.getElementById('vquality_reports');
+  let q = sb.from('ndt_inspections').select('*, joints(joint_number,iso_number)').eq('org_id',_org.id);
+  if(curProj) q = q.eq('project_id',curProj);
+  const {data} = await q.order('inspected_at',{ascending:false}).limit(500);
+  _ndtReports = data || [];
+  const tot = _ndtReports.length;
+  const byType = {};
+  _ndtReports.forEach(r=>{byType[r.ndt_type] = (byType[r.ndt_type]||0)+1});
+  const aprovados = _ndtReports.filter(r=>r.result==='aprovado').length;
+  const reprovados = _ndtReports.filter(r=>r.result==='reprovado').length;
+  const pendentes = _ndtReports.filter(r=>r.result==='pendente').length;
+  const typeNames = {visual:'VS · Visual',lp:'LP · Líquido Penetrante',pm:'PM · Partículas Magnéticas',ut:'UT · Ultrassom',rt:'RT · Radiografia',th:'TH · Teste Hidrostático',dureza:'Dureza',pmi:'PMI · Identificação Material',ev:'EV · Correntes Parasitas',es:'ES · Estanqueidade',tt:'TT · Tratamento Térmico',outro:'Outros'};
+
+  el.innerHTML = `
+    <div class="bc-row"><i data-lucide="clipboard-pen-line" style="width:14px;height:14px;color:var(--primary)"></i><span style="font-weight:600;color:var(--t9)">Relatórios END · VS · LP · RT · UT · TH · Dureza · PMI</span><span style="margin-left:auto;font-size:11px;color:var(--t6)">${tot} laudos${curProj?' · projeto atual':''}</span></div>
+    <div style="padding:18px 22px">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:18px">
+        <div class="kpi" style="background:var(--t0);border:1px solid var(--t3);border-radius:10px;padding:12px;text-align:center"><div style="font-size:10px;text-transform:uppercase;color:var(--t6);font-weight:600">Total laudos</div><div style="font-size:24px;font-weight:800;color:var(--t9);font-family:'JetBrains Mono',monospace">${tot}</div></div>
+        <div class="kpi" style="background:var(--t0);border:1px solid var(--t3);border-radius:10px;padding:12px;text-align:center"><div style="font-size:10px;text-transform:uppercase;color:var(--t6);font-weight:600">Aprovados</div><div style="font-size:24px;font-weight:800;color:var(--success);font-family:'JetBrains Mono',monospace">${aprovados}</div></div>
+        <div class="kpi" style="background:var(--t0);border:1px solid var(--t3);border-radius:10px;padding:12px;text-align:center"><div style="font-size:10px;text-transform:uppercase;color:var(--t6);font-weight:600">Reprovados</div><div style="font-size:24px;font-weight:800;color:var(--danger);font-family:'JetBrains Mono',monospace">${reprovados}</div></div>
+        <div class="kpi" style="background:var(--t0);border:1px solid var(--t3);border-radius:10px;padding:12px;text-align:center"><div style="font-size:10px;text-transform:uppercase;color:var(--t6);font-weight:600">Pendentes</div><div style="font-size:24px;font-weight:800;color:var(--warning);font-family:'JetBrains Mono',monospace">${pendentes}</div></div>
+        <div class="kpi" style="background:var(--t0);border:1px solid var(--t3);border-radius:10px;padding:12px;text-align:center"><div style="font-size:10px;text-transform:uppercase;color:var(--t6);font-weight:600">% Aprovação</div><div style="font-size:24px;font-weight:800;color:var(--primary);font-family:'JetBrains Mono',monospace">${tot?Math.round(aprovados/tot*100):0}%</div></div>
+      </div>
+
+      <!-- Tipos de ensaio -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-bottom:18px">
+        ${Object.entries(typeNames).map(([k,name])=>{
+          const c = byType[k]||0;
+          return `<div style="background:var(--t0);border:1px solid var(--t3);border-radius:8px;padding:10px;display:flex;align-items:center;gap:8px">
+            <div style="font-size:11px;font-weight:600;color:var(--t7);flex:1">${name}</div>
+            <div style="font-size:14px;font-weight:800;color:${c>0?'var(--primary)':'var(--t5)'};font-family:'JetBrains Mono',monospace">${c}</div>
+          </div>`;
+        }).join('')}
+      </div>
+
+      <div style="background:var(--primary-l);border:1px solid var(--primary);border-radius:10px;padding:14px;margin-bottom:18px;display:flex;align-items:center;gap:12px;color:var(--primary-h)">
+        <i data-lucide="notebook-pen" style="width:24px;height:24px"></i>
+        <div style="flex:1"><strong>Caderneta → laudo digital:</strong> cadastre cada inspeção (VS, LP, RT, TH, dureza, PMI) pela caderneta. Cada laudo é vinculado à junta correspondente e gera rastreabilidade completa.</div>
+        <button class="bp" onclick="oNdt(null)"><i data-lucide="plus"></i>Novo Relatório</button>
+      </div>
+
+      <!-- Lista de laudos -->
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>Data</th><th>Tipo</th><th>Junta</th><th>Iso</th><th>Inspetor</th><th>Cert.</th><th>Resultado</th><th>Cobertura</th><th>Caderneta</th><th>Achados</th></tr></thead>
+        <tbody>${tot?_ndtReports.map(r=>{
+          const j = r.joints||{};
+          const resColor = r.result==='aprovado'?'b-sim':r.result==='reprovado'?'b-nao':'b-pen';
+          return `<tr>
+            <td class="mono" style="font-size:11px">${r.inspected_at?new Date(r.inspected_at).toLocaleDateString('pt-BR'):'—'}</td>
+            <td><span class="badge b-info">${san(typeNames[r.ndt_type]?.split('·')[0]?.trim() || r.ndt_type)}</span></td>
+            <td class="mono"><strong>${san(j.joint_number||'—')}</strong></td>
+            <td class="mono" style="font-size:11px">${san((j.iso_number||'').slice(-12)||'—')}</td>
+            <td>${san(r.inspector_name||'—')}</td>
+            <td class="mono" style="font-size:11px">${san(r.inspector_certification||'—')}</td>
+            <td><span class="badge ${resColor}">${san(r.result||'pendente')}</span></td>
+            <td class="mono">${r.coverage_pct||'—'}%</td>
+            <td class="mono" style="font-size:11px">${san(r.notebook_ref||'—')}</td>
+            <td style="font-size:11px;color:var(--t6);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${san(r.findings||'')}">${san(r.findings||'—')}</td>
+          </tr>`;
+        }).join(''):'<tr><td colspan="10"><div style="text-align:center;padding:60px 22px"><i data-lucide="clipboard-pen-line" style="width:48px;height:48px;color:var(--t4);margin-bottom:12px"></i><div style="font-size:16px;font-weight:700;color:var(--t8);margin-bottom:6px">Nenhum laudo END registrado</div><div style="font-size:12.5px;color:var(--t6);margin-bottom:18px">Inspetor cadastra cada relatório direto pela caderneta de inspeção.</div><button class="bp" onclick="oNdt(null)"><i data-lucide="plus"></i>Cadastrar primeiro laudo</button></div></td></tr>'}</tbody>
+      </table></div>
+    </div>`;
+  _renderIcons();
+}
+
+// Modal de cadastro de Relatório END
+async function oNdt(id){
+  const types = [
+    {v:'visual',l:'Visual (VS)'},{v:'lp',l:'Líquido Penetrante (LP)'},{v:'pm',l:'Partículas Magnéticas (PM)'},
+    {v:'ut',l:'Ultrassom (UT)'},{v:'rt',l:'Radiografia (RT)'},{v:'th',l:'Teste Hidrostático (TH)'},
+    {v:'dureza',l:'Dureza'},{v:'pmi',l:'PMI · Identificação Material'},
+    {v:'ev',l:'Correntes Parasitas (EV)'},{v:'es',l:'Estanqueidade (ES)'},{v:'tt',l:'Tratamento Térmico (TT)'},{v:'outro',l:'Outros'}
+  ];
+  // Lista de juntas pra escolher
+  let qj = sb.from('joints').select('id, joint_number, iso_number').eq('org_id',_org.id).eq('junta_ativa',true);
+  if(curProj) qj = qj.eq('project_id', curProj);
+  const {data:joints} = await qj.order('joint_number').limit(500);
+  const jointOpts = (joints||[]).map(j=>`<option value="${j.id}">${j.joint_number||'(s/n)'} · ${(j.iso_number||'').slice(-12)}</option>`).join('');
+
+  const html = `<div class="overlay open" id="ndt-modal" onclick="if(event.target===this)document.getElementById('ndt-modal').remove()">
+    <div class="mbox">
+      <button class="mclose" onclick="document.getElementById('ndt-modal').remove()" title="Fechar"><i data-lucide="x"></i></button>
+      <div class="mtitle"><i data-lucide="clipboard-pen-line" style="width:18px;height:18px;color:var(--primary)"></i>Novo Relatório END</div>
+      <div class="fg">
+        <div class="field"><label>Tipo de END *</label><select id="nd-type">${types.map(t=>`<option value="${t.v}">${t.l}</option>`).join('')}</select></div>
+        <div class="field"><label>Junta inspecionada *</label><select id="nd-joint"><option value="">— Selecione —</option>${jointOpts}</select></div>
+        <div class="field"><label>Data inspeção</label><input type="date" id="nd-date" value="${new Date().toISOString().slice(0,10)}"></div>
+        <div class="field"><label>Etapa</label><select id="nd-stage"><option value="">—</option><option value="fabricacao">Fabricação</option><option value="montagem">Montagem</option></select></div>
+        <div class="field"><label>Nome do Inspetor</label><input id="nd-insp"></div>
+        <div class="field"><label>Certificação (SNQC, etc.)</label><input id="nd-cert" placeholder="Ex: SNQC N3 RT"></div>
+        <div class="field"><label>Sinete do soldador</label><input id="nd-sinete"></div>
+        <div class="field"><label>Caderneta · ref</label><input id="nd-notebook" placeholder="Folha 12 / Linha 4"></div>
+        <div class="field"><label>Cobertura (%)</label><input type="number" min="0" max="100" id="nd-cov" placeholder="100"></div>
+        <div class="field"><label>Resultado</label><select id="nd-res"><option value="pendente">Pendente</option><option value="aprovado">Aprovado</option><option value="reprovado">Reprovado</option></select></div>
+        <div class="field"><label>Dureza (HB) <em style="color:var(--t5)">opcional</em></label><input type="number" step="0.1" id="nd-hb"></div>
+        <div class="field"><label>Pressão TH (bar) <em style="color:var(--t5)">opcional</em></label><input type="number" step="0.1" id="nd-th"></div>
+        <div class="field"><label>PMI · Liga identificada <em style="color:var(--t5)">opcional</em></label><input id="nd-pmi" placeholder="Ex: A335 P11"></div>
+        <div class="field full"><label>Achados / Observações</label><textarea id="nd-findings" rows="3"></textarea></div>
+      </div>
+      <div class="mfooter"><button class="bg" onclick="document.getElementById('ndt-modal').remove()">Cancelar</button><button class="bp" onclick="saveNdt()"><i data-lucide="check"></i>Salvar Laudo</button></div>
+    </div>
+  </div>`;
+  document.body.insertAdjacentHTML('beforeend', html);
+  _renderIcons();
+}
+
+async function saveNdt(){
+  const payload = {
+    org_id: _org.id,
+    project_id: curProj || null,
+    ndt_type: document.getElementById('nd-type').value,
+    joint_id: document.getElementById('nd-joint').value || null,
+    inspected_at: document.getElementById('nd-date').value || new Date().toISOString(),
+    inspection_stage: document.getElementById('nd-stage').value || null,
+    inspector_name: document.getElementById('nd-insp').value.trim() || null,
+    inspector_certification: document.getElementById('nd-cert').value.trim() || null,
+    welder_sinete: document.getElementById('nd-sinete').value.trim() || null,
+    notebook_ref: document.getElementById('nd-notebook').value.trim() || null,
+    coverage_pct: parseFloat(document.getElementById('nd-cov').value)||null,
+    result: document.getElementById('nd-res').value || 'pendente',
+    hardness_hb: parseFloat(document.getElementById('nd-hb').value)||null,
+    test_pressure_bar: parseFloat(document.getElementById('nd-th').value)||null,
+    pmi_alloy_found: document.getElementById('nd-pmi').value.trim() || null,
+    findings: document.getElementById('nd-findings').value.trim() || null
+  };
+  if(!payload.joint_id){toast('Selecione a junta inspecionada','warn');return;}
+  const {error} = await sb.from('ndt_inspections').insert(payload);
+  if(error){toast('Erro: '+error.message,'err');return;}
+  toast('Laudo END salvo','ok');
+  document.getElementById('ndt-modal').remove();
+  rQualityReports();
+}
+
+// ═══════════════════════════════════════════════════
+// MÓDULOS EXPANDIDOS (Pendências, RDO, Materiais, Soldadores, Comissionamento, Mapa, Importar)
+// ═══════════════════════════════════════════════════
+let _pendings=[],_rdos=[],_materials=[],_welders=[],_testsys=[];
+
+let _pmMap={}; // material_id -> { totalQty, projects: [{projId, projName, qty}] }
+async function loadExtra(){
+  const [pe,rd,mt,wd,ts,pm]=await Promise.all([
+    sb.from('pendings').select('*, projects(code, name)').order('created_at',{ascending:false}).limit(200),
+    sb.from('daily_reports').select('*, projects(code)').order('report_date',{ascending:false}).limit(100),
+    sb.from('materials_catalog').select('*').is('deleted_at',null).order('code').limit(500),
+    sb.from('welders').select('*').is('deleted_at',null).order('matricula'),
+    sb.from('test_systems').select('*, projects(code)').order('code').limit(200),
+    sb.from('project_materials').select('material_id, qty_planned, qty_purchased, qty_used, created_at, projects(id, code, name)').order('created_at',{ascending:false}).limit(5000)
+  ]);
+  _pendings=pe.data||[];_rdos=rd.data||[];_materials=mt.data||[];_welders=wd.data||[];_testsys=ts.data||[];
+  _pmMap={};
+  (pm.data||[]).forEach(r=>{
+    const mid=r.material_id;
+    if(!_pmMap[mid])_pmMap[mid]={total:0,purchased:0,used:0,projects:[],last_added:null,additions:[]};
+    const q=parseFloat(r.qty_planned)||0;
+    _pmMap[mid].total+=q;
+    _pmMap[mid].purchased+=parseFloat(r.qty_purchased)||0;
+    _pmMap[mid].used+=parseFloat(r.qty_used)||0;
+    if(!_pmMap[mid].last_added||r.created_at>_pmMap[mid].last_added)_pmMap[mid].last_added=r.created_at;
+    _pmMap[mid].additions.push({date:r.created_at,qty:q,project:r.projects?.code||''});
+    if(r.projects)_pmMap[mid].projects.push({id:r.projects.id,code:r.projects.code,name:r.projects.name,qty:q,date:r.created_at});
+  });
+  const pn=_pendings.filter(p=>['aberta','em_andamento'].includes(p.status)).length;
+  const el=document.getElementById('tb-pn');if(el)el.textContent=pn;
+}
+
+// === MAPA DE JUNTAS ===
+function rMap(){
+  const list=curProj?pSheets(curProj):sheets;
+  const proj=projects.find(p=>p.id===curProj);
+  // Agrupa por linha
+  const byLine={};
+  list.forEach(s=>{const l=s.line||'(sem linha)';if(!byLine[l])byLine[l]=[];byLine[l].push(s);});
+  const lines=Object.keys(byLine).sort();
+  document.getElementById('vmap').innerHTML=`
+    <div class="bc-row">
+      <button class="bcl" onclick="goV('projects')"><i data-lucide="folder-kanban" style="width:14px;height:14px;display:inline-block;vertical-align:-2px;margin-right:4px"></i>Projetos</button>
+      <span style="color:var(--hbr)">›</span>
+      <span style="font-weight:500">🗺️ Mapa de Juntas — ${proj?san(proj.name):'Todos os projetos'}</span>
+    </div>
+    <div style="padding:16px;background:var(--bg)">
+      <div style="font-size:11px;color:var(--hmu);margin-bottom:14px">Cada quadrado representa uma folha. Cores: <span class="badge b-sim">verde = aprovado/montado</span> <span class="badge b-pen">amarelo = em andamento</span> <span class="badge b-nn">cinza = pendente</span></div>
+      ${!lines.length?'<div class="empty-st">Nenhuma folha cadastrada.</div>':lines.map(line=>{
+        const items=byLine[line].sort((a,b)=>(a.sheet||'').localeCompare(b.sheet||''));
+        return `<div style="margin-bottom:18px">
+          <div style="font-size:11px;font-weight:600;color:var(--hb);font-family:monospace;margin-bottom:6px">${san(line)} <span style="color:var(--hmu);font-weight:400">· ${items.length} folha${items.length!==1?'s':''}</span></div>
+          <div style="display:flex;gap:5px;flex-wrap:wrap">
+            ${items.map(s=>{
+              const f=fPct(s),m=mPct(s),th=(s.mon||{}).th;
+              const color=th==='Sim'?'#1a8c4e':m>=70?'#1558cc':m>0?'#b85c00':'#7a8aa3';
+              return `<div title="${san(s.num)} #${san(s.sheet)} · Fab ${f}% · Mon ${m}% · T.H. ${th||'pend'}" style="background:${color};color:#fff;padding:5px 7px;border-radius:5px;font-size:9.5px;font-family:monospace;cursor:pointer;min-width:60px;text-align:center" onclick="goV('isos','${s.projId}')">#${san(s.sheet||'?')}<div style="font-size:8px;opacity:.85">${m}%</div></div>`;
+            }).join('')}
+          </div>
+        </div>`;
+      }).join('')}
+    </div>`;
+}
+
+// === PENDÊNCIAS ===
+function rPend(){
+  document.getElementById('vpend').innerHTML=`
+    <div class="fbar">
+      <select id="pf-st" onchange="rPend()" style="width:160px"><option value="abertas">Em aberto</option><option value="todas">Todas</option><option value="resolvida">Resolvidas</option></select>
+      <select id="pf-tp" onchange="rPend()" style="width:160px"><option value="">Todos tipos</option><option value="end">END</option><option value="montagem">Montagem</option><option value="fabricacao">Fabricação</option><option value="pintura">Pintura</option><option value="material">Material</option><option value="documentacao">Documentação</option><option value="inspecao">Inspeção</option></select>
+      <span style="font-size:10px;color:var(--hmu)">${_pendings.length} pendência${_pendings.length!==1?'s':''}</span>
+    </div>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Prioridade</th><th>Tipo</th><th>Título</th><th>Projeto</th><th>Prazo</th><th>Status</th><th></th></tr></thead>
+      <tbody id="pend-tb"></tbody>
+    </table></div>`;
+  fPend();
+}
+function fPend(){
+  const st=document.getElementById('pf-st')?.value||'abertas';
+  const tp=document.getElementById('pf-tp')?.value||'';
+  let list=_pendings;
+  if(st==='abertas')list=list.filter(p=>['aberta','em_andamento'].includes(p.status));
+  else if(st&&st!=='todas')list=list.filter(p=>p.status===st);
+  if(tp)list=list.filter(p=>p.pending_type===tp);
+  const tb=document.getElementById('pend-tb');if(!tb)return;
+  if(!list.length){
+    tb.innerHTML=`<tr><td colspan="7" style="padding:0">
+      <div style="text-align:center;padding:50px 22px;background:var(--t1);border-radius:12px;margin:18px 22px">
+        <div style="width:64px;height:64px;border-radius:16px;background:var(--success-l);display:inline-flex;align-items:center;justify-content:center;margin-bottom:14px"><i data-lucide="check-circle-2" style="width:32px;height:32px;color:var(--success)"></i></div>
+        <div style="font-size:18px;font-weight:700;color:var(--t9);margin-bottom:6px;letter-spacing:-.3px">Sem pendências em aberto</div>
+        <div style="font-size:13px;color:var(--t6);max-width:520px;margin:0 auto 22px;line-height:1.6">Tudo em dia! Quando inspeções identificarem não-conformidades, elas aparecerão aqui.</div>
+        <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+          <button class="bp" onclick="oPend()"><i data-lucide="plus"></i>Registrar pendência</button>
+          <button class="bc" onclick="goV('com')"><i data-lucide="clipboard-check"></i>Ir para Comissionamento</button>
+          <button class="bo" onclick="goV('isos')"><i data-lucide="file-text"></i>Ver Folhas</button>
+        </div>
+      </div>
+    </td></tr>`;
+    _renderIcons();
+    return;
+  }
+  const priClr={baixa:'b-nn',media:'b-pen',alta:'b-ny',critica:'b-nao'};
+  tb.innerHTML=list.map(p=>`<tr>
+    <td><span class="badge ${priClr[p.priority]||'b-nn'}">${san(p.priority)}</span></td>
+    <td>${san(p.pending_type)}</td>
+    <td><strong>${san(p.title)}</strong>${p.description?'<div style="font-size:9px;color:var(--hmu)">'+san(p.description.slice(0,90))+'</div>':''}</td>
+    <td>${san(p.projects?.code||'—')}</td>
+    <td class="mono" style="font-size:9.5px">${fmtD(p.due_date)}</td>
+    <td><span class="badge ${p.status==='resolvida'?'b-sim':p.status==='cancelada'?'b-nao':'b-pen'}">${san(p.status.replace('_',' '))}</span></td>
+    <td><div class="act-col">${p.status!=='resolvida'?`<button class="sm-p" onclick="resPend('${p.id}')"><i data-lucide="check"></i>Resolver</button>`:''}<button class="sm-d" onclick="delPend('${p.id}')" title="Excluir"><i data-lucide="trash-2"></i></button></div></td>
+  </tr>`).join('');
+}
+function oPend(){
+  document.getElementById('pep-proj').innerHTML='<option value="">— Selecione —</option>'+projects.map(p=>`<option value="${p.id}">${san(p.code)} · ${san(p.name)}</option>`).join('');
+  ['pep-title','pep-desc','pep-due'].forEach(i=>{const el=document.getElementById(i);if(el)el.value='';});
+  document.getElementById('pep-type').value='end';document.getElementById('pep-pri').value='media';
+  document.getElementById('pend-modal').classList.add('open');
+}
+async function savePend(){
+  const t=document.getElementById('pep-title').value.trim();const proj=document.getElementById('pep-proj').value;
+  if(!t||!proj){toast('Título e projeto obrigatórios','warn');return;}
+  const {error}=await sb.from('pendings').insert({org_id:_org.id,project_id:proj,title:t,pending_type:document.getElementById('pep-type').value,priority:document.getElementById('pep-pri').value,description:document.getElementById('pep-desc').value.trim()||null,due_date:document.getElementById('pep-due').value||null,status:'aberta'});
+  if(error){toast('Erro: '+error.message,'err');return;}
+  toast('Pendência criada','ok');cm('pend-modal');await loadExtra();rPend();
+}
+async function resPend(id){
+  const _ok = await (window.PIAConfirm ? window.PIAConfirm.warning('Marcar como resolvida?', 'Marcar como resolvida?', 'Marcar') : Promise.resolve(confirm('Marcar como resolvida??'))); if(!_ok) return;
+  const {data:{user}}=await sb.auth.getUser();
+  const {error}=await sb.from('pendings').update({status:'resolvida',resolved_at:new Date().toISOString(),resolved_by:user.id}).eq('id',id);
+  if(error){toast('Erro: '+error.message,'err');return;}
+  toast('Resolvida','ok');await loadExtra();rPend();
+}
+async function delPend(id){
+  const _ok = await (window.PIAConfirm ? window.PIAConfirm.danger('Excluir pendência?', 'Esta ação remove a pendência. Não pode ser desfeito.', 'Excluir') : Promise.resolve(confirm('Excluir pendência??'))); if(!_ok) return;
+  const {error}=await sb.from('pendings').delete().eq('id',id);
+  if(error){toast('Erro: '+error.message,'err');return;}
+  toast('Excluída','ok');await loadExtra();rPend();
+}
+
+// === RDO/RDC ===
+function rRdo(){
+  document.getElementById('vrdo').innerHTML=`
+    <div class="fbar"><span style="font-size:10px;color:var(--hmu)">${_rdos.length} relatório${_rdos.length!==1?'s':''}</span></div>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Data</th><th>Tipo</th><th>Projeto</th><th>Clima</th><th>Horas</th><th>Resumo</th><th></th></tr></thead>
+      <tbody>${!_rdos.length?'<tr><td colspan="7"><div class="empty-st">Nenhum relatório. Clique em + Novo Relatório.</div></td></tr>':_rdos.map(d=>`<tr>
+        <td class="mono" style="font-size:9.5px">${fmtD(d.report_date)}</td>
+        <td><strong>${d.report_type.toUpperCase()}</strong></td>
+        <td>${san(d.projects?.code||'—')}</td>
+        <td style="font-size:9.5px">${san(d.weather_morning||'—')} / ${san(d.weather_afternoon||'—')}</td>
+        <td>${d.hours_worked||0}h ${d.hours_lost?`<span style="color:var(--hd);font-size:9px">(${d.hours_lost}h parada)</span>`:''}</td>
+        <td style="font-size:9.5px;color:var(--hmu)">${san((d.work_summary||'').slice(0,80))}</td>
+        <td><button class="sm-d" onclick="delRdo('${d.id}')" title="Excluir"><i data-lucide="trash-2"></i></button></td>
+      </tr>`).join('')}</tbody>
+    </table></div>`;
+}
+function oRdo(){
+  document.getElementById('rdo-proj').innerHTML='<option value="">— Selecione —</option>'+projects.map(p=>`<option value="${p.id}">${san(p.code)} · ${san(p.name)}</option>`).join('');
+  ['rdo-tmin','rdo-tmax','rdo-hw','rdo-hl','rdo-hlr','rdo-summary','rdo-issues','rdo-safe'].forEach(i=>{const el=document.getElementById(i);if(el)el.value='';});
+  document.getElementById('rdo-date').value=new Date().toISOString().slice(0,10);
+  document.getElementById('rdo-type').value='rdo';
+  document.getElementById('rdo-modal').classList.add('open');
+}
+async function saveRdo(){
+  const proj=document.getElementById('rdo-proj').value;const date=document.getElementById('rdo-date').value;
+  if(!proj||!date){toast('Projeto e data obrigatórios','warn');return;}
+  const {error}=await sb.from('daily_reports').insert({
+    org_id:_org.id,project_id:proj,report_type:document.getElementById('rdo-type').value,report_date:date,
+    weather_morning:document.getElementById('rdo-wm').value||null,weather_afternoon:document.getElementById('rdo-wa').value||null,
+    temp_min_c:parseFloat(document.getElementById('rdo-tmin').value)||null,temp_max_c:parseFloat(document.getElementById('rdo-tmax').value)||null,
+    hours_worked:parseFloat(document.getElementById('rdo-hw').value)||null,hours_lost:parseFloat(document.getElementById('rdo-hl').value)||null,
+    hours_lost_reason:document.getElementById('rdo-hlr').value.trim()||null,
+    work_summary:document.getElementById('rdo-summary').value.trim()||null,
+    issues:document.getElementById('rdo-issues').value.trim()||null,
+    safety_notes:document.getElementById('rdo-safe').value.trim()||null,
+    submitted_at:new Date().toISOString()
+  });
+  if(error){toast('Erro: '+error.message,'err');return;}
+  toast('Relatório criado','ok');cm('rdo-modal');await loadExtra();rRdo();
+}
+async function delRdo(id){
+  const _ok = await (window.PIAConfirm ? window.PIAConfirm.danger('Excluir relatório?', 'Esta ação remove o relatório. Não pode ser desfeito.', 'Excluir') : Promise.resolve(confirm('Excluir relatório??'))); if(!_ok) return;
+  const {error}=await sb.from('daily_reports').delete().eq('id',id);
+  if(error){toast('Erro: '+error.message,'err');return;}
+  toast('Excluído','ok');await loadExtra();rRdo();
+}
+
+// === MATERIAIS ===
+let _expMat=new Set();
+function rMat(){
+  // Aplica filtros atuais
+  const f = _matFilters;
+  const now = new Date();
+  let daysCutoff = null;
+  if(f.period === '7d') daysCutoff = new Date(now.getTime() - 7*86400000);
+  else if(f.period === '15d') daysCutoff = new Date(now.getTime() - 15*86400000);
+  else if(f.period === '30d') daysCutoff = new Date(now.getTime() - 30*86400000);
+  else if(f.period === '90d') daysCutoff = new Date(now.getTime() - 90*86400000);
+  else if(f.period === 'custom' && f.dateFrom) daysCutoff = new Date(f.dateFrom);
+  const dateTo = (f.period === 'custom' && f.dateTo) ? new Date(f.dateTo+'T23:59:59') : null;
+
+  // Filtra materiais
+  const filtered = _materials.filter(m=>{
+    const pm = _pmMap[m.id] || {total:0,projects:[],last_added:null};
+    // Filtro por projeto
+    if(f.projectId && f.projectId !== 'all'){
+      if(!pm.projects.some(p=>p.id===f.projectId)) return false;
+    }
+    // Filtro por categoria
+    if(f.category && m.category !== f.category) return false;
+    // Filtro por busca
+    if(f.search){
+      const q = f.search.toLowerCase();
+      if(!(m.code||'').toLowerCase().includes(q) &&
+         !(m.description||'').toLowerCase().includes(q) &&
+         !(m.material_type||'').toLowerCase().includes(q)) return false;
+    }
+    // Filtro por período (usa last_added como data de inserção)
+    if(daysCutoff){
+      if(!pm.last_added || new Date(pm.last_added) < daysCutoff) return false;
+    }
+    if(dateTo){
+      if(!pm.last_added || new Date(pm.last_added) > dateTo) return false;
+    }
+    // Filtro: só mostrar com saldo > 0
+    if(f.onlyWithStock && pm.total<=0) return false;
+    // Filtro: ocultar 100% aplicados
+    if(f.hideUsed){
+      const left = pm.total - pm.used;
+      if(left <= 0) return false;
+    }
+    return true;
+  });
+
+  // Resumo por categoria (apenas dos filtrados)
+  const byCat = {};
+  filtered.forEach(m=>{const c=m.category||'outro';if(!byCat[c])byCat[c]={count:0,qty:0};byCat[c].count++;byCat[c].qty+=(_pmMap[m.id]?.total||0);});
+  const catChips = Object.keys(byCat).sort().map(c=>`<span class="pst" style="cursor:pointer" onclick="mtSetCategory('${c}')">${san(c)} · ${byCat[c].count} item${byCat[c].count!==1?'s':''} (${byCat[c].qty.toLocaleString('pt-BR',{maximumFractionDigits:1})} un)</span>`).join('');
+  const totalQty = filtered.reduce((s,m)=>s+(_pmMap[m.id]?.total||0),0);
+  const allCategories = [...new Set(_materials.map(m=>m.category||'outro'))].sort();
+  const projOptions = projects.map(p=>`<option value="${p.id}" ${f.projectId===p.id?'selected':''}>${san(p.code)} · ${san(p.name)}</option>`).join('');
+  const catOptions = allCategories.map(c=>`<option value="${c}" ${f.category===c?'selected':''}>${san(c)}</option>`).join('');
+
+  document.getElementById('vmat').innerHTML=`
+    <div class="fbar" style="flex-direction:column;align-items:stretch;gap:7px;padding:10px 16px">
+      <!-- Linha 1: filtros -->
+      <div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap">
+        🔍 <input type="text" id="mt-search" placeholder="Buscar código, descrição..." value="${san(f.search||'')}" oninput="mtSetSearch(this.value)" style="min-width:170px">
+        <select id="mt-proj" onchange="mtSetProject(this.value)" style="min-width:200px">
+          <option value="all">Todos os projetos</option>
+          ${projOptions}
+        </select>
+        <select id="mt-period" onchange="mtSetPeriod(this.value)" style="min-width:140px">
+          <option value="all" ${f.period==='all'?'selected':''}>Todo o período</option>
+          <option value="7d" ${f.period==='7d'?'selected':''}>📅 Últimos 7 dias</option>
+          <option value="15d" ${f.period==='15d'?'selected':''}>📅 Últimos 15 dias</option>
+          <option value="30d" ${f.period==='30d'?'selected':''}>📅 Últimos 30 dias</option>
+          <option value="90d" ${f.period==='90d'?'selected':''}>📅 Últimos 90 dias</option>
+          <option value="custom" ${f.period==='custom'?'selected':''}>📆 Intervalo customizado</option>
+        </select>
+        ${f.period==='custom'?`
+          <input type="date" id="mt-from" value="${f.dateFrom||''}" oninput="mtSetDate('from',this.value)" style="width:140px">
+          até
+          <input type="date" id="mt-to" value="${f.dateTo||''}" oninput="mtSetDate('to',this.value)" style="width:140px">
+        `:''}
+        <select id="mt-cat" onchange="mtSetCategory(this.value)" style="min-width:140px">
+          <option value="">Todas categorias</option>
+          ${catOptions}
+        </select>
+        <label style="display:flex;align-items:center;gap:4px;font-size:10.5px;color:var(--hmu);cursor:pointer">
+          <input type="checkbox" ${f.onlyWithStock?'checked':''} onchange="mtSetFlag('onlyWithStock',this.checked)"> Só com saldo
+        </label>
+        <label style="display:flex;align-items:center;gap:4px;font-size:10.5px;color:var(--hmu);cursor:pointer">
+          <input type="checkbox" ${f.hideUsed?'checked':''} onchange="mtSetFlag('hideUsed',this.checked)"> Ocultar aplicados
+        </label>
+        <button class="bg" onclick="mtClearFilters()"><i data-lucide="x"></i>Limpar</button>
+      </div>
+      <!-- Linha 2: resumo e ações -->
+      <div style="display:flex;justify-content:space-between;align-items:center;width:100%">
+        <span style="font-size:10.5px;color:var(--hmu)"><strong>${filtered.length}</strong> de ${_materials.length} materiais · <strong>${totalQty.toLocaleString('pt-BR',{maximumFractionDigits:1})}</strong> unidades totais</span>
+        <div style="display:flex;gap:6px">
+          
+        </div>
+      </div>
+      ${catChips?`<div style="display:flex;gap:5px;flex-wrap:wrap">${catChips}</div>`:''}
+    </div>
+    <div class="tbl-wrap"><table>
+      <thead><tr>
+        <th>Código</th><th>Descrição</th><th>Categoria</th><th>Material</th>
+        <th>Ø</th><th>Classe</th><th>Schedule</th>
+        <th style="text-align:right">Quantidade</th><th>Un.</th>
+        <th>Inserido em</th><th>Projetos</th><th></th>
+      </tr></thead>
+      <tbody>${!filtered.length?(Object.values(_matFilters).some(v=>v&&v!=='all')?'<tr><td colspan="12"><div class="empty-st">Nenhum material com esses filtros. Ajuste ou limpe os filtros.</div></td></tr>':`<tr><td colspan="12" style="padding:0">
+        <div style="text-align:center;padding:50px 22px;background:var(--t1);border-radius:12px;margin:18px 22px">
+          <div style="width:64px;height:64px;border-radius:16px;background:var(--accent-l);display:inline-flex;align-items:center;justify-content:center;margin-bottom:14px"><i data-lucide="package-plus" style="width:32px;height:32px;color:var(--accent)"></i></div>
+          <div style="font-size:18px;font-weight:700;color:var(--t9);margin-bottom:6px;letter-spacing:-.3px">Catálogo de materiais vazio</div>
+          <div style="font-size:13px;color:var(--t6);max-width:520px;margin:0 auto 22px;line-height:1.6">3 caminhos para popular: a IA cadastra automaticamente ao processar uma lista de materiais em PDF, ou você importa de Excel, ou cadastra manualmente.</div>
+          <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+            <button class="btn bia" onclick="openDisciplineAIModal&&openDisciplineAIModal('tubulacao')"><i data-lucide="sparkles"></i>Subir PDF pra IA</button>
+            <button class="bp" onclick="goV('imp')"><i data-lucide="file-spreadsheet"></i>Importar Excel</button>
+            <button class="bo" onclick="oMat()"><i data-lucide="plus"></i>Cadastrar manualmente</button>
+          </div>
+        </div>
+      </td></tr>`):filtered.map(m=>{
+        const pm=_pmMap[m.id]||{total:0,projects:[],last_added:null};
+        const qtyColor=pm.total>0?'#1a8c4e':'#7a8aa3';
+        const exp=_expMat.has(m.id);
+        const lastDate = pm.last_added ? new Date(pm.last_added).toLocaleDateString('pt-BR') : '—';
+        const lastIso = pm.last_added ? new Date(pm.last_added).toISOString().slice(0,10) : '';
+        const ageDays = pm.last_added ? Math.floor((Date.now()-new Date(pm.last_added).getTime())/86400000) : null;
+        const dateClr = ageDays===null?'var(--hmu)':ageDays<=7?'#1a8c4e':ageDays<=30?'#0B3D91':'var(--hmu)';
+        return `<tr>
+        <td><strong class="mono" style="font-size:10px">${san(m.code)}</strong></td>
+        <td>${san(m.description)}</td>
+        <td><span class="badge b-fl">${san(m.category||'—')}</span></td>
+        <td style="font-size:10px">${san(m.material_type||'—')}</td>
+        <td>${m.diameter_in?m.diameter_in+'"':'—'}</td>
+        <td>${san(m.pressure_class||'—')}</td>
+        <td>${san(m.schedule||'—')}</td>
+        <td style="text-align:right"><strong class="mono" style="color:${qtyColor};font-size:12px">${pm.total.toLocaleString('pt-BR',{maximumFractionDigits:3})}</strong></td>
+        <td style="font-size:10px">${san(m.unit||'un')}</td>
+        <td style="font-size:10px;color:${dateClr};font-family:monospace" title="${lastIso}">${lastDate}${ageDays!==null?'<div style="font-size:8.5px;color:var(--hmu)">há '+ageDays+'d</div>':''}</td>
+        <td style="font-size:10px">${pm.projects.length?pm.projects.length+' proj.':'—'}</td>
+        <td><div class="act-col">
+          <button class="sm-e" onclick="toggleMatDet('${m.id}')"><i data-lucide="${exp?'chevron-up':'chevron-down'}"></i>${exp?'Fechar':'Detalhes'}</button>
+          <button class="sm-d" onclick="delMat('${m.id}')" title="Excluir material"><i data-lucide="trash-2"></i></button>
+        </div></td>
+      </tr>${exp?`<tr><td colspan="12" style="background:var(--t1);padding:16px 22px">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:18px;font-size:12.5px">
+          <div><div style="font-size:10.5px;color:var(--t5);text-transform:uppercase;letter-spacing:.6px;font-weight:700;margin-bottom:8px">Especificações</div>
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px"><i data-lucide="circle" style="width:13px;height:13px;color:var(--t5)"></i><strong>Ø</strong>&nbsp;${m.diameter_in?m.diameter_in+' pol':'—'}</div>
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px"><i data-lucide="layers" style="width:13px;height:13px;color:var(--t5)"></i><strong>Schedule</strong>&nbsp;${san(m.schedule||'—')}</div>
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px"><i data-lucide="gauge" style="width:13px;height:13px;color:var(--t5)"></i><strong>Cl. pressão</strong>&nbsp;${san(m.pressure_class||'—')}</div>
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px"><i data-lucide="atom" style="width:13px;height:13px;color:var(--t5)"></i><strong>Material</strong>&nbsp;${san(m.material_type||'—')}</div>
+            <div style="display:flex;align-items:center;gap:6px"><i data-lucide="tag" style="width:13px;height:13px;color:var(--t5)"></i><strong>NCM</strong>&nbsp;${san(m.ncm||'—')}</div>
+          </div>
+          <div><div style="font-size:10.5px;color:var(--t5);text-transform:uppercase;letter-spacing:.6px;font-weight:700;margin-bottom:8px">Quantidades</div>
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px"><i data-lucide="package" style="width:13px;height:13px;color:var(--primary)"></i><strong>Identificado</strong>&nbsp;${pm.total.toLocaleString('pt-BR',{maximumFractionDigits:3})} ${san(m.unit||'un')}</div>
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px"><i data-lucide="shopping-cart" style="width:13px;height:13px;color:var(--accent)"></i><strong>Comprado</strong>&nbsp;${pm.purchased.toLocaleString('pt-BR',{maximumFractionDigits:3})} ${san(m.unit||'un')}</div>
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px"><i data-lucide="check-circle-2" style="width:13px;height:13px;color:var(--success)"></i><strong>Aplicado</strong>&nbsp;${pm.used.toLocaleString('pt-BR',{maximumFractionDigits:3})} ${san(m.unit||'un')}</div>
+            <div style="display:flex;align-items:center;gap:6px"><i data-lucide="hourglass" style="width:13px;height:13px;color:${pm.total-pm.purchased>0?'var(--warning)':'var(--success)'}"></i><strong>Falta comprar</strong>&nbsp;<span style="color:${pm.total-pm.purchased>0?'var(--warning)':'var(--success)'};font-weight:700">${Math.max(0,pm.total-pm.purchased).toLocaleString('pt-BR',{maximumFractionDigits:3})}</span></div>
+          </div>
+          <div><div style="font-size:10.5px;color:var(--t5);text-transform:uppercase;letter-spacing:.6px;font-weight:700;margin-bottom:8px">Comercial</div>
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px"><i data-lucide="dollar-sign" style="width:13px;height:13px;color:var(--success)"></i><strong>Preço un.</strong>&nbsp;${m.unit_price?'R$ '+Number(m.unit_price).toFixed(2):'—'}</div>
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px"><i data-lucide="scale" style="width:13px;height:13px;color:var(--t5)"></i><strong>Peso/un</strong>&nbsp;${m.weight_per_unit?m.weight_per_unit+' kg':'—'}</div>
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px"><i data-lucide="truck" style="width:13px;height:13px;color:var(--t5)"></i><strong>Fornecedor</strong>&nbsp;${san(m.supplier||'—')}</div>
+            <div style="display:flex;align-items:center;gap:6px"><i data-lucide="banknote" style="width:13px;height:13px;color:var(--success)"></i><strong>Valor total</strong>&nbsp;${m.unit_price?'R$ '+(pm.total*Number(m.unit_price)).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}):'—'}</div>
+          </div>
+          <div><div style="font-size:10.5px;color:var(--t5);text-transform:uppercase;letter-spacing:.6px;font-weight:700;margin-bottom:8px">Histórico de inserção</div>
+            ${pm.additions?.length?pm.additions.slice(0,5).map(a=>`<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;font-family:'JetBrains Mono',monospace;font-size:11px"><i data-lucide="calendar" style="width:12px;height:12px;color:var(--t5);flex-shrink:0"></i>${new Date(a.date).toLocaleDateString('pt-BR')} · ${a.project} · ${a.qty.toLocaleString('pt-BR',{maximumFractionDigits:2})} ${san(m.unit||'un')}</div>`).join(''):'<div style="color:var(--t5)">—</div>'}
+          </div>
+          <div><div style="font-size:10.5px;color:var(--t5);text-transform:uppercase;letter-spacing:.6px;font-weight:700;margin-bottom:8px">Aparece nos projetos</div>
+            ${pm.projects.length?pm.projects.map(p=>`<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px"><i data-lucide="folder" style="width:13px;height:13px;color:var(--primary)"></i><strong class="mono" style="font-size:11px">${san(p.code)}</strong> · ${san(p.name).slice(0,40)} <span style="color:var(--primary-h);font-weight:600">(${p.qty.toLocaleString('pt-BR',{maximumFractionDigits:2})} ${san(m.unit||'un')})</span></div>`).join(''):'<div style="color:var(--t5)">Nenhum projeto ainda</div>'}
+          </div>
+          ${m.notes?`<div style="grid-column:1/-1"><div style="font-size:10.5px;color:var(--t5);text-transform:uppercase;letter-spacing:.6px;font-weight:700;margin-bottom:8px">Observações</div><div>${san(m.notes)}</div></div>`:''}
+        </div>
+      </td></tr>`:''}`;}).join('')}</tbody>
+    </table></div>`;
+  _renderIcons();
+}
+
+// === FILTROS DA ABA MATERIAIS ===
+let _matFilters = {projectId:'all', period:'all', category:'', search:'', dateFrom:'', dateTo:'', onlyWithStock:false, hideUsed:false};
+function mtSetProject(v){_matFilters.projectId=v;rMat();}
+function mtSetPeriod(v){_matFilters.period=v;rMat();}
+function mtSetCategory(v){_matFilters.category=v;rMat();}
+function mtSetSearch(v){_matFilters.search=v;rMat();}
+function mtSetDate(k,v){if(k==='from')_matFilters.dateFrom=v;else _matFilters.dateTo=v;rMat();}
+function mtSetFlag(k,v){_matFilters[k]=v;rMat();}
+function mtClearFilters(){_matFilters={projectId:'all', period:'all', category:'', search:'', dateFrom:'', dateTo:'', onlyWithStock:false, hideUsed:false};rMat();}
+
+// === EXPORT XLSX/CSV DA ABA MATERIAIS ===
+function _mtGetFilteredRows(){
+  const f = _matFilters;
+  const now = new Date();
+  let cutoff = null;
+  if(f.period === '7d') cutoff = new Date(now.getTime() - 7*86400000);
+  else if(f.period === '15d') cutoff = new Date(now.getTime() - 15*86400000);
+  else if(f.period === '30d') cutoff = new Date(now.getTime() - 30*86400000);
+  else if(f.period === '90d') cutoff = new Date(now.getTime() - 90*86400000);
+  else if(f.period === 'custom' && f.dateFrom) cutoff = new Date(f.dateFrom);
+  const dateTo = (f.period === 'custom' && f.dateTo) ? new Date(f.dateTo+'T23:59:59') : null;
+
+  const list = _materials.filter(m=>{
+    const pm = _pmMap[m.id] || {total:0,projects:[],last_added:null};
+    if(f.projectId && f.projectId !== 'all' && !pm.projects.some(p=>p.id===f.projectId)) return false;
+    if(f.category && m.category !== f.category) return false;
+    if(f.search){
+      const q = f.search.toLowerCase();
+      if(!(m.code||'').toLowerCase().includes(q) &&
+         !(m.description||'').toLowerCase().includes(q) &&
+         !(m.material_type||'').toLowerCase().includes(q)) return false;
+    }
+    if(cutoff && (!pm.last_added || new Date(pm.last_added)<cutoff)) return false;
+    if(dateTo && (!pm.last_added || new Date(pm.last_added)>dateTo)) return false;
+    if(f.onlyWithStock && pm.total<=0) return false;
+    if(f.hideUsed && (pm.total-pm.used)<=0) return false;
+    return true;
+  });
+  return list.map(m=>{
+    const pm = _pmMap[m.id] || {total:0,purchased:0,used:0,projects:[],last_added:null};
+    const valor_total = m.unit_price ? Number(m.unit_price) * pm.total : null;
+    return {
+      'Código': m.code,
+      'Descrição': m.description,
+      'Categoria': m.category || '',
+      'Material': m.material_type || '',
+      'Ø (pol)': m.diameter_in || '',
+      'Schedule': m.schedule || '',
+      'Classe Pressão': m.pressure_class || '',
+      'Unidade': m.unit || 'un',
+      'Quantidade': pm.total,
+      'Comprado': pm.purchased,
+      'Aplicado': pm.used,
+      'Falta Comprar': Math.max(0, pm.total - pm.purchased),
+      'Preço Un. (R$)': m.unit_price || '',
+      'Valor Total (R$)': valor_total || '',
+      'Peso Un. (kg)': m.weight_per_unit || '',
+      'Fornecedor': m.supplier || '',
+      'NCM': m.ncm || '',
+      'Projetos': pm.projects.map(p=>p.code).join(' | '),
+      'Última Inserção': pm.last_added ? new Date(pm.last_added).toLocaleDateString('pt-BR') : '',
+      'Observações': m.notes || ''
+    };
+  });
+}
+
+function mtExportXLSX(){
+  const rows = _mtGetFilteredRows();
+  if(!rows.length){toast('Nenhum material no filtro pra exportar','warn');return;}
+  const ws = XLSX.utils.json_to_sheet(rows);
+  // Larguras das colunas
+  ws['!cols'] = [
+    {wch:18},{wch:42},{wch:14},{wch:16},{wch:8},{wch:10},{wch:14},
+    {wch:8},{wch:14},{wch:12},{wch:12},{wch:14},{wch:14},{wch:14},
+    {wch:12},{wch:18},{wch:12},{wch:30},{wch:14},{wch:30}
+  ];
+  const wb = XLSX.utils.book_new();
+  const proj = projects.find(p=>p.id===_matFilters.projectId);
+  const sheetName = (proj?proj.code:'Materiais').replace(/[^A-Za-z0-9_-]/g,'_').slice(0,28);
+  XLSX.utils.book_append_sheet(wb, ws, sheetName);
+  const today = new Date().toISOString().slice(0,10);
+  const fn = `materiais_${proj?proj.code.replace(/[^A-Z0-9]/gi,'_'):'todos'}_${today}.xlsx`;
+  XLSX.writeFile(wb, fn);
+  toast(`Exportado · ${rows.length} materiais`,'ok');
+}
+
+function mtExportCSV(){
+  const rows = _mtGetFilteredRows();
+  if(!rows.length){toast('Nenhum material pra exportar','warn');return;}
+  const headers = Object.keys(rows[0]);
+  const csv = '﻿' + headers.join(';') + '\n' + rows.map(r=>headers.map(k=>{
+    const v = r[k];
+    if(v==null||v==='') return '';
+    const s = String(v);
+    return s.includes(';')||s.includes('"')||s.includes('\n') ? '"'+s.replace(/"/g,'""')+'"' : s;
+  }).join(';')).join('\n');
+  const blob = new Blob([csv],{type:'text/csv;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  const today = new Date().toISOString().slice(0,10);
+  a.download = `materiais_${today}.csv`;
+  a.click();
+  toast(`CSV exportado · ${rows.length} linhas`,'ok');
+}
+
+function toggleMatDet(id){if(_expMat.has(id))_expMat.delete(id);else _expMat.add(id);rMat();}
+function oMat(){
+  ['mat-code','mat-desc','mat-cat','mat-dia','mat-sch','mat-class','mat-price'].forEach(i=>{const el=document.getElementById(i);if(el)el.value='';});
+  document.getElementById('mat-unit').value='un';
+  document.getElementById('mat-modal').classList.add('open');
+}
+async function saveMat(){
+  const c=document.getElementById('mat-code').value.trim();const d=document.getElementById('mat-desc').value.trim();
+  if(!c||!d){toast('Código e descrição obrigatórios','warn');return;}
+  const {error}=await sb.from('materials_catalog').insert({
+    org_id:_org.id,code:c,description:d,
+    category:document.getElementById('mat-cat').value.trim()||null,
+    unit:document.getElementById('mat-unit').value.trim()||'un',
+    diameter_in:parseFloat(document.getElementById('mat-dia').value)||null,
+    schedule:document.getElementById('mat-sch').value.trim()||null,
+    pressure_class:document.getElementById('mat-class').value.trim()||null,
+    unit_price:parseFloat(document.getElementById('mat-price').value)||null
+  });
+  if(error){toast('Erro: '+error.message,'err');return;}
+  toast('Material cadastrado','ok');cm('mat-modal');await loadExtra();rMat();
+}
+async function delMat(id, c){
+  // Suporta chamadas legadas (id, c) e novas (só id)
+  if(!c){const m = _materials.find(x=>x.id===id); c = m ? m.code : 'material';}
+  const _ok = await (window.PIAConfirm ? window.PIAConfirm.danger('Excluir item?', `Excluir "${c}"? Esta ação não pode ser desfeita.`, 'Excluir') : Promise.resolve(confirm('Excluir item??'))); if(!_ok) return;
+  const {error}=await sb.from('materials_catalog').update({deleted_at:new Date().toISOString()}).eq('id',id);
+  if(error){toast('Erro: '+error.message,'err');return;}
+  toast('Excluído','ok');await loadExtra();rMat();
+}
+
+// === SOLDADORES ===
+function rSold(){
+  document.getElementById('vsold').innerHTML=`
+    <div class="fbar"><span style="font-size:10px;color:var(--hmu)">${_welders.length} soldador${_welders.length!==1?'es':''}</span></div>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Matrícula</th><th>Nome</th><th>CPF</th><th>Telefone</th><th>Status</th><th></th></tr></thead>
+      <tbody>${!_welders.length?'<tr><td colspan="6"><div class="empty-st">Sem soldadores.</div></td></tr>':_welders.map(w=>`<tr>
+        <td><strong class="mono" style="font-size:10px">${san(w.matricula)}</strong></td>
+        <td>${san(w.full_name)}</td>
+        <td>${san(w.cpf||'—')}</td>
+        <td>${san(w.phone||'—')}</td>
+        <td><span class="badge ${w.active?'b-sim':'b-nao'}">${w.active?'Ativo':'Inativo'}</span></td>
+        <td><button class="sm-d" onclick="delSold('${w.id}')" title="Excluir">🗑</button></td>
+      </tr>`).join('')}</tbody>
+    </table></div>`;
+}
+function oSold(){
+  ['sld-mat','sld-name','sld-cpf','sld-phone'].forEach(i=>{const el=document.getElementById(i);if(el)el.value='';});
+  document.getElementById('sold-modal').classList.add('open');
+}
+async function saveSold(){
+  const m=document.getElementById('sld-mat').value.trim();const n=document.getElementById('sld-name').value.trim();
+  if(!m||!n){toast('Matrícula e nome obrigatórios','warn');return;}
+  const {error}=await sb.from('welders').insert({
+    org_id:_org.id,matricula:m,full_name:n,
+    cpf:document.getElementById('sld-cpf').value.trim()||null,
+    phone:document.getElementById('sld-phone').value.trim()||null
+  });
+  if(error){toast('Erro: '+error.message,'err');return;}
+  toast('Soldador cadastrado','ok');cm('sold-modal');await loadExtra();rSold();
+}
+async function delSold(id, n){
+  if(!n){const w = _welders.find(x=>x.id===id); n = w ? (w.full_name||w.matricula) : 'soldador';}
+  const _ok = await (window.PIAConfirm ? window.PIAConfirm.danger('Excluir item?', `Excluir "${n}"? Esta ação não pode ser desfeita.`, 'Excluir') : Promise.resolve(confirm('Excluir item??'))); if(!_ok) return;
+  const {error}=await sb.from('welders').update({deleted_at:new Date().toISOString()}).eq('id',id);
+  if(error){toast('Erro: '+error.message,'err');return;}
+  toast('Excluído','ok');await loadExtra();rSold();
+}
+
+// === COMISSIONAMENTO ===
+function rCom(){
+  document.getElementById('vcom').innerHTML=`
+    <div class="fbar"><span style="font-size:10px;color:var(--hmu)">${_testsys.length} sistema${_testsys.length!==1?'s':''} de teste</span></div>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Código</th><th>Tipo</th><th>Nome</th><th>Projeto</th><th>Pressão</th><th>Status</th><th></th></tr></thead>
+      <tbody>${!_testsys.length?'<tr><td colspan="7"><div class="empty-st">Sem sistemas de teste.</div></td></tr>':_testsys.map(t=>`<tr>
+        <td><strong class="mono" style="font-size:10px">${san(t.code)}</strong></td>
+        <td><span class="badge b-in">${t.system_type.toUpperCase()}</span></td>
+        <td>${san(t.name)}</td>
+        <td>${san(t.projects?.code||'—')}</td>
+        <td>${t.test_pressure?t.test_pressure+' bar':'—'}</td>
+        <td><span class="badge ${t.status==='aprovado'?'b-sim':t.status==='reprovado'?'b-nao':'b-pen'}">${san(t.status.replace('_',' '))}</span></td>
+        <td><button class="sm-d" onclick="delCom('${t.id}','${san(t.code)}')" title="Excluir"><i data-lucide="trash-2"></i></button></td>
+      </tr>`).join('')}</tbody>
+    </table></div>`;
+}
+function oCom(){
+  document.getElementById('com-proj').innerHTML='<option value="">— Selecione —</option>'+projects.map(p=>`<option value="${p.id}">${san(p.code)} · ${san(p.name)}</option>`).join('');
+  ['com-code','com-name','com-desc','com-pres','com-dur'].forEach(i=>{const el=document.getElementById(i);if(el)el.value='';});
+  document.getElementById('com-type').value='sop';document.getElementById('com-status').value='em_montagem';
+  document.getElementById('com-modal').classList.add('open');
+}
+async function saveCom(){
+  const c=document.getElementById('com-code').value.trim();const n=document.getElementById('com-name').value.trim();const proj=document.getElementById('com-proj').value;
+  if(!c||!n||!proj){toast('Código, nome e projeto obrigatórios','warn');return;}
+  const {error}=await sb.from('test_systems').insert({
+    org_id:_org.id,project_id:proj,code:c,name:n,system_type:document.getElementById('com-type').value,
+    description:document.getElementById('com-desc').value.trim()||null,
+    test_pressure:parseFloat(document.getElementById('com-pres').value)||null,
+    test_duration_min:parseInt(document.getElementById('com-dur').value)||null,
+    status:document.getElementById('com-status').value
+  });
+  if(error){toast('Erro: '+error.message,'err');return;}
+  toast('Sistema criado','ok');cm('com-modal');await loadExtra();rCom();
+}
+async function delCom(id,c){
+  if(arguments.length<2 || !arguments[1]){const _it = (_testsys||[]).find(x=>x.id===id); arguments[1] = _it ? (_it.code||'item') : 'item';}
+  const _ok = await (window.PIAConfirm ? window.PIAConfirm.danger('Excluir sistema?', `Excluir "${c}"? Esta ação não pode ser desfeita.`, 'Excluir') : Promise.resolve(confirm("Excluir sistema?"))); if(!_ok) return;
+  const {error}=await sb.from('test_systems').delete().eq('id',id);
+  if(error){toast('Erro: '+error.message,'err');return;}
+  toast('Excluído','ok');await loadExtra();rCom();
+}
+
+// === IMPORTAR EXCEL ===
+let _impWb=null,_impSheet=null,_impHeaders=[],_impRows=[];
+function rImp(){
+  document.getElementById('vimp').innerHTML=`
+    <div class="bc-row"><i data-lucide="upload" style="width:14px;height:14px;color:var(--primary)"></i><span style="font-weight:600;color:var(--t9)">Importar planilha (.xlsx)</span></div>
+    <div style="padding:18px;background:var(--bg)">
+      <div id="imp-step1">
+        <div class="dz" onclick="document.getElementById('imp-f').click()" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="impDrop(event)">
+          <div style="font-size:24px;margin-bottom:5px">📊</div>
+          <div style="font-size:11.5px;font-weight:500">Arraste sua planilha aqui</div>
+          <div style="font-size:9.5px;color:var(--hmu);margin-top:3px">.xlsx, .xls, .csv</div>
+        </div>
+        <input type="file" id="imp-f" accept=".xlsx,.xls,.csv" style="display:none" onchange="impLoad(event)">
+      </div>
+      <div id="imp-step2" style="display:none">
+        <div style="background:var(--hbl);border-radius:8px;padding:12px;margin-bottom:12px">
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+            <div class="field" style="flex:1;min-width:160px"><label>Aba</label><select id="imp-sht" onchange="impSheet()"></select></div>
+            <div class="field" style="width:90px"><label>Linha header</label><input type="number" id="imp-hdr" min="1" value="1" onchange="impPrev()"></div>
+            <div class="field" style="flex:1;min-width:180px"><label>Importar como</label>
+              <select id="imp-tgt" onchange="impMap()">
+                <option value="">— Selecione —</option>
+                <option value="sheets">Folhas de isométrico</option>
+                <option value="materials">Materiais</option>
+                <option value="welders">Soldadores</option>
+              </select>
+            </div>
+            <div class="field" style="flex:1;min-width:200px"><label>Projeto destino</label><select id="imp-proj"></select></div>
+          </div>
+        </div>
+        <div style="font-size:10px;color:var(--hmu);margin-bottom:6px">📊 Pré-visualização (8 primeiras linhas):</div>
+        <div style="overflow-x:auto;max-height:240px;border:0.5px solid var(--hbr);border-radius:6px"><table id="imp-prev" style="font-size:10px"></table></div>
+        <div id="imp-mapbox" style="display:none;margin-top:14px;background:var(--bg2);border-radius:8px;padding:12px">
+          <div style="font-size:10px;font-weight:600;color:var(--hb);margin-bottom:8px">🔗 Mapeamento (auto-detectado · ajuste se preciso)</div>
+          <div id="imp-fields"></div>
+          <div style="display:flex;justify-content:space-between;margin-top:14px;align-items:center">
+            <span id="imp-count" style="font-size:10px;color:var(--hmu)"></span>
+            <div><button class="bg" onclick="impReset()">← Recomeçar</button><button class="bp" id="imp-run-btn" onclick="impRun()">🚀 Importar</button></div>
+          </div>
+        </div>
+      </div>
+      <div id="imp-res" style="display:none;margin-top:14px"></div>
+    </div>`;
+}
+function impDrop(e){e.preventDefault();const f=e.dataTransfer.files[0];if(f){const inp=document.getElementById('imp-f');const dt=new DataTransfer();dt.items.add(f);inp.files=dt.files;impLoad({target:inp});}}
+function impLoad(e){
+  const file=e.target.files[0];if(!file)return;
+  const r=new FileReader();
+  r.onload=ev=>{
+    try{
+      _impWb=XLSX.read(new Uint8Array(ev.target.result),{type:'array',cellDates:true});
+      document.getElementById('imp-sht').innerHTML=_impWb.SheetNames.map(n=>`<option>${san(n)}</option>`).join('');
+      document.getElementById('imp-proj').innerHTML='<option value="">— Selecione —</option>'+projects.map(p=>`<option value="${p.id}">${san(p.code)} · ${san(p.name)}</option>`).join('');
+      document.getElementById('imp-step1').style.display='none';
+      document.getElementById('imp-step2').style.display='block';
+      impSheet();
+      toast(`Planilha carregada · ${_impWb.SheetNames.length} aba${_impWb.SheetNames.length!==1?'s':''}`,'ok');
+    }catch(err){toast('Erro: '+err.message,'err');}
+  };
+  r.readAsArrayBuffer(file);
+}
+function impSheet(){if(!_impWb)return;_impSheet=XLSX.utils.sheet_to_json(_impWb.Sheets[document.getElementById('imp-sht').value],{header:1,defval:null,blankrows:false});impPrev();}
+function impPrev(){
+  if(!_impSheet||!_impSheet.length)return;
+  const hdr=Math.max(1,parseInt(document.getElementById('imp-hdr').value)||1);
+  const headerRow=_impSheet[hdr-1]||[];
+  _impHeaders=headerRow.map((c,i)=>c?String(c):`Col_${i+1}`);
+  const data=_impSheet.slice(hdr).filter(r=>r.some(c=>c!=null&&c!==''));
+  _impRows=data.map(r=>{const o={};_impHeaders.forEach((h,i)=>o[h]=r[i]);return o;});
+  let html='<thead><tr>'+_impHeaders.map(h=>`<th>${san(h)}</th>`).join('')+'</tr></thead><tbody>';
+  data.slice(0,8).forEach(r=>{html+='<tr>'+_impHeaders.map((_,i)=>{const v=r[i];return `<td>${v==null?'':san(String(v).slice(0,50))}</td>`}).join('')+'</tr>';});
+  document.getElementById('imp-prev').innerHTML=html+'</tbody>';
+  impMap();
+}
+const IMP_SCH={
+  sheets:{label:'Folhas de isométrico',proj:true,fields:[
+    {k:'iso_number',l:'Nº Isométrico',req:true,syn:['isometrico','iso','desenho']},
+    {k:'sheet_number',l:'Nº Folha',req:true,syn:['folha','sheet']},
+    {k:'line',l:'Linha',req:false,syn:['linha','line','tag']},
+    {k:'area',l:'Área',req:false,syn:['area','unidade']},
+    {k:'fluid_class',l:'Cl. Fluido',req:false,syn:['fluido','fluid','classe']},
+    {k:'nr13',l:'NR-13',req:false,syn:['nr13','nr-13']},
+    {k:'thermal_insulation',l:'Isol. Térmico',req:false,syn:['isolamento','isol','term']},
+    {k:'operating_temp',l:'T. Operação',req:false,syn:['temp','operacao','operação']},
+    {k:'inspection_class',l:'Cl. Inspeção',req:false,syn:['inspecao','inspeção','classe']}
+  ]},
+  materials:{label:'Materiais',proj:false,table:'materials_catalog',fields:[
+    {k:'code',l:'Código',req:true,syn:['codigo','cod','code']},
+    {k:'description',l:'Descrição',req:true,syn:['descricao','descrição','desc']},
+    {k:'category',l:'Categoria',req:false,syn:['categoria','tipo']},
+    {k:'unit',l:'Unidade',req:false,syn:['un','unit','unidade']},
+    {k:'diameter_in',l:'Ø (pol)',req:false,syn:['diametro','dn','bitola'],n:1},
+    {k:'schedule',l:'Schedule',req:false,syn:['sch','schedule']},
+    {k:'unit_price',l:'Preço un.',req:false,syn:['preco','valor','preço'],n:1}
+  ]},
+  welders:{label:'Soldadores',proj:false,table:'welders',fields:[
+    {k:'matricula',l:'Matrícula',req:true,syn:['matricula','matrícula','registro']},
+    {k:'full_name',l:'Nome',req:true,syn:['nome','soldador','operador']},
+    {k:'cpf',l:'CPF',req:false,syn:['cpf']},
+    {k:'phone',l:'Telefone',req:false,syn:['fone','telefone','celular']}
+  ]}
+};
+function impMap(){
+  const tgt=document.getElementById('imp-tgt').value;const sc=IMP_SCH[tgt];
+  if(!sc){document.getElementById('imp-mapbox').style.display='none';return;}
+  const norm=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]/g,'');
+  const map={};
+  sc.fields.forEach(f=>{
+    const targets=[norm(f.k),norm(f.l),...(f.syn||[]).map(norm)];
+    let best='',score=0;
+    _impHeaders.forEach(h=>{const c=norm(h);if(!c)return;let s=0;targets.forEach(t=>{if(!t)return;if(c===t)s=Math.max(s,100);else if(c.startsWith(t)||t.startsWith(c))s=Math.max(s,80);else if(c.includes(t)&&t.length>=3)s=Math.max(s,60);});if(s>score){score=s;best=h;}});
+    map[f.k]=score>=40?best:'';
+  });
+  document.getElementById('imp-fields').innerHTML=sc.fields.map(f=>`<div style="display:grid;grid-template-columns:170px 1fr 22px;gap:8px;align-items:center;padding:5px 0;border-bottom:0.5px solid var(--hbr)">
+    <div style="font-size:11px;font-weight:500">${san(f.l)}${f.req?' <span style="color:var(--hd)">*</span>':''}</div>
+    <select data-field="${f.k}" style="padding:4px 8px;border:0.5px solid var(--hbr);border-radius:5px;font-size:10.5px;background:var(--bg);font-family:inherit"><option value="">— ignorar —</option>${_impHeaders.map(h=>`<option ${h===map[f.k]?'selected':''}>${san(h)}</option>`).join('')}</select>
+    <span style="font-size:14px;color:${map[f.k]?'#1a8c4e':'#7a8aa3'}">${map[f.k]?'✓':'·'}</span>
+  </div>`).join('');
+  document.getElementById('imp-count').textContent=`${_impRows.length} linha${_impRows.length!==1?'s':''} para importar`;
+  document.getElementById('imp-mapbox').style.display='block';
+}
+async function impRun(){
+  const tgt=document.getElementById('imp-tgt').value;const sc=IMP_SCH[tgt];if(!sc)return;
+  const proj=sc.proj?document.getElementById('imp-proj').value:null;
+  if(sc.proj&&!proj){toast('Selecione um projeto','warn');return;}
+  const mapping={};document.querySelectorAll('#imp-fields select[data-field]').forEach(s=>mapping[s.dataset.field]=s.value);
+  const miss=sc.fields.filter(f=>f.req&&!mapping[f.k]).map(f=>f.l);
+  if(miss.length){toast('Obrigatórios sem mapeamento: '+miss.join(', '),'warn');return;}
+  const btn=document.getElementById('imp-run-btn');btn.disabled=true;btn.textContent='Importando…';
+  let ok=0,err=0;const errs=[];
+  for(let i=0;i<_impRows.length;i++){
+    const r=_impRows[i];const payload={org_id:_org.id};
+    if(proj)payload.project_id=proj;
+    let valid=true;
+    sc.fields.forEach(f=>{
+      const col=mapping[f.k];if(!col)return;
+      let v=r[col];
+      if(f.n){const n=parseFloat(String(v||'').replace(',','.').replace(/[^\d.\-]/g,''));v=isNaN(n)?null:n;}
+      if(v==null||v==='')v=null;
+      if(f.req&&v==null){valid=false;}
+      else payload[f.k]=v;
+    });
+    if(!valid){errs.push({l:i+2,m:'campos obrigatórios vazios'});err++;continue;}
+    if(tgt==='sheets'){
+      payload.iso_number=String(payload.iso_number);payload.sheet_number=String(payload.sheet_number);
+      // Cria isometric se não existir
+      let isoId=null;
+      const {data:ex}=await sb.from('isometrics').select('id').eq('project_id',proj).eq('number',payload.iso_number).maybeSingle();
+      if(ex)isoId=ex.id;else{const {data:nIso,error:eiso}=await sb.from('isometrics').insert({org_id:_org.id,project_id:proj,number:payload.iso_number,title:'Importado'}).select('id').single();if(eiso){errs.push({l:i+2,m:'iso: '+eiso.message});err++;continue;}isoId=nIso.id;}
+      payload.isometric_id=isoId;
+      const {error:e}=await sb.from('isometric_sheets').insert(payload);
+      if(e){errs.push({l:i+2,m:e.message});err++;}else ok++;
+    } else {
+      const {error:e}=await sb.from(sc.table).insert(payload);
+      if(e){errs.push({l:i+2,m:e.message});err++;}else ok++;
+    }
+  }
+  btn.disabled=false;btn.textContent='🚀 Importar';
+  document.getElementById('imp-res').innerHTML=`<div class="em-ok ext-msg" style="display:block">✅ ${ok} importado${ok!==1?'s':''}</div>${err?`<div class="em-err ext-msg" style="display:block">❌ ${err} erro${err!==1?'s':''}</div>${errs.slice(0,15).map(e=>`<div style="font-size:10px;color:var(--hd);font-family:monospace">L${e.l}: ${san(e.m)}</div>`).join('')}`:''}`;
+  document.getElementById('imp-res').style.display='block';
+  toast(`Importação: ${ok} ok, ${err} erros`,err?'warn':'ok');
+  await loadAll();await loadExtra();
+}
+function impReset(){_impWb=null;_impSheet=null;_impHeaders=[];_impRows=[];rImp();}
+
+// ═══════════════════════════════════════════════════
+// GANTT CHART
+// ═══════════════════════════════════════════════════
+function rGantt(){
+  const list=curProj?pSheets(curProj):sheets;
+  const proj=projects.find(p=>p.id===curProj);
+  // Pega range de datas
+  const allDates=[];
+  list.forEach(s=>{const f=s.fab||{},m=s.mon||{};[f.si,f.sf,m.si,m.sf].forEach(d=>{if(d)allDates.push(new Date(d));});});
+  let minD=new Date(),maxD=new Date(Date.now()+90*86400000);
+  if(allDates.length){
+    minD=new Date(Math.min(...allDates));maxD=new Date(Math.max(...allDates));
+    // padding de 7 dias cada lado
+    minD.setDate(minD.getDate()-7);maxD.setDate(maxD.getDate()+14);
+  }
+  const totalDays=Math.max(30,Math.ceil((maxD-minD)/86400000));
+  const pxPerDay=Math.max(4,Math.min(20,800/totalDays));
+  function dayPos(s){if(!s)return null;return Math.round((new Date(s)-minD)/86400000)*pxPerDay;}
+  function dayWidth(s,e){if(!s)return 0;const ed=e?new Date(e):new Date();return Math.max(2,Math.round((ed-new Date(s))/86400000)*pxPerDay);}
+  // Eixo de meses
+  const months=[];const m=new Date(minD);m.setDate(1);
+  while(m<=maxD){const left=Math.max(0,Math.round((m-minD)/86400000)*pxPerDay);months.push({label:m.toLocaleDateString('pt-BR',{month:'short',year:'2-digit'}),left});const nm=new Date(m);nm.setMonth(nm.getMonth()+1);m.setTime(nm);}
+  document.getElementById('vgantt').innerHTML=`
+    <div class="bc-row">
+      <button class="bcl" onclick="goV('projects')"><i data-lucide="folder-kanban" style="width:14px;height:14px;display:inline-block;vertical-align:-2px;margin-right:4px"></i>Projetos</button>
+      <span style="color:var(--hbr)">›</span>
+      <span style="font-weight:500">📅 Gantt — ${proj?san(proj.name):'Todos os projetos'}</span>
+      <span style="margin-left:auto;font-size:10px;color:var(--hmu)">${list.length} folhas · ${totalDays} dias</span>
+    </div>
+    <div style="padding:14px 16px;background:var(--bg);overflow-x:auto">
+      ${!list.length?'<div class="empty-st">Nenhuma folha pra exibir.</div>':`
+      <div style="display:flex;gap:0">
+        <div style="min-width:260px;border-right:0.5px solid var(--hbr)">
+          <div style="height:34px;background:var(--bg2);border-bottom:0.5px solid var(--hbr);display:flex;align-items:center;padding:0 10px;font-size:10px;font-weight:600;color:var(--hmu);text-transform:uppercase;letter-spacing:.4px">Folha</div>
+          ${list.map(s=>`<div style="height:34px;border-bottom:0.5px solid var(--hbr);display:flex;flex-direction:column;justify-content:center;padding:0 10px">
+            <div class="mono" style="font-size:10px;font-weight:600">${san(s.num)} · #${san(s.sheet)}</div>
+            <div style="font-size:9px;color:var(--hmu)">${san(s.line||'')}</div>
+          </div>`).join('')}
+        </div>
+        <div style="position:relative;min-width:${totalDays*pxPerDay}px">
+          <div style="height:34px;background:var(--bg2);border-bottom:0.5px solid var(--hbr);position:relative">
+            ${months.map(mn=>`<div style="position:absolute;left:${mn.left}px;top:0;height:34px;border-left:0.5px solid var(--hbr);padding:9px 6px;font-size:10px;font-weight:600;color:var(--hmu)">${mn.label}</div>`).join('')}
+          </div>
+          ${list.map(s=>{
+            const f=s.fab||{},m=s.mon||{};
+            const fLeft=dayPos(f.si),fWidth=dayWidth(f.si,f.sf);
+            const mLeft=dayPos(m.si),mWidth=dayWidth(m.si,m.sf);
+            const fPct=Math.round((f.pre||0)*.3+(f.sol||0)*.5+(f.end||0)*.2);
+            const mPct=Math.round((m.pre||0)*.3+(m.sol||0)*.5+(m.end||0)*.2);
+            return `<div style="height:34px;border-bottom:0.5px solid var(--hbr);position:relative">
+              ${fLeft!==null?`<div style="position:absolute;left:${fLeft}px;top:5px;width:${fWidth}px;height:10px;background:linear-gradient(90deg,#1558cc ${fPct}%,#cdd8ec ${fPct}%);border-radius:3px;cursor:pointer" title="Fab ${fPct}% · ${fmtD(f.si)} → ${fmtD(f.sf)}"></div>`:''}
+              ${mLeft!==null?`<div style="position:absolute;left:${mLeft}px;top:18px;width:${mWidth}px;height:10px;background:linear-gradient(90deg,#00A8E8 ${mPct}%,#cdebf9 ${mPct}%);border-radius:3px;cursor:pointer" title="Mon ${mPct}% · ${fmtD(m.si)} → ${fmtD(m.sf)}"></div>`:''}
+            </div>`;
+          }).join('')}
+        </div>
+      </div>
+      <div style="margin-top:14px;display:flex;gap:18px;font-size:10px;color:var(--hmu)">
+        <span style="display:flex;align-items:center;gap:5px"><span style="width:18px;height:8px;background:#1558cc;border-radius:2px"></span>Fabricação</span>
+        <span style="display:flex;align-items:center;gap:5px"><span style="width:18px;height:8px;background:#00A8E8;border-radius:2px"></span>Montagem</span>
+        <span style="color:var(--hmu)">Sem datas? Atualize as folhas com início/término em Fabricação e Montagem.</span>
+      </div>`}
+    </div>`;
+}
+
+// ═══════════════════════════════════════════════════
+// EXPORTADORES PRIMAVERA P6 + MS PROJECT
+// ═══════════════════════════════════════════════════
+function exportP6(){
+  const list=curProj?pSheets(curProj):sheets;
+  const proj=projects.find(p=>p.id===curProj);
+  if(!list.length){toast('Nenhuma folha pra exportar','warn');return;}
+  const projCode=(proj?.code||'PROJECT_IA').replace(/[^A-Z0-9]/gi,'_');
+  const today=new Date().toISOString().slice(0,10).replace(/-/g,'')+'0000';
+  let xml=`<?xml version="1.0" encoding="UTF-8"?>
+<APIBusinessObjects xmlns="http://xmlns.oracle.com/Primavera/P6/V8.4/API/BusinessObjects" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Project>
+    <Id>${projCode}</Id>
+    <Name>${san(proj?.name||'PROJECT.IA')}</Name>
+    <Status>Active</Status>
+    <PlannedStartDate>${today}</PlannedStartDate>
+    <DataDate>${today}</DataDate>
+`;
+  // Cada folha vira 2 atividades (Fab + Mon)
+  let actId=1000;
+  list.forEach(s=>{
+    const f=s.fab||{},m=s.mon||{};
+    const fStart=f.si||'',fFinish=f.sf||'';
+    const mStart=m.si||'',mFinish=m.sf||'';
+    const baseId=`${projCode}.${s.sheet||actId}`;
+    if(fStart){
+      const dur=fFinish?Math.max(1,Math.ceil((new Date(fFinish)-new Date(fStart))/86400000)):5;
+      xml+=`    <Activity>
+      <Id>FAB-${baseId}</Id>
+      <Name>Fabricação - ${san(s.num)} folha ${san(s.sheet)}</Name>
+      <Type>Task Dependent</Type>
+      <Status>Not Started</Status>
+      <PlannedStartDate>${fStart.replace(/-/g,'')}0800</PlannedStartDate>
+      <PlannedFinishDate>${(fFinish||fStart).replace(/-/g,'')}1700</PlannedFinishDate>
+      <PlannedDuration>${dur*8}</PlannedDuration>
+      <PercentComplete>${Math.round((f.pre||0)*.3+(f.sol||0)*.5+(f.end||0)*.2)}</PercentComplete>
+    </Activity>
+`;}
+    if(mStart){
+      const dur=mFinish?Math.max(1,Math.ceil((new Date(mFinish)-new Date(mStart))/86400000)):5;
+      xml+=`    <Activity>
+      <Id>MON-${baseId}</Id>
+      <Name>Montagem - ${san(s.num)} folha ${san(s.sheet)}</Name>
+      <Type>Task Dependent</Type>
+      <Status>Not Started</Status>
+      <PlannedStartDate>${mStart.replace(/-/g,'')}0800</PlannedStartDate>
+      <PlannedFinishDate>${(mFinish||mStart).replace(/-/g,'')}1700</PlannedFinishDate>
+      <PlannedDuration>${dur*8}</PlannedDuration>
+      <PercentComplete>${Math.round((m.pre||0)*.3+(m.sol||0)*.5+(m.end||0)*.2)}</PercentComplete>
+    </Activity>
+`;}
+    actId++;
+  });
+  xml+=`  </Project>
+</APIBusinessObjects>`;
+  dlB(new Blob([xml],{type:'application/xml'}),`primavera_p6_${projCode}.xml`);
+  toast(`Primavera XML exportado · ${list.length*2} atividades`,'ok');
+}
+
+function exportProject(){
+  const list=curProj?pSheets(curProj):sheets;
+  const proj=projects.find(p=>p.id===curProj);
+  if(!list.length){toast('Nenhuma folha pra exportar','warn');return;}
+  const tasks=[];
+  let id=1;
+  // Tarefa-mãe do projeto
+  tasks.push({'ID':id++,'Nome':proj?.name||'PROJECT.IA','Duração':'','Início':'','Término':'','% Concluído':'','Predecessores':'','Recursos':''});
+  list.forEach(s=>{
+    const f=s.fab||{},m=s.mon||{};
+    const fPct=Math.round((f.pre||0)*.3+(f.sol||0)*.5+(f.end||0)*.2);
+    const mPct=Math.round((m.pre||0)*.3+(m.sol||0)*.5+(m.end||0)*.2);
+    const fabDur=(f.si&&f.sf)?Math.ceil((new Date(f.sf)-new Date(f.si))/86400000)+1:'';
+    const monDur=(m.si&&m.sf)?Math.ceil((new Date(m.sf)-new Date(m.si))/86400000)+1:'';
+    tasks.push({'ID':id,'Nome':`Fab · ${s.num} folha ${s.sheet}`,'Duração':fabDur?fabDur+' dias':'','Início':fmtD(f.si),'Término':fmtD(f.sf),'% Concluído':fPct+'%','Predecessores':'','Recursos':'Soldador, Caldeireiro'});
+    tasks.push({'ID':id+1,'Nome':`Mon · ${s.num} folha ${s.sheet}`,'Duração':monDur?monDur+' dias':'','Início':fmtD(m.si),'Término':fmtD(m.sf),'% Concluído':mPct+'%','Predecessores':id,'Recursos':'Montador'});
+    id+=2;
+  });
+  const ws=XLSX.utils.json_to_sheet(tasks);
+  ws['!cols']=[{wch:5},{wch:38},{wch:11},{wch:11},{wch:11},{wch:11},{wch:13},{wch:24}];
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'Tarefas');
+  XLSX.writeFile(wb,`ms_project_${(proj?.code||'project_ia').replace(/[^A-Z0-9]/gi,'_')}.xlsx`);
+  toast(`MS Project XLSX exportado · ${tasks.length} tarefas`,'ok');
+}
+
+// ═══════════════════════════════════════════════════
+// INTEGRAÇÕES (Power BI / API / Primavera / Office)
+// ═══════════════════════════════════════════════════
+function rInt(){
+  const connectors = [
+    {id:'powerbi', name:'Power BI', desc:'Dashboards conectados em 3 cliques', ic:'bar-chart-3', col:'#F2C811', status:'active', action:'connectPowerBI()', lastSync:'2 min atrás'},
+    {id:'p6', name:'Primavera P6', desc:'Importar e exportar XML do cronograma', ic:'calendar-range', col:'#C8102E', status:'active', action:"goV('gantt')", lastSync:'5 min atrás'},
+    {id:'msp', name:'MS Project + Excel', desc:'Export XLSX direto pro Project', ic:'file-spreadsheet', col:'#217346', status:'active', action:"goV('gantt')", lastSync:'agora'},
+    {id:'rest', name:'API REST', desc:'Endpoints OpenAPI para integração externa', ic:'code-2', col:'#3B82F6', status:'configure', action:"alert('API REST disponível em planos Multi e Enterprise. Fale com vendas.')", lastSync:null},
+    {id:'sap', name:'SAP', desc:'Conector para SAP S/4HANA · materiais e ordens', ic:'database', col:'#0FAAFF', status:'soon', action:null, lastSync:null},
+    {id:'whatsapp', name:'WhatsApp Business', desc:'Notificações de obra direto no celular', ic:'message-square', col:'#25D366', status:'soon', action:null, lastSync:null},
+    {id:'slack', name:'Slack', desc:'Alertas no canal #obra (pendências, NR-13)', ic:'hash', col:'#4A154B', status:'soon', action:null, lastSync:null},
+    {id:'teams', name:'Microsoft Teams', desc:'Webhook para canal do projeto', ic:'message-circle', col:'#6264A7', status:'soon', action:null, lastSync:null}
+  ];
+  const stColors = {active:'success', configure:'warning', soon:'t6'};
+  const stLabels = {active:'Conectado', configure:'Configurar', soon:'Em breve'};
+  const stIcons = {active:'check-circle-2', configure:'settings', soon:'clock'};
+
+  document.getElementById('vint').innerHTML=`
+    <div class="bc-row"><i data-lucide="plug" style="width:14px;height:14px;color:var(--primary)"></i><span style="font-weight:600;color:var(--t9)">Integrações</span><span style="margin-left:auto;font-size:11px;color:var(--t6)">${connectors.filter(c=>c.status==='active').length} de ${connectors.length} conectores ativos</span></div>
+
+    <div style="padding:24px 22px;background:var(--t0)">
+      <div style="margin-bottom:18px">
+        <div style="font-size:24px;font-weight:800;color:var(--t9);letter-spacing:-.5px;margin-bottom:4px">Conectores</div>
+        <div style="font-size:13px;color:var(--t6);max-width:640px;line-height:1.6">Conecte o sistema às suas ferramentas existentes. Cada chip mostra status, último sync e configuração específica.</div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px">
+        ${connectors.map(c=>{
+          const colorVar = `var(--${stColors[c.status]==='t6'?'t5':stColors[c.status]})`;
+          const disabled = c.status === 'soon';
+          return `<div style="background:var(--t0);border:1px solid var(--t3);border-radius:14px;padding:18px;transition:all .15s;box-shadow:var(--sh-1);${disabled?'opacity:.7;':'cursor:pointer;'}" ${disabled?'':`onclick="${c.action}"`} onmouseover="${disabled?'':"this.style.boxShadow='var(--sh-2)';this.style.borderColor='var(--t4)';this.style.transform='translateY(-2px)'"}" onmouseout="this.style.boxShadow='var(--sh-1)';this.style.borderColor='var(--t3)';this.style.transform='none'">
+            <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:14px">
+              <div style="width:44px;height:44px;border-radius:11px;background:${c.col}22;color:${c.col};display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                <i data-lucide="${c.ic}" style="width:22px;height:22px"></i>
+              </div>
+              <div style="flex:1;min-width:0">
+                <div style="font-size:14px;font-weight:700;color:var(--t9);letter-spacing:-.2px;margin-bottom:2px">${c.name}</div>
+                <div style="font-size:11.5px;color:var(--t6);line-height:1.45">${c.desc}</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding-top:12px;border-top:1px solid var(--t3)">
+              <span class="badge" style="background:${colorVar}22;color:${colorVar};border-color:${colorVar}44;font-family:inherit;font-weight:600"><i data-lucide="${stIcons[c.status]}" style="width:11px;height:11px"></i>${stLabels[c.status]}</span>
+              ${c.lastSync ? `<span style="font-size:10.5px;color:var(--t5);font-family:'JetBrains Mono',monospace">sync: ${c.lastSync}</span>` : ''}
+              ${disabled ? '<span style="font-size:10.5px;color:var(--t5)">avise-me</span>' : '<i data-lucide="arrow-right" style="width:14px;height:14px;color:var(--t5)"></i>'}
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+
+      <!-- POWER BI HUB embutido abaixo -->
+      <div id="pb-area" style="margin-top:24px;background:var(--t1);border:1px solid var(--t3);border-radius:14px;padding:20px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+          <div style="width:36px;height:36px;border-radius:9px;background:#F2C81122;color:#F2C811;display:flex;align-items:center;justify-content:center"><i data-lucide="bar-chart-3" style="width:18px;height:18px"></i></div>
+          <div>
+            <div style="font-size:15px;font-weight:700;color:var(--t9);letter-spacing:-.2px">Power BI · Link de conexão direta</div>
+            <div style="font-size:12px;color:var(--t6)">Geramos um endpoint OData que o Power BI Desktop puxa em "Obter Dados → Web"</div>
+          </div>
+        </div>
+        <button class="bp" onclick="connectPowerBI()"><i data-lucide="link"></i>Conectar Power BI agora</button>
+      </div>
+
+      <!-- Webhooks -->
+      <div style="margin-top:24px;background:var(--accent-l);border:1px solid var(--accent);border-radius:12px;padding:18px;font-size:13px;color:#0C5DA8;display:flex;align-items:center;gap:12px">
+        <i data-lucide="webhook" style="width:24px;height:24px;flex-shrink:0"></i>
+        <div style="flex:1">
+          <strong>Webhook customizado?</strong> Configure endpoint próprio (HTTP POST) para receber eventos em tempo real: nova pendência crítica, RDO criado, inspeção NR-13 vencida.
+        </div>
+        <a class="bg" href="mailto:contato@projectia.com" style="text-decoration:none"><i data-lucide="mail"></i>Configurar</a>
+      </div>
+    </div>`;
+  _renderIcons();
+}
+function copyToCb(id){
+  const text=document.getElementById(id).textContent;
+  navigator.clipboard.writeText(text).then(()=>toast('URL copiada','ok')).catch(()=>toast('Erro ao copiar','err'));
+}
+
+// Catálogo de dashboards por departamento
+const POWER_BI_DASHBOARDS={
+  planejamento:{
+    icon:'📅', cor:'#0B3D91', titulo:'Planejamento',
+    desc:'Curva S, lookahead, histograma de recursos, andamento das folhas',
+    datasets:[
+      {key:'planning_curva_s',     label:'Curva S mensal',        desc:'HH planejado vs realizado, acumulado por mês'},
+      {key:'planning_histogram',   label:'Histograma semanal',    desc:'Carga de HH planejado vs realizado por semana'},
+      {key:'planning_lookahead',   label:'Lookahead 21 dias',     desc:'Folhas que iniciam/terminam nas próximas 3 semanas'},
+      {key:'planning_sheets',      label:'Folhas detalhadas',     desc:'Lista completa de folhas para drill-down'}
+    ]
+  },
+  qualidade:{
+    icon:'✅', cor:'#1a8c4e', titulo:'Qualidade',
+    desc:'Desempenho de soldadores, pendências, status END, T.H. e torque',
+    datasets:[
+      {key:'quality_welders',           label:'Desempenho soldadores', desc:'Taxa de aprovação por soldador, ranking'},
+      {key:'quality_welder_workload',   label:'Carga por soldador',    desc:'Juntas atribuídas vs executadas'},
+      {key:'quality_pendings',          label:'Pendências',            desc:'Resumo por tipo e prioridade, tempo médio de resolução'},
+      {key:'quality_paint_th_torque',   label:'Status final',          desc:'% de pintura, T.H. e torque concluídos por projeto'}
+    ]
+  },
+  orcamento:{
+    icon:'💰', cor:'#b85c00', titulo:'Orçamento',
+    desc:'Orçado × realizado, custo HH, materiais críticos',
+    datasets:[
+      {key:'budget_actual',              label:'Orçado × realizado',     desc:'Comparativo HH e R$ planejado vs executado por projeto'},
+      {key:'budget_critical_materials',  label:'Material crítico',       desc:'Itens com falta de compra e valor associado'},
+      {key:'budget_materials_full',      label:'Catálogo completo',      desc:'Todos os materiais com preço unitário e categoria'}
+    ]
+  },
+  executivo:{
+    icon:'🎯', cor:'#6c3fc5', titulo:'Executivo',
+    desc:'Visão consolidada para diretoria — KPIs agregados de toda a operação',
+    datasets:[
+      {key:'executive_kpis',     label:'KPIs consolidados',  desc:'Projetos, folhas, fab/mon médios, pendências, custos totais'},
+      {key:'executive_projects', label:'Resumo de projetos', desc:'Estatísticas por projeto com média e desvio padrão'}
+    ]
+  }
+};
+
+let _pbToken=null;
+async function connectPowerBI(reset=false){
+  const {data:token,error}=await sb.rpc('hyd_get_or_create_powerbi_token',{p_reset:reset});
+  if(error){toast('Erro: '+error.message,'err');return;}
+  if(token==='__EXISTING__'){
+    const ok = await (window.PIAConfirm ? window.PIAConfirm.warning('Gerar novo link?', 'Já existe um link configurado, mas ele não fica visível depois de gerado por segurança. Gerar um novo? O antigo deixará de funcionar.', 'Gerar novo') : Promise.resolve(confirm('Gerar novo link?')));
+    if(!ok)return;
+    return connectPowerBI(true);
+  }
+  if(!token){toast('Sem permissão (apenas admin/gerente)','warn');return;}
+  _pbToken=token;
+  renderPbiDashboards();
+  toast('✔ Links Power BI gerados','ok');
+}
+
+function renderPbiDashboards(){
+  const baseUrl=SUPABASE_URL+'/functions/v1/powerbi-feed';
+  const cards=Object.entries(POWER_BI_DASHBOARDS).map(([dept,d])=>`
+    <div style="background:#fff;border:0.5px solid var(--hbr);border-radius:10px;padding:14px;border-left:3px solid ${d.cor}">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px">
+        <div style="font-size:22px">${d.icon}</div>
+        <div style="flex:1">
+          <div style="font-size:12px;font-weight:600;color:${d.cor}">${d.titulo}</div>
+          <div style="font-size:9.5px;color:var(--hmu);margin-top:1px">${d.desc}</div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:4px;font-family:monospace;font-size:9.5px;margin-top:8px">
+        ${d.datasets.map(ds=>`<div style="display:flex;align-items:center;gap:6px;padding:5px 7px;background:var(--bg2);border-radius:5px">
+          <div style="flex:1">
+            <div style="font-size:10.5px;color:var(--ht);font-weight:500;font-family:inherit">${ds.label}</div>
+            <div style="font-size:9px;color:var(--hmu);font-family:inherit">${ds.desc}</div>
+          </div>
+          <input readonly id="url-${ds.key}" value="${baseUrl}?token=${_pbToken}&dataset=${ds.key}" style="width:140px;padding:3px 6px;border:0.5px solid var(--hbr);border-radius:4px;background:#fff;font-family:monospace;font-size:9px;outline:none" onclick="this.select()">
+          <button class="sm-e" style="padding:3px 7px" onclick="copyVal('url-${ds.key}')">📋</button>
+        </div>`).join('')}
+      </div>
+    </div>
+  `).join('');
+  document.getElementById('pb-area').innerHTML=`
+    <div style="background:var(--hsl);border:0.5px solid #b5d8c5;border-radius:6px;padding:10px 12px;margin-bottom:14px;font-size:10.5px;color:#0f5c33">
+      <strong>✔ Pronto!</strong> Escolha o departamento abaixo e copie os links pro Power BI. Cada link puxa dados específicos da área correspondente.
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">${cards}</div>
+    <div style="background:var(--bg2);border-radius:6px;padding:10px 12px;font-size:10.5px;line-height:1.7;color:var(--hmu);margin-top:14px">
+      <strong>Passos no Power BI Desktop:</strong><br>
+      1. Obter Dados → <strong>Web</strong> → cole o link<br>
+      2. Detecta JSON automaticamente → clique em <strong>rows</strong> → <strong>Para Tabela</strong><br>
+      3. Repita pra cada dataset que você quer no mesmo arquivo<br>
+      4. <strong>Atualizar</strong> sempre que quiser puxar dados novos<br>
+      <span style="color:var(--hd)">⚠️ Mantenha esses links em segredo: quem tem, vê seus dados.</span>
+    </div>
+    <button class="bg" onclick="if(confirm('Gerar novo link? O atual deixará de funcionar.')){connectPowerBI(true);}" style="margin-top:10px">🔄 Regenerar todos os links</button>`;
+}
+function copyVal(id){
+  const el=document.getElementById(id);el.select();navigator.clipboard.writeText(el.value).then(()=>toast('URL copiada','ok'));
+}
+
+// ═══════════════════════════════════════════════════
+// PARÂMETROS DE PRODUTIVIDADE
+// ═══════════════════════════════════════════════════
+let _prodParams=[];
+async function loadProd(){
+  const {data,error}=await sb.from('productivity_params').select('*').order('process').order('material').order('diameter_min_in');
+  if(error){toast('Parâmetros: '+error.message,'err');return;}
+  _prodParams=data||[];
+  if(!_prodParams.length){
+    // Auto-seed se nunca foi feito
+    await sb.rpc('hyd_seed_default_productivity',{p_org_id:_org.id});
+    const r=await sb.from('productivity_params').select('*').order('process').order('material');
+    _prodParams=r.data||[];
+  }
+}
+async function rProd(){
+  await loadProd();
+  const procColors={eletrodo:'b-fl',tig:'b-in',mig_mag:'b-py',arame_tubular:'b-ny',montagem:'b-sim'};
+  document.getElementById('vprod').innerHTML=`
+    <div class="bc-row"><span style="font-weight:500">⚙️ Parâmetros de Produtividade do Planejador</span><span style="font-size:10px;color:var(--hmu);margin-left:auto">Valores usados pelo sistema pra calcular HH planejado e gerar desvio padrão.</span></div>
+    <div style="padding:14px 16px;background:var(--bg)">
+      <div style="background:var(--hbl);border-radius:8px;padding:12px 14px;margin-bottom:14px;font-size:11px;line-height:1.6">
+        <strong>Como funciona:</strong> o sistema busca o parâmetro mais específico que casa com o serviço (processo + material + diâmetro) e usa o HH/m, HH/junta e HH/suporte pra calcular o HH planejado. Quando a obra avança, o desvio entre realizado e planejado vira o que aparece no Power BI.<br>
+        <strong>Fórmula:</strong> HH = (HH/m × comprimento + HH/junta × nº juntas) × fator(material)
+      </div>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>Processo</th><th>Material</th><th>Ø min</th><th>Ø max</th><th style="text-align:right">HH/metro</th><th style="text-align:right">HH/junta</th><th style="text-align:right">HH/suporte</th><th style="text-align:right">Fator INOX</th><th style="text-align:right">Fator galv.</th><th style="text-align:right">Fator campo</th><th>Tipo</th><th></th></tr></thead>
+        <tbody>${!_prodParams.length?'<tr><td colspan="12"><div class="empty-st">Sem parâmetros. Clique em Restaurar padrões.</div></td></tr>':_prodParams.map(p=>`<tr>
+          <td><span class="badge ${procColors[p.process]||'b-nn'}">${san(p.process||'—')}</span></td>
+          <td>${san(p.material||'—')}</td>
+          <td class="mono">${p.diameter_min_in||'—'}"</td>
+          <td class="mono">${p.diameter_max_in||'—'}"</td>
+          <td style="text-align:right" class="mono"><strong>${p.hh_per_meter||0}</strong></td>
+          <td style="text-align:right" class="mono">${p.hh_per_joint||0}</td>
+          <td style="text-align:right" class="mono">${p.hh_per_support||0}</td>
+          <td style="text-align:right" class="mono">${p.factor_inox||1}×</td>
+          <td style="text-align:right" class="mono">${p.factor_galv||1}×</td>
+          <td style="text-align:right" class="mono">${p.factor_field||1}×</td>
+          <td>${p.is_default?'<span class="badge b-in">Padrão sistema</span>':'<span class="badge b-py">Customizado</span>'}</td>
+          <td><div class="act-col"><button class="sm-e" onclick="oProd('${p.id}')"><i data-lucide="pencil"></i>Editar</button>${!p.is_default?`<button class="sm-d" onclick="delProd('${p.id}')" title="Excluir"><i data-lucide="trash-2"></i></button>`:''}</div></td>
+        </tr>`).join('')}</tbody>
+      </table></div>
+    </div>`;
+}
+async function seedDefaultParams(){
+  const _ok = await (window.PIAConfirm ? window.PIAConfirm.warning('Restaurar padrão?', 'Restaurar parâmetros padrão? Os customizados não serão apagados.', 'Restaurar') : Promise.resolve(confirm('Restaurar padrão??'))); if(!_ok) return;
+  // Apaga só os padrão e recria
+  await sb.from('productivity_params').delete().eq('is_default',true).eq('org_id',_org.id);
+  await sb.rpc('hyd_seed_default_productivity',{p_org_id:_org.id});
+  toast('Padrões restaurados','ok');rProd();
+}
+let _editProd=null;
+function oProd(id){
+  _editProd=id;
+  const p=id?_prodParams.find(x=>x.id===id):{};
+  document.getElementById('prod-title').textContent=id?'Editar Parâmetro':'Novo Parâmetro';
+  document.getElementById('pr-process').value=p.process||'eletrodo';
+  document.getElementById('pr-material').value=p.material||'AC';
+  document.getElementById('pr-dmin').value=p.diameter_min_in||'';
+  document.getElementById('pr-dmax').value=p.diameter_max_in||'';
+  document.getElementById('pr-hpm').value=p.hh_per_meter||'';
+  document.getElementById('pr-hpj').value=p.hh_per_joint||'';
+  document.getElementById('pr-hps').value=p.hh_per_support||'';
+  document.getElementById('pr-hpf').value=p.hh_per_flange||'';
+  document.getElementById('pr-fi').value=p.factor_inox||1.5;
+  document.getElementById('pr-fg').value=p.factor_galv||1.15;
+  document.getElementById('pr-ff').value=p.factor_field||1.15;
+  document.getElementById('pr-label').value=p.label||'';
+  document.getElementById('pr-notes').value=p.notes||'';
+  document.getElementById('prod-modal').classList.add('open');
+}
+async function saveProd(){
+  const p={
+    org_id:_org.id,
+    process:document.getElementById('pr-process').value,
+    material:document.getElementById('pr-material').value.trim()||null,
+    diameter_min_in:parseFloat(document.getElementById('pr-dmin').value)||null,
+    diameter_max_in:parseFloat(document.getElementById('pr-dmax').value)||null,
+    hh_per_meter:parseFloat(document.getElementById('pr-hpm').value)||null,
+    hh_per_joint:parseFloat(document.getElementById('pr-hpj').value)||null,
+    hh_per_support:parseFloat(document.getElementById('pr-hps').value)||null,
+    hh_per_flange:parseFloat(document.getElementById('pr-hpf').value)||null,
+    factor_inox:parseFloat(document.getElementById('pr-fi').value)||1.0,
+    factor_galv:parseFloat(document.getElementById('pr-fg').value)||1.0,
+    factor_field:parseFloat(document.getElementById('pr-ff').value)||1.0,
+    label:document.getElementById('pr-label').value.trim()||null,
+    notes:document.getElementById('pr-notes').value.trim()||null,
+    is_default:false
+  };
+  let r;
+  if(_editProd)r=await sb.from('productivity_params').update(p).eq('id',_editProd);
+  else r=await sb.from('productivity_params').insert(p);
+  if(r.error){toast('Erro: '+r.error.message,'err');return;}
+  toast('Parâmetro salvo','ok');cm('prod-modal');rProd();
+}
+async function delProd(id){
+  const _ok = await (window.PIAConfirm ? window.PIAConfirm.danger('Excluir parâmetro?', 'Esta ação remove o parâmetro. Não pode ser desfeito.', 'Excluir') : Promise.resolve(confirm('Excluir parâmetro??'))); if(!_ok) return;
+  const {error}=await sb.from('productivity_params').delete().eq('id',id);
+  if(error){toast('Erro: '+error.message,'err');return;}
+  toast('Excluído','ok');rProd();
+}
+
+// ═══════════════════════════════════════════════════
+// DASHBOARD PREVIEW (4 sub-abas: Executivo, Planejamento, Qualidade, Orçamento)
+// ═══════════════════════════════════════════════════
+let _dashTab='exec';
+async function rDash(){
+  document.getElementById('vdash').innerHTML=`
+    <div class="bc-row">
+      <span style="font-weight:500">📊 Dashboards Operacionais — Preview do Power BI</span>
+      <span style="font-size:10px;color:var(--hmu);margin-left:auto">${curProj?'Projeto selecionado':'Todos os projetos'}</span>
+    </div>
+    <div style="padding:14px 16px 0 16px;background:var(--bg);border-bottom:0.5px solid var(--hbr)">
+      <div style="display:flex;gap:4px">
+        <button class="ntab ${_dashTab==='exec'?'active':''}" style="background:none;color:${_dashTab==='exec'?'var(--hb)':'var(--hmu)'};border:none;border-bottom:2px solid ${_dashTab==='exec'?'var(--hc)':'transparent'};padding:9px 14px;font-size:11.5px;cursor:pointer;font-family:inherit;font-weight:500" onclick="setDashTab('exec')">🎯 Executivo</button>
+        <button class="ntab ${_dashTab==='plan'?'active':''}" style="background:none;color:${_dashTab==='plan'?'var(--hb)':'var(--hmu)'};border:none;border-bottom:2px solid ${_dashTab==='plan'?'var(--hc)':'transparent'};padding:9px 14px;font-size:11.5px;cursor:pointer;font-family:inherit;font-weight:500" onclick="setDashTab('plan')">📅 Planejamento</button>
+        <button class="ntab ${_dashTab==='qual'?'active':''}" style="background:none;color:${_dashTab==='qual'?'var(--hb)':'var(--hmu)'};border:none;border-bottom:2px solid ${_dashTab==='qual'?'var(--hc)':'transparent'};padding:9px 14px;font-size:11.5px;cursor:pointer;font-family:inherit;font-weight:500" onclick="setDashTab('qual')">✅ Qualidade</button>
+        <button class="ntab ${_dashTab==='budg'?'active':''}" style="background:none;color:${_dashTab==='budg'?'var(--hb)':'var(--hmu)'};border:none;border-bottom:2px solid ${_dashTab==='budg'?'var(--hc)':'transparent'};padding:9px 14px;font-size:11.5px;cursor:pointer;font-family:inherit;font-weight:500" onclick="setDashTab('budg')">💰 Orçamento</button>
+      </div>
+    </div>
+    <div id="dash-body" style="padding:16px;background:var(--bg)"></div>`;
+  await renderDashBody();
+}
+function setDashTab(t){_dashTab=t;rDash();}
+
+async function renderDashBody(){
+  const body=document.getElementById('dash-body');
+  if(_dashTab==='exec')body.innerHTML=await renderExecDash();
+  else if(_dashTab==='plan')body.innerHTML=await renderPlanDash();
+  else if(_dashTab==='qual')body.innerHTML=await renderQualDash();
+  else if(_dashTab==='budg')body.innerHTML=await renderBudgDash();
+}
+
+async function renderExecDash(){
+  // KPIs cross-módulo
+  const totProj = projects.length;
+  const totIso = sheets.length;
+  const totMat = _materials.length;
+  const totEq = (_equipments||[]).length;
+  const totOS = (_maintOS||[]).length;
+  const totWelders = (_welders||[]).length;
+  
+  // Avanço médio
+  const avgFab = totIso ? Math.round(sheets.reduce((s,e)=>s+fPct(e),0)/totIso) : 0;
+  const avgMon = totIso ? Math.round(sheets.reduce((s,e)=>s+mPct(e),0)/totIso) : 0;
+  
+  // Pendências
+  const pendOpen = (_pendings||[]).filter(p=>['aberta','em_andamento'].includes(p.status)).length;
+  const pendCrit = (_pendings||[]).filter(p=>p.priority==='critica'&&['aberta','em_andamento'].includes(p.status)).length;
+  
+  // OS por status
+  const osBy = {solicitada:0,aberta:0,planejada:0,em_execucao:0,postergada:0,concluida:0};
+  (_maintOS||[]).forEach(o=>{if(osBy[o.status]!==undefined)osBy[o.status]++;});
+  
+  // Equipamentos por tipo
+  const eqByType = {};
+  (_equipments||[]).forEach(e=>{const t=e.equipment_type||'outros';eqByType[t]=(eqByType[t]||0)+1;});
+
+  // Materiais por categoria (top 6)
+  const matByCat = {};
+  (_materials||[]).forEach(m=>{const c=m.category||'outro';matByCat[c]=(matByCat[c]||0)+1;});
+  const topCats = Object.entries(matByCat).sort((a,b)=>b[1]-a[1]).slice(0,6);
+
+  // Valor monetário (se tiver preços)
+  const totalValue = (_materials||[]).reduce((s,m)=>s+((_pmMap[m.id]?.total||0)*(parseFloat(m.unit_price)||0)),0);
+
+  document.getElementById('vdash').innerHTML = `
+    <div class="bc-row">
+      <span style="font-weight:500">📊 Dashboard Executivo</span>
+      <span style="margin-left:auto;font-size:10.5px;color:var(--hmu)">Visão consolidada · ${new Date().toLocaleDateString('pt-BR')}</span>
+    </div>
+    <div style="padding:14px 16px;background:var(--bg);display:flex;flex-direction:column;gap:14px">
+      
+      <!-- KPIs principais -->
+      <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:10px">
+        ${kpiBoxE('Projetos',totProj,'',null)}
+        ${kpiBoxE('Folhas Iso',totIso,'',null)}
+        ${kpiBoxE('Materiais',totMat,'no catálogo',null)}
+        ${kpiBoxE('Equipamentos',totEq,'cadastrados',null)}
+        ${kpiBoxE('OSs abertas',osBy.aberta+osBy.planejada+osBy.em_execucao,'em fluxo','var(--hbm)')}
+        ${kpiBoxE('Pendências',pendOpen,pendCrit?pendCrit+' críticas':'em aberto',pendCrit?'#c0392b':'var(--hw)')}
+      </div>
+
+      <!-- Gráficos -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div style="background:#fff;border:0.5px solid var(--hbr);border-radius:10px;padding:16px">
+          <div style="font-weight:600;color:var(--hb);font-size:12px;margin-bottom:10px">📊 Avanço Físico Médio</div>
+          <canvas id="chart-progress" style="max-height:220px"></canvas>
+        </div>
+        <div style="background:#fff;border:0.5px solid var(--hbr);border-radius:10px;padding:16px">
+          <div style="font-weight:600;color:var(--hb);font-size:12px;margin-bottom:10px">🛠️ Ordens de Serviço por Status</div>
+          <canvas id="chart-os" style="max-height:220px"></canvas>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div style="background:#fff;border:0.5px solid var(--hbr);border-radius:10px;padding:16px">
+          <div style="font-weight:600;color:var(--hb);font-size:12px;margin-bottom:10px">🛢️ Equipamentos por Tipo</div>
+          <canvas id="chart-eq" style="max-height:220px"></canvas>
+        </div>
+        <div style="background:#fff;border:0.5px solid var(--hbr);border-radius:10px;padding:16px">
+          <div style="font-weight:600;color:var(--hb);font-size:12px;margin-bottom:10px">📦 Top Categorias de Materiais</div>
+          <canvas id="chart-mat" style="max-height:220px"></canvas>
+        </div>
+      </div>
+
+      <!-- Resumo financeiro / soldagem -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px">
+        ${kpiBoxE('Valor estimado',totalValue?'R$ '+totalValue.toLocaleString('pt-BR',{maximumFractionDigits:0}):'—','em materiais','var(--hs)')}
+        ${kpiBoxE('Soldadores',totWelders,'qualificados',null)}
+        ${kpiBoxE('Avanço Fab',avgFab+'%','média geral','var(--hbm)')}
+        ${kpiBoxE('Avanço Mon',avgMon+'%','média geral','var(--hc)')}
+      </div>
+
+      <!-- Lista de pendências críticas -->
+      ${pendCrit>0?`<div style="background:#fff;border:0.5px solid var(--hbr);border-left:3px solid var(--hd);border-radius:10px;padding:14px">
+        <div style="font-weight:600;color:var(--hd);font-size:12px;margin-bottom:8px">🚨 ${pendCrit} pendências críticas em aberto</div>
+        ${(_pendings||[]).filter(p=>p.priority==='critica'&&['aberta','em_andamento'].includes(p.status)).slice(0,5).map(p=>`
+          <div style="padding:6px 0;border-bottom:0.5px solid var(--hbr);font-size:11.5px">
+            <strong>${san(p.title)}</strong>
+            <div style="font-size:10px;color:var(--hmu)">${san(p.pending_type||'')} · ${p.due_date?'prazo '+fmtD(p.due_date):''}</div>
+          </div>`).join('')}
+      </div>`:''}
+    </div>`;
+
+  // Renderiza os gráficos com Chart.js (após DOM atualizado)
+  setTimeout(()=>renderDashCharts({avgFab, avgMon, osBy, eqByType, topCats}), 100);
+}
+
+function kpiBoxE(label, val, sub, color){
+  return `<div style="background:#fff;border:0.5px solid var(--hbr);border-radius:8px;padding:11px;text-align:center;position:relative;overflow:hidden">
+    ${color?`<div style="position:absolute;top:0;left:0;right:0;height:3px;background:${color}"></div>`:''}
+    <div style="font-size:9px;color:var(--hmu);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">${label}</div>
+    <div style="font-size:20px;font-weight:600;color:${color||'var(--ht)'};font-family:monospace">${val}</div>
+    ${sub?`<div style="font-size:9.5px;color:var(--hmu);font-family:inherit">${sub}</div>`:''}
+  </div>`;
+}
+
+function renderDashCharts(data){
+  if(typeof Chart === 'undefined') return;
+  // ─── Paleta PROJECT.IA (alinhada à landing styles.css) ───
+  const PALETTE = {
+    primary:'#1E40AF', primary2:'#2563EB',
+    accent:'#06B6D4', accent2:'#22D3EE',
+    violet:'#7C3AED', violet2:'#A78BFA',
+    success:'#10B981', warning:'#F59E0B', danger:'#EF4444',
+    slate4:'#94A3B8', slate3:'#CBD5E1', slate7:'#334155', slate6:'#64748B'
+  };
+  const BRAND_SCALE = [PALETTE.primary, PALETTE.accent, PALETTE.violet, PALETTE.success, PALETTE.warning, PALETTE.primary2, PALETTE.accent2, PALETTE.violet2];
+  // Defaults globais (Inter, cinza slate, grids finos)
+  Chart.defaults.font.family = "'Inter','Segoe UI',-apple-system,sans-serif";
+  Chart.defaults.font.size = 11;
+  Chart.defaults.color = PALETTE.slate6;
+  Chart.defaults.plugins.tooltip.backgroundColor = '#0A1628';
+  Chart.defaults.plugins.tooltip.padding = 10;
+  Chart.defaults.plugins.tooltip.cornerRadius = 8;
+  Chart.defaults.plugins.tooltip.titleFont = {weight:'600', size:12};
+  Chart.defaults.plugins.tooltip.bodyFont = {size:11};
+  Chart.defaults.plugins.legend.labels.usePointStyle = true;
+  Chart.defaults.plugins.legend.labels.padding = 12;
+  Chart.defaults.plugins.legend.labels.boxWidth = 8;
+
+  // Helper: gradient suave para barras (primary → accent)
+  const makeGradient = (ctx, from, to) => {
+    const g = ctx.createLinearGradient(0, 0, 0, 200);
+    g.addColorStop(0, from);
+    g.addColorStop(1, to);
+    return g;
+  };
+  const gridOpts = (label) => ({
+    grid:{color:'rgba(148,163,184,.15)', drawBorder:false, drawTicks:false},
+    ticks:{color:PALETTE.slate6, font:{size:10,weight:'500'}, padding:6,
+      callback: label==='percent' ? v=>v+'%' : undefined},
+    border:{display:false}
+  });
+
+  // Destrói gráficos anteriores
+  ['chart-progress','chart-os','chart-eq','chart-mat'].forEach(id=>{
+    const c = Chart.getChart(id);
+    if(c) c.destroy();
+  });
+
+  // Avanço físico (bar com gradient marca)
+  const cp = document.getElementById('chart-progress');
+  if(cp){
+    const ctx = cp.getContext('2d');
+    new Chart(cp, {
+      type: 'bar',
+      data: {
+        labels: ['Fabricação', 'Montagem'],
+        datasets: [{
+          label: '% Médio',
+          data: [data.avgFab, data.avgMon],
+          backgroundColor: [makeGradient(ctx, PALETTE.primary, PALETTE.primary2), makeGradient(ctx, PALETTE.accent, PALETTE.accent2)],
+          borderRadius: 8,
+          maxBarThickness: 56
+        }]
+      },
+      options: {responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{y:{max:100,beginAtZero:true, ...gridOpts('percent')}, x:{...gridOpts(), grid:{display:false}}}}
+    });
+  }
+
+  // OS por status (doughnut)
+  const co = document.getElementById('chart-os');
+  if(co){
+    const labels = Object.keys(data.osBy);
+    const vals = Object.values(data.osBy);
+    new Chart(co, {
+      type: 'doughnut',
+      data: {
+        labels: labels.map(l=>l.replace('_',' ')),
+        datasets: [{data: vals, backgroundColor: BRAND_SCALE.slice(0, labels.length), borderWidth:2, borderColor:'#fff', hoverOffset:6}]
+      },
+      options: {responsive:true, maintainAspectRatio:false, cutout:'62%', plugins:{legend:{position:'right',labels:{font:{size:10,weight:'500'},padding:10,boxWidth:8,usePointStyle:true}}}}
+    });
+  }
+
+  // Equipamentos por tipo (pie)
+  const ce = document.getElementById('chart-eq');
+  if(ce){
+    const labels = Object.keys(data.eqByType);
+    if(labels.length===0){ ce.parentElement.innerHTML += '<div style="text-align:center;color:var(--t5);padding:30px;font-size:11px">Sem dados</div>'; }
+    else{
+      new Chart(ce, {
+        type: 'doughnut',
+        data: {labels: labels.map(l=>l.replace('_',' ')), datasets: [{data: Object.values(data.eqByType), backgroundColor: BRAND_SCALE.slice(0, labels.length), borderWidth:2, borderColor:'#fff', hoverOffset:6}]},
+        options: {responsive:true, maintainAspectRatio:false, cutout:'58%', plugins:{legend:{position:'right',labels:{font:{size:10,weight:'500'},padding:10,boxWidth:8,usePointStyle:true}}}}
+      });
+    }
+  }
+
+  // Top categorias materiais (bar horizontal com gradient)
+  const cm = document.getElementById('chart-mat');
+  if(cm){
+    if(data.topCats.length===0){ cm.parentElement.innerHTML += '<div style="text-align:center;color:var(--t5);padding:30px;font-size:11px">Sem materiais</div>'; }
+    else{
+      const ctx = cm.getContext('2d');
+      const grad = ctx.createLinearGradient(0,0,300,0);
+      grad.addColorStop(0, PALETTE.primary); grad.addColorStop(1, PALETTE.accent);
+      new Chart(cm, {
+        type: 'bar',
+        data: {
+          labels: data.topCats.map(c=>c[0]),
+          datasets: [{label:'Itens', data: data.topCats.map(c=>c[1]), backgroundColor:grad, borderRadius:6, maxBarThickness:24}]
+        },
+        options: {indexAxis:'y', responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{x:{...gridOpts()},y:{...gridOpts(), grid:{display:false}}}}
+      });
+    }
+  }
+}
+
+
+async function renderPlanDash(){
+  const projFilter=curProj?{eq:['project_id',curProj]}:null;
+  const [curva,hist,la,projInfo]=await Promise.all([
+    sb.from('v_curva_s_monthly').select('*').eq('org_id',_org.id).order('mes').limit(50),
+    sb.from('v_resource_histogram').select('*').eq('org_id',_org.id).order('semana').limit(50),
+    sb.from('v_lookahead_3w').select('*').eq('org_id',_org.id).order('next_date').limit(30),
+    curProj ? sb.from('projects').select('last_p6_sync_at,last_p6_sync_baseline,name,code').eq('id',curProj).maybeSingle() : Promise.resolve({data:null})
+  ]);
+  const curvaData=projFilter?(curva.data||[]).filter(r=>r.project_id===curProj):(curva.data||[]);
+  const pInfo = projInfo?.data;
+
+  // Badge "P6 sincronizado · há X min" (espelha promessa da landing)
+  let p6Badge = '';
+  if(pInfo?.last_p6_sync_at){
+    const diffMin = Math.round((Date.now() - new Date(pInfo.last_p6_sync_at).getTime())/60000);
+    const ago = diffMin < 60 ? diffMin+' min' : diffMin < 1440 ? Math.round(diffMin/60)+'h' : Math.round(diffMin/1440)+'d';
+    p6Badge = `<span style="display:inline-flex;align-items:center;gap:6px;background:var(--primary-l);color:var(--primary);border:1px solid var(--primary);padding:3px 9px;border-radius:100px;font-size:10.5px;font-weight:700;font-family:'JetBrains Mono',monospace;letter-spacing:.3px">
+      <span style="width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 3px rgba(6,182,212,.18);animation:ia-pulse 1.6s infinite"></span>
+      Sincronizada · P6${pInfo.last_p6_sync_baseline?' · '+san(pInfo.last_p6_sync_baseline):''}
+      <span style="color:var(--t6);font-weight:500">há ${ago}</span>
+    </span>`;
+  } else {
+    p6Badge = `<button onclick="openP6ImportModal()" style="display:inline-flex;align-items:center;gap:6px;background:var(--t1);color:var(--t6);border:1px dashed var(--t4);padding:3px 10px;border-radius:100px;font-size:10.5px;font-weight:600;cursor:pointer;font-family:inherit">
+      <i data-lucide="upload" style="width:11px;height:11px"></i>Importar baseline do P6
+    </button>`;
+  }
+
+  // Cria div pra Chart.js da Curva S
+  const hasData = curvaData.length > 0;
+  const curvaChartHTML = hasData
+    ? `<div style="position:relative;height:240px"><canvas id="chart-curva-s"></canvas></div>`
+    : `<div style="text-align:center;padding:60px 22px"><i data-lucide="line-chart" style="width:40px;height:40px;color:var(--t4)"></i><div style="margin-top:10px;font-size:13px;color:var(--t6)">Sem dados de Curva S — cadastre datas nas folhas ou importe o baseline do P6.</div></div>`;
+
+  const maxH=Math.max(...(hist.data||[]).map(h=>Math.max(h.hh_planejado,h.hh_realizado)),1);
+  const histRows=(projFilter?(hist.data||[]).filter(r=>r.project_id===curProj):(hist.data||[])).slice(-12);
+
+  // Renderiza após injetar HTML (deferred)
+  setTimeout(()=>{
+    if(!hasData || typeof Chart==='undefined') return;
+    const cv = document.getElementById('chart-curva-s');
+    if(!cv) return;
+    if(Chart.getChart(cv)) Chart.getChart(cv).destroy();
+    const ctx = cv.getContext('2d');
+    const gradPlan = ctx.createLinearGradient(0,0,0,240);
+    gradPlan.addColorStop(0,'rgba(30,64,175,.16)'); gradPlan.addColorStop(1,'rgba(30,64,175,0)');
+    const gradReal = ctx.createLinearGradient(0,0,0,240);
+    gradReal.addColorStop(0,'rgba(6,182,212,.30)'); gradReal.addColorStop(1,'rgba(6,182,212,0)');
+
+    // Determina indice do "HOJE" baseado nos meses
+    const labels = curvaData.map(r=>r.periodo||r.mes||'');
+    const today = new Date().toISOString().slice(0,7); // YYYY-MM
+    const todayIdx = labels.findIndex(l => (l||'').slice(0,7) === today);
+
+    new Chart(cv, {
+      type:'line',
+      data:{
+        labels: labels.map(l=>(l||'').slice(0,7)),
+        datasets:[
+          {label:'Planejado', data:curvaData.map(r=>r.hh_planned_acum), borderColor:'#1E40AF', backgroundColor:gradPlan, borderDash:[6,4], tension:.4, fill:true, pointRadius:0, pointHoverRadius:5, borderWidth:2},
+          {label:'Realizado', data:curvaData.map(r=>r.hh_earned_acum), borderColor:'#06B6D4', backgroundColor:gradReal, tension:.4, fill:true, pointBackgroundColor:'#06B6D4', pointRadius:3, pointHoverRadius:6, borderWidth:2.5}
+        ]
+      },
+      options:{
+        responsive:true, maintainAspectRatio:false,
+        interaction:{mode:'index', intersect:false},
+        plugins:{
+          legend:{position:'top', align:'end', labels:{usePointStyle:true, boxWidth:8, padding:14, font:{size:11, weight:'600'}}},
+          tooltip:{backgroundColor:'#0A1628', padding:10, cornerRadius:8, titleFont:{weight:'600'}, callbacks:{label:c=>c.dataset.label+': '+Math.round(c.parsed.y).toLocaleString('pt-BR')+' HH'}},
+          annotation: todayIdx >= 0 ? {} : undefined
+        },
+        scales:{
+          x:{grid:{display:false}, ticks:{color:'#64748B', font:{size:10,weight:'500'}}, border:{display:false}},
+          y:{grid:{color:'rgba(148,163,184,.15)', drawBorder:false}, ticks:{color:'#64748B', font:{size:10,weight:'500'}, callback:v=>v>=1000?(v/1000).toFixed(1)+'k':v}, border:{display:false}, beginAtZero:true}
+        }
+      },
+      plugins: todayIdx >= 0 ? [{
+        id:'hoje-marker',
+        afterDraw: chart=>{
+          const xa=chart.scales.x, ya=chart.scales.y;
+          const x = xa.getPixelForValue(todayIdx);
+          const c = chart.ctx;
+          c.save();
+          c.beginPath(); c.setLineDash([4,4]); c.strokeStyle='#06B6D4'; c.lineWidth=1.5;
+          c.moveTo(x, ya.top); c.lineTo(x, ya.bottom); c.stroke();
+          c.setLineDash([]);
+          // Label "HOJE"
+          c.fillStyle='#06B6D4'; c.font='700 10px Inter,sans-serif';
+          c.textAlign='center';
+          c.fillText('HOJE', x, ya.top - 4);
+          c.restore();
+        }
+      }] : []
+    });
+  }, 100);
+
+  return `<div style="background:var(--t0);border:1px solid var(--t3);border-radius:14px;padding:18px 20px;margin-bottom:14px;box-shadow:var(--sh-sm)">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+      <i data-lucide="line-chart" style="width:18px;height:18px;color:var(--primary)"></i>
+      <div>
+        <div style="font-size:14px;font-weight:700;color:var(--t9);letter-spacing:-.2px">Curva S — Avanço físico vs planejado</div>
+        <div style="font-size:11px;color:var(--t6);margin-top:1px">HH acumulado · ${curvaData.length} ${curvaData.length===1?'período':'períodos'}${curProj && pInfo?' · '+san(pInfo.code||pInfo.name||''):''}</div>
+      </div>
+      <span style="margin-left:auto">${p6Badge}</span>
+    </div>
+    ${curvaChartHTML}
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+    <div style="background:var(--t0);border:1px solid var(--t3);border-radius:14px;padding:18px 20px;box-shadow:var(--sh-sm)">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+        <i data-lucide="bar-chart-3" style="width:16px;height:16px;color:var(--primary)"></i>
+        <div style="font-size:13px;font-weight:700;color:var(--t9);letter-spacing:-.2px">Histograma semanal de HH</div>
+      </div>
+      <div style="display:flex;align-items:flex-end;gap:4px;height:160px;border-bottom:1px solid var(--t3);padding-bottom:1px">
+        ${!histRows.length?'<div class="empty-st" style="width:100%">Sem dados</div>':histRows.map(h=>{
+          const hPlan=Math.round((h.hh_planejado/maxH)*150);
+          const hReal=Math.round((h.hh_realizado/maxH)*150);
+          return `<div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;gap:2px;position:relative" title="Sem ${h.semana_iso}: ${h.hh_planejado||0} planejado, ${h.hh_realizado||0} realizado">
+            <div style="height:${hPlan}px;background:#1E40AF;border-radius:3px 3px 0 0;opacity:.65"></div>
+            <div style="height:${hReal}px;background:#06B6D4;border-radius:3px 3px 0 0"></div>
+            <span style="position:absolute;bottom:-14px;left:50%;transform:translateX(-50%);font-size:8px;color:var(--t5);font-family:'JetBrains Mono',monospace">${h.semana_iso.slice(-2)}</span>
+          </div>`;
+        }).join('')}
+      </div>
+      <div style="margin-top:18px;display:flex;gap:14px;font-size:10px;color:var(--t6);justify-content:center">
+        <span style="display:inline-flex;align-items:center;gap:5px"><span style="display:inline-block;width:10px;height:10px;background:#1E40AF;opacity:.65;border-radius:2px"></span> Planejado</span>
+        <span style="display:inline-flex;align-items:center;gap:5px"><span style="display:inline-block;width:10px;height:10px;background:#06B6D4;border-radius:2px"></span> Realizado</span>
+      </div>
+    </div>
+    <div style="background:#fff;border:0.5px solid var(--hbr);border-radius:10px;padding:14px">
+      <div style="font-size:11.5px;font-weight:600;color:var(--hb);margin-bottom:10px">📅 Lookahead 21 dias</div>
+      <div style="max-height:200px;overflow-y:auto">${!(la.data||[]).length?'<div class="empty-st">Sem eventos no horizonte</div>':(la.data||[]).map(l=>`<div style="padding:5px 0;border-bottom:0.5px solid var(--hbr);font-size:10.5px">
+        <div style="display:flex;gap:6px;align-items:center"><span class="badge b-in">${san(l.evento||'—')}</span><strong class="mono">${san(l.iso_number)}/${san(l.sheet_number)}</strong><span style="color:var(--hmu);margin-left:auto;font-family:monospace">${fmtD(l.next_date)}</span></div>
+        <div style="font-size:9.5px;color:var(--hmu);margin-top:2px">${san(l.line||'')} · ${san(l.project_code||'')}</div>
+      </div>`).join('')}</div>
+    </div>
+  </div>`;
+}
+
+async function renderQualDash(){
+  const [wstats,wload,pends]=await Promise.all([
+    sb.from('v_welder_stats').select('*').eq('org_id',_org.id).order('approval_rate',{ascending:false}).limit(15),
+    sb.from('v_welder_workload').select('*').eq('org_id',_org.id).order('total_juntas',{ascending:false}).limit(15),
+    sb.from('v_pendings_summary').select('*').eq('org_id',_org.id)
+  ]);
+  const list=curProj?pSheets(curProj):sheets;
+  const py=list.filter(e=>e.paint==='Pintado').length;
+  const th=list.filter(e=>(e.mon||{}).th==='Sim').length;
+  const trq=list.filter(e=>(e.mon||{}).trq==='Sim').length;
+  // Tipo de pendência total
+  const pBytype={};(pends.data||[]).forEach(p=>{if(!pBytype[p.pending_type])pBytype[p.pending_type]={ab:0,res:0};pBytype[p.pending_type].ab+=p.em_aberto||0;pBytype[p.pending_type].res+=p.resolvidas||0;});
+  return `<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px">
+    ${kpiBox('Folhas pintadas',py+'/'+list.length,Math.round(py/(list.length||1)*100)+'%','#1a8c4e')}
+    ${kpiBox('T.H. aprovado',th+'/'+list.length,Math.round(th/(list.length||1)*100)+'%','#b85c00')}
+    ${kpiBox('Torque OK',trq+'/'+list.length,Math.round(trq/(list.length||1)*100)+'%','#6c3fc5')}
+    ${kpiBox('Soldadores ativos',(wstats.data||[]).filter(w=>w.total_joints>0).length,'','#1558cc')}
+  </div>
+  <div style="display:grid;grid-template-columns:1.3fr 1fr;gap:14px;margin-bottom:14px">
+    <div style="background:#fff;border:0.5px solid var(--hbr);border-radius:10px;padding:14px">
+      <div style="font-size:11.5px;font-weight:600;color:var(--hb);margin-bottom:10px">🏆 Performance de soldadores</div>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>Matrícula</th><th>Nome</th><th style="text-align:right">Juntas</th><th style="text-align:right">Aprov.</th><th style="text-align:right">Reprov.</th><th style="text-align:right">Aprov%</th></tr></thead>
+        <tbody>${!(wstats.data||[]).length?'<tr><td colspan="6"><div class="empty-st">Sem juntas atribuídas a soldadores</div></td></tr>':wstats.data.slice(0,10).map(w=>{
+          const rt=w.approval_rate||0;
+          return `<tr><td><strong class="mono">${san(w.matricula)}</strong></td><td style="font-size:10px">${san(w.full_name)}</td><td class="mono" style="text-align:right">${w.total_joints}</td><td class="mono" style="text-align:right;color:#1a8c4e">${w.approved}</td><td class="mono" style="text-align:right;color:#c0392b">${w.rejected}</td><td style="text-align:right"><strong style="color:${rt>=95?'#1a8c4e':rt>=85?'#b85c00':'#c0392b'}">${rt}%</strong></td></tr>`;
+        }).join('')}</tbody>
+      </table></div>
+    </div>
+    <div style="background:#fff;border:0.5px solid var(--hbr);border-radius:10px;padding:14px">
+      <div style="font-size:11.5px;font-weight:600;color:var(--hb);margin-bottom:10px">⚠️ Pendências por tipo</div>
+      ${!Object.keys(pBytype).length?'<div class="empty-st">Sem pendências</div>':Object.entries(pBytype).map(([t,v])=>`<div style="margin-bottom:8px">
+        <div style="display:flex;justify-content:space-between;font-size:10.5px;margin-bottom:3px"><span><strong>${san(t)}</strong></span><span><span style="color:#c0392b">${v.ab} abertas</span> · <span style="color:#1a8c4e">${v.res} resolvidas</span></span></div>
+        <div style="height:6px;background:var(--bg2);border-radius:3px;overflow:hidden;display:flex"><div style="background:#c0392b;width:${v.ab+v.res>0?Math.round(v.ab/(v.ab+v.res)*100):0}%"></div><div style="background:#1a8c4e;width:${v.ab+v.res>0?Math.round(v.res/(v.ab+v.res)*100):0}%"></div></div>
+      </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+async function renderBudgDash(){
+  const {data:bud}=await sb.from('v_budget_actual').select('*').eq('org_id',_org.id);
+  const {data:crit}=await sb.from('v_critical_materials').select('*').eq('org_id',_org.id).limit(20);
+  const totals=(bud||[]).reduce((a,b)=>({plan:a.plan+(+b.custo_total_planejado||0),real:a.real+(+b.custo_total_realizado||0),hhp:a.hhp+(+b.hh_planejado||0),hhr:a.hhr+(+b.hh_realizado||0)}),{plan:0,real:0,hhp:0,hhr:0});
+  const ratio=totals.plan?Math.round((totals.real/totals.plan)*100):0;
+  const critValue=(crit||[]).reduce((s,c)=>s+(+c.valor_falta_comprar||0),0);
+  return `<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px">
+    ${kpiBox('Custo planejado','R$ '+brl(totals.plan),'','#0B3D91')}
+    ${kpiBox('Custo realizado','R$ '+brl(totals.real),ratio+'% do plano','#b85c00')}
+    ${kpiBox('HH planejado',Math.round(totals.hhp).toLocaleString('pt-BR'),'','#1558cc')}
+    ${kpiBox('HH realizado',Math.round(totals.hhr).toLocaleString('pt-BR'),Math.round((totals.hhr/totals.hhp||0)*100)+'% do plano','#00A8E8')}
+  </div>
+  <div style="background:#fff;border:0.5px solid var(--hbr);border-radius:10px;padding:14px;margin-bottom:14px">
+    <div style="font-size:11.5px;font-weight:600;color:var(--hb);margin-bottom:10px">💰 Orçado × Realizado por projeto</div>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Projeto</th><th style="text-align:right">HH planejado</th><th style="text-align:right">HH realizado</th><th style="text-align:right">Desvio</th><th style="text-align:right">R$ planejado</th><th style="text-align:right">R$ realizado</th><th>% Plano</th></tr></thead>
+      <tbody>${!(bud||[]).length?'<tr><td colspan="7"><div class="empty-st">Sem dados</div></td></tr>':bud.map(b=>{
+        const pct=b.custo_total_planejado?Math.min(150,Math.round((+b.custo_total_realizado/+b.custo_total_planejado)*100)):0;
+        const desv=+b.hh_desvio||0;
+        return `<tr>
+          <td><strong class="mono">${san(b.project_code)}</strong> <span style="color:var(--hmu);font-size:9.5px">${san(b.project_name||'')}</span></td>
+          <td class="mono" style="text-align:right">${Math.round(+b.hh_planejado||0).toLocaleString('pt-BR')}</td>
+          <td class="mono" style="text-align:right">${Math.round(+b.hh_realizado||0).toLocaleString('pt-BR')}</td>
+          <td class="mono" style="text-align:right;color:${desv>0?'#c0392b':desv<0?'#1a8c4e':'#7a8aa3'}">${desv>0?'+':''}${Math.round(desv)}</td>
+          <td class="mono" style="text-align:right">R$ ${brl(b.custo_total_planejado)}</td>
+          <td class="mono" style="text-align:right;color:${pct>100?'#c0392b':'#1a8c4e'}">R$ ${brl(b.custo_total_realizado)}</td>
+          <td><div style="height:8px;background:var(--bg2);border-radius:3px;overflow:hidden"><div style="height:100%;background:${pct>100?'#c0392b':pct>=80?'#b85c00':'#1a8c4e'};width:${Math.min(100,pct)}%"></div></div><span style="font-size:9.5px;color:var(--hmu);font-family:monospace">${pct}%</span></td>
+        </tr>`;
+      }).join('')}</tbody>
+    </table></div>
+  </div>
+  <div style="background:#fff;border:0.5px solid var(--hbr);border-radius:10px;padding:14px">
+    <div style="font-size:11.5px;font-weight:600;color:var(--hb);margin-bottom:6px">🔴 Material crítico — falta comprar</div>
+    <div style="font-size:10.5px;color:var(--hmu);margin-bottom:10px">Soma da falta de compra: <strong style="color:#c0392b">R$ ${brl(critValue)}</strong> em ${(crit||[]).length} item${(crit||[]).length!==1?'s':''}.</div>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Código</th><th>Descrição</th><th>Cat.</th><th style="text-align:right">Planejado</th><th style="text-align:right">Comprado</th><th style="text-align:right">Falta</th><th style="text-align:right">Valor falta</th></tr></thead>
+      <tbody>${!(crit||[]).length?'<tr><td colspan="7"><div class="empty-st">Tudo comprado</div></td></tr>':crit.map(c=>`<tr>
+        <td><strong class="mono">${san(c.code)}</strong></td>
+        <td style="font-size:10px">${san(c.description)}</td>
+        <td>${san(c.category||'—')}</td>
+        <td class="mono" style="text-align:right">${(+c.qty_planejado).toLocaleString('pt-BR',{maximumFractionDigits:3})} ${san(c.unit||'')}</td>
+        <td class="mono" style="text-align:right">${(+c.qty_comprado).toLocaleString('pt-BR',{maximumFractionDigits:3})}</td>
+        <td class="mono" style="text-align:right;color:#c0392b"><strong>${(+c.qty_falta_comprar).toLocaleString('pt-BR',{maximumFractionDigits:3})}</strong></td>
+        <td class="mono" style="text-align:right;color:#c0392b">R$ ${brl(c.valor_falta_comprar)}</td>
+      </tr>`).join('')}</tbody>
+    </table></div>
+  </div>`;
+}
+
+function brl(v){return (+v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});}
+
+function kpiBox(label,val,sub,color){
+  return '<div style="background:#fff;border:0.5px solid var(--hbr);border-radius:8px;padding:11px;text-align:center;position:relative;overflow:hidden">'
+    +(color?'<div style="position:absolute;top:0;left:0;right:0;height:3px;background:'+color+'"></div>':'')
+    +'<div style="font-size:9px;color:var(--hmu);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">'+label+'</div>'
+    +'<div style="font-size:18px;font-weight:600;color:'+(color||'var(--ht)')+'">'+val+'</div>'
+    +(sub?'<div style="font-size:9px;color:var(--hmu);font-family:monospace">'+sub+'</div>':'')
+    +'</div>';
+}
+
+// ═══════════════════════════════════════════════════
+// PROJECT CRUD
+// ═══════════════════════════════════════════════════
+function oProj(id){
+  editProj=id;const p=id?projects.find(x=>x.id===id):null;
+  document.getElementById('proj-ttl').textContent=p?'Editar Projeto':'Novo Projeto';
+  document.getElementById('pm-name').value=p?p.name:'';
+  document.getElementById('pm-code').value=p?p.code:'';
+  document.getElementById('pm-resp').value=p?p.resp:'';
+  document.getElementById('pm-plant').value=p?p.plant:'';
+  document.getElementById('pm-desc').value=p?p.desc:'';
+  document.getElementById('pm-contract').value = p?.contract_type || '';
+  document.getElementById('pm-supplied').checked = !!(p?.material_supplied_by_client);
+  document.getElementById('proj-modal').classList.add('open');
+  _renderIcons();
+  setTimeout(()=>document.getElementById('pm-name').focus(),100);
+}
+async function saveProj(){
+  const btn=event?.target;
+  if(btn) btn.disabled=true;
+  const code=document.getElementById('pm-code').value.trim();
+  const name=document.getElementById('pm-name').value.trim();
+  if(!code||!name){toast('Nome e código são obrigatórios','warn');if(btn)btn.disabled=false;return;}
+  const payload={
+    org_id:_org.id, code, name,
+    client_name:document.getElementById('pm-plant').value.trim()||null,
+    notes:document.getElementById('pm-desc').value.trim()||null,
+    contract_type: document.getElementById('pm-contract').value || null,
+    material_supplied_by_client: document.getElementById('pm-supplied').checked
+  };
+  let result;
+  if(editProj){
+    // UPDATE
+    result=await sb.from('projects').update({...payload, updated_at:new Date().toISOString()}).eq('id',editProj);
+  } else {
+    // UPSERT - se já existe (mesmo code na mesma org), atualiza em vez de duplicar
+    result=await sb.from('projects').upsert(payload, {onConflict:'org_id,code', ignoreDuplicates:false});
+  }
+  if(btn) btn.disabled=false;
+  if(result.error){
+    const msg=result.error.message||'';
+    if(msg.includes('duplicate key') || msg.includes('projects_org_id_code_key')){
+      toast(`Já existe um projeto com o código "${code}". Use outro código ou edite o existente.`,'warn');
+    } else {
+      toast('Erro ao salvar: '+msg,'err');
+    }
+    return;
+  }
+  toast(editProj?'Projeto atualizado':'Projeto criado','ok');
+  cm('proj-modal');editProj=null;await loadAll();rProj();
+}
+
+
+async function delProj(id,name){
+  if(arguments.length<2 || !arguments[1]){const _it = (projects||[]).find(x=>x.id===id); arguments[1] = _it ? (_it.name||'item') : 'item';}
+  const _ok1 = await (w.PIAConfirm ? w.PIAConfirm.danger("Excluir projeto", `"${name}" será removido. As folhas associadas também serão excluídas. Esta ação não pode ser desfeita.`, "Excluir projeto") : Promise.resolve(confirm(`Excluir projeto "${name}"? As folhas associadas também serão removidas.`)));
+  if(!_ok1) return;
+  const {error}=await sb.from('projects').update({deleted_at:new Date().toISOString()}).eq('id',id);
+  if(error){toast('Erro: '+error.message,'err');return;}
+  toast('Projeto excluído','ok');if(curProj===id)curProj=null;
+  await loadAll();rProj();
+}
+
+// ═══════════════════════════════════════════════════
+// ISO/SHEET CRUD
+// ═══════════════════════════════════════════════════
+let _pendingPdf=null; // arquivo PDF a subir quando salvar
+
+function oIso(id){
+  editIso=id;_pendingPdf=null;
+  const e=id?sheets.find(x=>x.id===id):null;
+  const fab=(e&&e.fab)||{pre:0,sol:0,end:0,si:'',sf:''};
+  const mon=(e&&e.mon)||{pre:0,sol:0,end:0,si:'',sf:'',th:'Pendente',trq:'Pendente'};
+  document.getElementById('iso-ttl').textContent=e?'Editar Folha':'Cadastrar Nova Folha';
+  document.getElementById('ext-msg').style.display='none';
+  document.getElementById('pdf-f').value='';
+  [['e-num',e?e.num:''],['e-sheet',e?e.sheet:''],['e-total',e?e.total:''],['e-line',e?e.line:''],['e-area',e?e.area:''],['e-fluid',e?e.fluid:''],['e-iso',e?e.iso_term:''],['e-temp',e?e.temp:''],['e-insp',e?e.insp:'']].forEach(([id,v])=>document.getElementById(id).value=v||'');
+  document.getElementById('e-nr13').value=e?e.nr13:'Sim';
+  document.getElementById('e-paint').value=e?e.paint:'Não Pintado';
+  document.getElementById('e-fp').value=fab.pre;document.getElementById('e-fs').value=fab.sol;document.getElementById('e-fe').value=fab.end;
+  document.getElementById('e-fi').value=fab.si||'';document.getElementById('e-ff').value=fab.sf||'';
+  document.getElementById('e-mp').value=mon.pre;document.getElementById('e-ms').value=mon.sol;document.getElementById('e-me').value=mon.end;
+  document.getElementById('e-mi').value=mon.si||'';document.getElementById('e-mf').value=mon.sf||'';
+  document.getElementById('e-mth').value=mon.th||'Pendente';document.getElementById('e-mtrq').value=mon.trq||'Pendente';
+  document.getElementById('iso-modal').classList.add('open');
+}
+
+async function saveIso(){
+  const num=document.getElementById('e-num').value.trim();
+  const sheet=document.getElementById('e-sheet').value.trim();
+  if(!num){toast('Informe o número do isométrico','warn');return;}
+  if(!sheet){toast('Informe o número da folha','warn');return;}
+  if(!curProj){toast('Abra um projeto primeiro','warn');return;}
+
+  // Garante isometric (cabeçalho) — reutiliza se já existir, senão cria
+  let isoId=null;
+  const {data:existIso}=await sb.from('isometrics').select('id').eq('project_id',curProj).eq('number',num).maybeSingle();
+  if(existIso)isoId=existIso.id;
+  else{
+    const {data:newIso,error:isoErr}=await sb.from('isometrics').insert({org_id:_org.id,project_id:curProj,number:num,title:'Importado via formulário'}).select('id').single();
+    if(isoErr){toast('Erro criando iso: '+isoErr.message,'err');return;}
+    isoId=newIso.id;
+  }
+
+  const payload={
+    org_id:_org.id,project_id:curProj,isometric_id:isoId,
+    sheet_number:sheet,iso_number:num,
+    total_sheets:parseInt(document.getElementById('e-total').value)||1,
+    line:document.getElementById('e-line').value.trim()||null,
+    area:document.getElementById('e-area').value.trim()||null,
+    fluid_class:document.getElementById('e-fluid').value.trim()||null,
+    nr13:document.getElementById('e-nr13').value,
+    thermal_insulation:document.getElementById('e-iso').value.trim()||null,
+    operating_temp:document.getElementById('e-temp').value.trim()||null,
+    inspection_class:document.getElementById('e-insp').value.trim()||null,
+    paint_status:document.getElementById('e-paint').value,
+    revision:document.getElementById('e-rev')?.value.trim()||'0',
+    fab_pre:cl(document.getElementById('e-fp').value),fab_sol:cl(document.getElementById('e-fs').value),fab_end:cl(document.getElementById('e-fe').value),
+    fab_start:document.getElementById('e-fi').value||null,fab_finish:document.getElementById('e-ff').value||null,
+    mon_pre:cl(document.getElementById('e-mp').value),mon_sol:cl(document.getElementById('e-ms').value),mon_end:cl(document.getElementById('e-me').value),
+    mon_start:document.getElementById('e-mi').value||null,mon_finish:document.getElementById('e-mf').value||null,
+    hydro_test:document.getElementById('e-mth').value,torque:document.getElementById('e-mtrq').value
+  };
+
+  let r,sheetId;
+  if(editIso){
+    r = await sb.from('isometric_sheets').update(payload).eq('id',editIso).select().single();
+    sheetId = editIso;
+  } else {
+    // Detecção inteligente: revisão nova vs duplicata
+    const newRev = (document.getElementById('e-rev')?.value || '0').trim();
+    const {data: existSheets} = await sb.from('isometric_sheets').select('id, revision, sheet_number')
+      .eq('org_id', _org.id).eq('iso_number', num).eq('sheet_number', sheet)
+      .is('deleted_at', null);
+    
+    if(existSheets && existSheets.length > 0){
+      const same = existSheets.find(s => (s.revision||'0') === newRev);
+      const older = existSheets.find(s => (s.revision||'0') !== newRev);
+      
+      if(same){
+        // Mesma revisão: oferece atualizar
+        const _atualiza = await (window.PIAConfirm ? window.PIAConfirm.warning('Atualizar folha existente?', `Já existe folha "${num}" rev ${same.revision||'0'}. Atualizar com os novos dados?`, 'Atualizar') : Promise.resolve(confirm('Atualizar folha existente?')));
+        if(!_atualiza){
+          return;
+        }
+        r = await sb.from('isometric_sheets').update(payload).eq('id', same.id).select().single();
+        sheetId = same.id;
+        editIso = same.id;
+      } else if(older){
+        // Revisão diferente: pergunta se substitui antiga
+        const msg = `Detectada revisão ${newRev} do iso "${num}". Já existe revisão ${older.revision||'0'} cadastrada.\n\n` +
+                    `[OK] = Substituir a antiga pela nova (marcar antiga como obsoleta)\n` +
+                    `[Cancelar] = Manter ambas (criar revisão paralela)`;
+        const substituir = await (window.PIAConfirm ? window.PIAConfirm.warning('Substituir revisão antiga?', msg, 'Substituir') : Promise.resolve(confirm('Substituir revisão antiga?')));
+        // Insere a nova
+        r = await sb.from('isometric_sheets').insert(payload).select().single();
+        sheetId = r.data?.id;
+        // Se confirmou, marca a antiga como obsoleta
+        if(substituir && sheetId){
+          await sb.from('isometric_sheets').update({
+            deleted_at: new Date().toISOString(),
+            replaced_by_id: sheetId,
+            revision_notes: 'Substituída por revisão ' + newRev + ' em ' + new Date().toLocaleDateString('pt-BR')
+          }).eq('id', older.id);
+          toast('Revisão ' + newRev + ' criada. Versão anterior arquivada.','ok');
+        }
+      }
+    } else {
+      r = await sb.from('isometric_sheets').insert(payload).select().single();
+      sheetId = r.data?.id;
+    }
+  }
+  if(r.error){
+    const m = r.error.message || '';
+    if(m.includes('uq_isheets_org_iso_sheet') || m.includes('duplicate key')){
+      toast(`Já existe folha "${num}" / "${sheet}". Edite a existente.`, 'warn');
+    } else {
+      toast('Erro: '+m, 'err');
+    }
+    return;
+  }
+
+  // Sobe PDF se houver
+  if(_pendingPdf&&sheetId){
+    const path=`${_org.id}/${curProj}/${sheetId}/${Date.now()}_${_pendingPdf.name}`;
+    const {error:upErr}=await sb.storage.from('isometrics').upload(path,_pendingPdf,{contentType:_pendingPdf.type,upsert:false});
+    if(upErr)toast('PDF não foi arquivado: '+upErr.message,'warn');
+    else{await sb.from('isometric_sheets').update({pdf_storage_path:path}).eq('id',sheetId);toast('Folha salva + PDF arquivado','ok');}
+  } else toast(editIso?'Folha atualizada':'Folha cadastrada','ok');
+
+  cm('iso-modal');await loadAll();rIsos();
+  document.getElementById('tb-i').textContent=(curProj?pSheets(curProj):sheets).length;
+}
+
+async function delIso(id,num){
+  if(arguments.length<2 || !arguments[1]){const _it = (sheets||[]).find(x=>x.id===id); arguments[1] = _it ? (_it.num||'item') : 'item';}
+  const _ok = await (window.PIAConfirm ? window.PIAConfirm.danger('Excluir folha?', `Excluir folha "${num}"? Esta ação remove a folha e todos os dados associados.`, 'Excluir') : Promise.resolve(confirm('Excluir folha??'))); if(!_ok) return;
+  const {error}=await sb.from('isometric_sheets').update({deleted_at:new Date().toISOString()}).eq('id',id);
+  if(error){toast('Erro: '+error.message,'err');return;}
+  toast('Excluído','ok');await loadAll();rIsos();
+}
+
+// ═══════════════════════════════════════════════════
+// PDF OCR (REGEX-BASED — extrai do texto via pdf.js)
+// ═══════════════════════════════════════════════════
+function dzDrag(e,on){e.preventDefault();document.getElementById('dz-area').classList.toggle('drag',on)}
+function dzDrop(e){e.preventDefault();document.getElementById('dz-area').classList.remove('drag');const f=e.dataTransfer.files[0];if(f&&f.type==='application/pdf')procPdf(f);else showExt('Arquivo inválido. Selecione um PDF.','err')}
+function handlePdf(inp){if(inp.files[0])procPdf(inp.files[0])}
+function showExt(msg,t){const el=document.getElementById('ext-msg');el.textContent=msg;el.style.display='block';el.className='ext-msg '+(t==='ok'?'em-ok':t==='err'?'em-err':'em-load')}
+
+let _extMode='ocr';
+const FN_URL=SUPABASE_URL+'/functions/v1/analyze-isometric';
+
+function selExtMode(m){
+  _extMode=m;
+  document.getElementById('ext-mode-ocr').classList.toggle('sel',m==='ocr');
+  document.getElementById('ext-mode-ai').classList.toggle('sel',m==='ai');
+  document.getElementById('dz-sub').textContent=m==='ai'
+    ?'IA analisa imagem/PDF e devolve memorial técnico completo'
+    :'Campos preenchidos via OCR regex + arquivo guardado no Storage';
+  const panel=document.getElementById('ai-custom-panel');if(panel)panel.style.display=m==='ai'?'block':'none';if(m==='ai')loadPresets();}
+
+async function procPdf(file){
+  _pendingPdf=file;
+  if(_extMode==='ai'){await procPdfAI(file);return;}
+  showExt('Lendo PDF e extraindo campos…','load');
+  try{
+    if(typeof pdfjsLib==='undefined'){showExt('PDF.js não disponível. Preencha manualmente.','err');return}
+    pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    const ab=await file.arrayBuffer();
+    const pdf=await pdfjsLib.getDocument({data:ab}).promise;
+    const totalPages=pdf.numPages;
+    let allText='';
+    for(let i=1;i<=Math.min(totalPages,4);i++){
+      const pg=await pdf.getPage(i);
+      const tc=await pg.getTextContent();
+      allText+=tc.items.map(x=>x.str).join(' ')+'\n';
+    }
+    exFields(allText,file.name,totalPages);
+  }catch(err){console.error(err);showExt('Erro ao processar PDF. Preencha manualmente.','err')}
+}
+
+async function procPdfAI(file){
+  if(!curProj){showExt('Abra um projeto primeiro pra IA salvar os materiais identificados.','err');return;}
+  showExt('Processando isométrico com IA (pode levar 10–30s)…','load');
+  document.getElementById('ai-analysis-box').style.display='none';
+  try{
+    const reader=new FileReader();
+    reader.onload=async ev=>{
+      const b64=ev.target.result.split(',')[1];
+      const {data:{session}}=await sb.auth.getSession();
+      const resp=await fetch(FN_URL,{
+        method:'POST',
+        headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+(session?.access_token||SUPABASE_KEY)},
+        body:JSON.stringify({file:b64,mime:file.type,project_id:curProj,custom_instructions:document.getElementById('ai-custom-instructions')?.value||null,preset_id:document.getElementById('ai-preset-select')?.value||null})
+      });
+      if(!resp.ok){
+        const er=await resp.json().catch(()=>({}));
+        if(er.limit_reached){showExt(`⚠️ Limite atingido: ${er.used}/${er.max} isométricos no mês. Faça upgrade do plano em Integrações.`,'err');await loadUsage();return;}
+        showExt('Erro IA: '+(er.error||resp.status),'err');return;
+      }
+      const data=await resp.json();
+      if(!data.text){showExt('IA não retornou texto. Tente novamente ou use OCR.','err');return;}
+      // Mostra a análise descritiva
+      const box=document.getElementById('ai-analysis-box');
+      let html='<div style="font-weight:600;color:var(--hb);margin-bottom:6px">🤖 PROJECT.IA · Análise técnica completa</div>'+aiFormat(data.text);
+      // Renderiza painel rico: avisos + cabeçalho + materiais + engenharia + planejamento
+      html += renderIsoIA(data);
+      box.innerHTML=html;box.style.display='block';
+      exFields(data.text,file.name,1);
+      const cachedTag=data.cached?' (cacheado · economizou US$ '+(data.cost_saved_usd||0).toFixed(4)+')':'';
+      showExt(`✔ Análise concluída${cachedTag} · ${data.materials?.length||0} materiais identificados${data.materials_added!==undefined?' · '+data.materials_added+' cadastrados':''}`,'ok');
+      // Recarrega a lista de materiais e contador de uso em background
+      await Promise.all([loadExtra(),loadUsage()]);
+    };
+    reader.readAsDataURL(file);
+  }catch(err){console.error(err);showExt('Erro ao chamar IA: '+err.message,'err')}
+}
+
+function aiFormat(t){
+  let h=san(t).replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>');
+  const blocks=h.split(/\n\s*\n/);
+  return blocks.map(b=>{
+    const lines=b.split('\n').filter(l=>l.trim());
+    if(!lines.length)return '';
+    const isList=lines.every(l=>/^\s*(?:[-•*]|\d+[\.\)])\s+/.test(l));
+    if(isList){const items=lines.map(l=>'<li>'+l.replace(/^\s*(?:[-•*]|\d+[\.\)])\s+/,'')+'</li>').join('');return '<ul style="margin-left:18px">'+items+'</ul>';}
+    return '<p style="margin:5px 0">'+lines.join('<br>')+'</p>';
+  }).join('');
+}
+
+function setF(id,v){if(v!=null&&v!==''&&document.getElementById(id)){document.getElementById(id).value=v;return true;}return false;}
+
+function exFields(raw,filename,numPages){
+  const t=raw.replace(/[ \t]+/g,' ').replace(/\r/g,'');
+  let cnt=0;
+
+  // 1. ISO num
+  let isoNum='';
+  const fnM=filename.replace(/\.pdf$/i,'').match(/([A-Z]{2}-[A-Z0-9]+-\d{4,6}-IS-\d{2}-\d{5,6})/i);
+  if(fnM){isoNum=fnM[1];if(setF('e-num',isoNum))cnt++;}
+  else{const tM=t.match(/([A-Z]{2}-[A-Z0-9]+-\d{4,6}-IS-\d{2}-\d{5,6})/i);if(tM){isoNum=tM[1];if(setF('e-num',isoNum))cnt++;}}
+
+  // 2. Folha + total
+  if(isoNum){const shM=t.match(new RegExp(isoNum.replace(/[-]/g,'[-]')+'\\s+(\\d{5})','i'));if(shM){if(setF('e-sheet',shM[1]))cnt++;}}
+  const shFn=filename.match(/_(\d{5})\.pdf$/i);
+  if(shFn&&!document.getElementById('e-sheet').value){if(setF('e-sheet',shFn[1]))cnt++;}
+  if(!document.getElementById('e-sheet').value){const shT=t.match(/FOLHA\s*[NO°ºn]?\s*:?\s*(\d{1,5})\s*(?:DE|\/)\s*(\d{1,5})/i);if(shT){if(setF('e-sheet',shT[1].padStart(5,'0')))cnt++;if(setF('e-total',shT[2]))cnt++;}}
+  if(!document.getElementById('e-total').value){setF('e-total',numPages);}
+
+  // 3. Linha
+  const lnPatterns=[/(\d{1,3}["”]?\s*-\s*[A-Z]{1,2}\s*-\s*\d{4}\s*-\s*\d{3,4}\s*-\s*[A-Z0-9]{2,8}(?:\s*-\s*[A-Z]{1,3})?)/i,/(\d{1,3}"\s*-\s*P\s*-\s*\d{4}\s*-\s*\d{3,4}\s*-\s*\S{2,10})/i];
+  for(const pat of lnPatterns){const m=t.match(pat);if(m){const ln=m[1].replace(/\s+/g,'');if(setF('e-line',ln))cnt++;break;}}
+
+  // 4. Área
+  const lv=document.getElementById('e-line').value;
+  let areaFound=false;
+  if(lv){const arM=lv.match(/[A-Z]-(\d{4})-/i);if(arM){if(setF('e-area',arM[1]))cnt++;areaFound=true;}}
+  if(!areaFound){const arT=t.match(/\/\s*(\d{4})\b/)||t.match(/[ÁA]REA\s*[:\-]?\s*(\d{4})/i);if(arT){if(setF('e-area',arT[1]))cnt++;}}
+
+  // 5. Classe fluido
+  const idTabM=t.match(/P-\d{4}-\d{3,4}\s+(?:[A-Z0-9]{3,8})\s+([A-Z])\s+(?:SIM|NAO|S|N|NR)\b/i);
+  if(idTabM){if(setF('e-fluid',idTabM[1]))cnt++;}
+  else{const flM=t.match(/CLASSE\s+DO\s+FLUIDO\s*[:\-]?\s*([A-Z])\b/i)||t.match(/FLUIDO\s*\(1\)\s*[:\-]?\s*([A-Z])\b/i);if(flM){if(setF('e-fluid',flM[1]))cnt++;}}
+
+  // 6. NR-13
+  let nr13Val=null;
+  const nr13Tab=t.match(/\b([A-Z])\s+(SIM|NAO|S|N)\s+(?:NR|-)\b/i);
+  if(nr13Tab){nr13Val=nr13Tab[2].toUpperCase().startsWith('S')?'Sim':'Não';}
+  if(!nr13Val&&/\bNR-?13\b|\bNR13\b/i.test(t))nr13Val='Sim';
+  if(!nr13Val)nr13Val='Não';
+  document.getElementById('e-nr13').value=nr13Val;cnt++;
+
+  // 7. Isolamento térmico
+  const isoTab=t.match(/(?:SIM|NAO|S|N)\s+(NR|C[0-9]|[A-Z]{1,5})\s+[-–]/i);
+  if(isoTab){if(setF('e-iso',isoTab[1].toUpperCase()))cnt++;}
+  else{const isoM=t.match(/ISOLAMENTO\s+T[EÉ]R[^\s]*\s*[:\-]?\s*([A-Z\d]{1,5})/i)||t.match(/ISO\s*[:\-]\s*(NR|[A-Z\d]{1,5})/i);if(isoM){if(setF('e-iso',isoM[1]))cnt++;}else if(!document.getElementById('e-iso').value&&/\bNR\b/.test(t)){setF('e-iso','NR');cnt++;}}
+
+  // 8. T.Op
+  const tOpM=t.match(/T\.?\s*Oper[^\d\n]{0,8}([\d]+(?:[,.]?\d*)?)\s*[oO°]?\s*C\b/i)||t.match(/TEMPERATURA\s+(?:DE\s+)?OPER[^\d]{0,10}([\d]+)/i);
+  if(tOpM){const v=parseFloat(tOpM[1].replace(',','.'));if(v>0&&v<700){if(setF('e-temp',v+' °C'))cnt++;}}
+  if(!document.getElementById('e-temp').value){const tColM=t.match(/[\d.]+\s+(\d{2,3})\s+[\d.]+\s+[A-Z]{1,3}\b/);if(tColM){const v=parseInt(tColM[1]);if(v>0&&v<700){if(setF('e-temp',v+' °C'))cnt++;}}}
+
+  // 9. Classe inspeção
+  const inM=t.match(/Classe\s+Insp[^:]*:\s*([IVX]{1,4})\b/i)||t.match(/CL\.?\s*INSP[^\s]*\s*[:\-]?\s*([IVX]{1,4})\b/i)||t.match(/INSP[^\s]*\s*[:\-\s]+([IVX]{1,4})\b/i);
+  if(inM){if(setF('e-insp',inM[1].toUpperCase()))cnt++;}
+  else{const inTab=t.match(/[\d.]+\s+([IVX]{1,4}|H)\b\s*(?:\n|$)/m);if(inTab){const val=inTab[1]==='H'?'II':inTab[1];if(setF('e-insp',val))cnt++;}}
+
+  if(cnt>=7)showExt(`✔ ${cnt} de 9 campos extraídos automaticamente. Revise e confirme.`,'ok');
+  else if(cnt>=4)showExt(`⚠️ ${cnt} de 9 campos extraídos. Verifique os campos em branco.`,'err');
+  else showExt(`${cnt} campo${cnt!==1?'s':''} extraído${cnt!==1?'s':''}. Este PDF pode não seguir o padrão esperado.`,'err');
+}
+
+// ═══════════════════════════════════════════════════
+// EXPORT
+// ═══════════════════════════════════════════════════
+function selExp(fmt){expFmt=fmt;document.querySelectorAll('.exp-card').forEach(c=>c.classList.remove('sel'));document.getElementById('ec-'+fmt).classList.add('sel')}
+function doExport(){
+  const list=curProj?pSheets(curProj):sheets;
+  const pm={};projects.forEach(p=>pm[p.id]=p);
+  const data=list.map(e=>{
+    const pr=pm[e.projId],fab=e.fab||{},mon=e.mon||{};
+    return{'Projeto':pr?pr.name:'—','Nº Projeto':pr?pr.code:'—','Isométrico':e.num,'Folha':e.sheet,'Total Folhas':e.total,'Linha':e.line,'Área':e.area,'Cl.Fluido':e.fluid,'NR-13':e.nr13,'Iso.Térmico':e.iso_term,'T.Operação':e.temp,'Cl.Inspeção':e.insp,'Pintura':e.paint,'Pré-Fab(%)':fab.pre,'Soldagem Fab(%)':fab.sol,'END Fab(%)':fab.end,'Início Fab':fab.si,'Término Fab':fab.sf,'Avanço Fab(%)':fPct(e),'Pré-Mon(%)':mon.pre,'Soldagem Mon(%)':mon.sol,'END Mon(%)':mon.end,'Início Mon':mon.si,'Término Mon':mon.sf,'Avanço Mon(%)':mPct(e),'T.H.':mon.th,'Torque':mon.trq};
+  });
+  if(!data.length){toast('Nenhum dado para exportar','warn');return}
+  const proj=projects.find(p=>p.id===curProj);
+  if(expFmt==='csv'){const h=Object.keys(data[0]);dlB(new Blob(['﻿'+[h.join(';'),...data.map(r=>h.map(k=>'"'+(r[k]??'')+'"').join(';'))].join('\n')],{type:'text/csv;charset=utf-8'}),'project_ia.csv')}
+  else if(expFmt==='xlsx'){const ws=XLSX.utils.json_to_sheet(data);const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Folhas');XLSX.writeFile(wb,'project_ia_relatorio.xlsx')}
+  else{const now=new Date().toLocaleDateString('pt-BR');const html=`<!DOCTYPE html><html><head><meta charset="utf-8"><title>HYDROSTEC</title><style>body{font-family:Arial;font-size:9px;margin:16px}h1{font-size:13px;color:#0B3D91}h2{font-size:9px;color:#5a6a85;font-weight:normal;margin-bottom:10px}table{width:100%;border-collapse:collapse}th{background:#0B3D91;color:#fff;padding:4px 5px;font-size:8px;text-align:left}td{padding:3px 5px;border-bottom:0.5px solid #d0d8e8;font-size:8px}tr:nth-child(even){background:#f4f6f9}</style></head><body><h1>HYDROSTEC</h1><h2>${proj?proj.name+' ('+proj.code+') — ':''}Gerado em ${now}</h2><table><thead><tr>${Object.keys(data[0]).map(k=>`<th>${k}</th>`).join('')}</tr></thead><tbody>${data.map(r=>`<tr>${Object.values(r).map(v=>`<td>${v??''}</td>`).join('')}</tr>`).join('')}</tbody></table></body></html>`;const w=window.open(URL.createObjectURL(new Blob([html],{type:'text/html'})),'_blank');if(w)setTimeout(()=>w.print(),700)}
+  cm('exp-modal');toast('Exportado','ok');
+}
+function dlB(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click()}
+
+
+// ═══════════════════════════════════════════════════
+// RENDER PROJECT.IA — painel rico (header, eng, plan, warnings)
+// ═══════════════════════════════════════════════════
+function renderIsoIA(data){
+  let html='';
+  const w=data.warnings||[];
+  const h=data.header_info||{};
+  const e=data.engineering_info||{};
+  const p=data.planning_info||{};
+
+  // 1. AVISOS
+  if(w.length){
+    html+='<div style="margin-bottom:10px">';
+    w.forEach(x=>{
+      const cb=x.level==='danger'?'#fdecea':x.level==='warn'?'#fff3e0':'#e8f0fb';
+      const cf=x.level==='danger'?'#7a1c12':x.level==='warn'?'#7c4400':'#0B3D91';
+      const ic=x.level==='danger'?'⛔':x.level==='warn'?'⚠️':'ℹ️';
+      html+='<div style="background:'+cb+';border-left:3px solid '+cf+';padding:6px 10px;font-size:10.5px;color:'+cf+';margin-bottom:4px;border-radius:4px">'+ic+' <b>'+san(x.category||'')+':</b> '+san(x.message||'')+'</div>';
+    });
+    html+='</div>';
+  }
+
+  // 2. HEADER TÉCNICO
+  if(Object.keys(h).length){
+    const kpi=(l,v,u)=>(v!=null&&v!=='')?'<div style="background:var(--bg2);padding:6px 9px;border-radius:5px;border:0.5px solid var(--hbr)"><div style="font-size:8.5px;color:var(--hmu);text-transform:uppercase;letter-spacing:.4px">'+l+'</div><div style="font-size:11.5px;font-weight:600;color:var(--hb);font-family:monospace">'+san(String(v))+(u?' <span style="font-size:9px;color:var(--hmu)">'+u+'</span>':'')+'</div></div>':'';
+    html+='<div style="margin-bottom:10px"><div style="font-weight:600;color:var(--hb);margin-bottom:6px;font-size:11px">📌 Identificação técnica</div><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px">';
+    html+=kpi('Isométrico',h.iso_number,'');
+    html+=kpi('Folha',h.sheet_number?(h.sheet_number+'/'+(h.total_sheets||1)):null,'');
+    html+=kpi('Revisão',h.revision,'');
+    html+=kpi('Cliente',h.client,'');
+    html+=kpi('Linha',h.line_tag,'');
+    html+=kpi('Ø nominal',h.line_diameter_in,'pol');
+    html+=kpi('Spec',h.specification,'');
+    html+=kpi('Schedule',h.schedule,'');
+    html+=kpi('Classe pressão',h.pressure_class,'');
+    html+=kpi('Fluido',h.fluid_name||h.fluid_class,'');
+    html+=kpi('P. projeto',h.design_pressure_bar,'bar');
+    html+=kpi('T. projeto',h.design_temp_c,'°C');
+    html+=kpi('Cl. inspeção',h.inspection_class,'');
+    html+=kpi('NR-13',h.nr13_required?'SIM':'Não','');
+    html+=kpi('Isolamento',h.thermal_insulation,'');
+    html+=kpi('Pintura',h.paint_status,'');
+    html+=kpi('Comp. linha',h.estimated_total_length_m,'m');
+    html+=kpi('Juntas',h.visible_joints_count,'');
+    html+=kpi('Suportes',h.visible_supports_count,'');
+    html+=kpi('Código projeto',h.design_code,'');
+    html+='</div></div>';
+  }
+
+  // 3. MATERIAIS
+  if(data.materials&&data.materials.length){
+    html+='<div style="margin-top:10px;padding-top:8px;border-top:0.5px solid var(--hbr)"><div style="font-weight:600;color:var(--hb);margin-bottom:5px;font-size:11px">📦 Materiais (cadastrados no Catálogo + Orçamento):</div>';
+    html+='<table style="width:100%;font-size:10px;border-collapse:collapse"><thead><tr style="background:var(--hbl)"><th style="text-align:left;padding:3px 6px">#</th><th style="text-align:left;padding:3px 6px">Código eng</th><th style="text-align:left;padding:3px 6px">Cat.</th><th style="text-align:left;padding:3px 6px">Descrição</th><th style="padding:3px 6px">Ø</th><th style="padding:3px 6px">SCH</th><th style="padding:3px 6px">Cl.</th><th style="text-align:right;padding:3px 6px">Qtd</th><th style="padding:3px 6px">Un</th></tr></thead><tbody>';
+    data.materials.forEach(m=>{
+      html+='<tr style="border-bottom:0.5px solid var(--hbr)">'+
+        '<td style="padding:3px 6px;font-family:monospace">'+(m.item||'—')+'</td>'+
+        '<td style="padding:3px 6px;font-family:monospace;font-size:9.5px">'+san(m.codigo_eng||'—')+'</td>'+
+        '<td style="padding:3px 6px"><span class="badge b-fl">'+san(m.categoria||'—')+'</span></td>'+
+        '<td style="padding:3px 6px;font-size:9.5px">'+san(m.descricao||'')+'</td>'+
+        '<td style="padding:3px 6px;font-family:monospace">'+(m.diametro_pol||'—')+'"</td>'+
+        '<td style="padding:3px 6px;font-family:monospace">'+san(m.schedule||'—')+'</td>'+
+        '<td style="padding:3px 6px;font-family:monospace">'+san(m.classe_pressao||'—')+'</td>'+
+        '<td style="text-align:right;padding:3px 6px;font-family:monospace"><b>'+(m.quantidade||0)+'</b></td>'+
+        '<td style="padding:3px 6px;font-family:monospace">'+san(m.unidade||'un')+'</td>'+
+      '</tr>';
+    });
+    html+='</tbody></table>';
+    if(data.materials_added!==undefined)html+='<div style="font-size:10px;color:var(--hs);margin-top:6px">✔ '+data.materials_added+' item(s) acumulado(s) no orçamento do projeto</div>';
+    html+='</div>';
+  }
+
+  // 4. ENGENHARIA
+  if(Object.keys(e).length){
+    html+='<div style="margin-top:10px;padding-top:8px;border-top:0.5px solid var(--hbr)"><div style="font-weight:600;color:var(--hb);margin-bottom:5px;font-size:11px">⚙️ Recomendações para engenharia / qualidade</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">';
+    html+='<div style="background:var(--bg2);padding:8px 10px;border-radius:6px;border-left:3px solid var(--hbm)"><div style="font-size:9px;color:var(--hmu);text-transform:uppercase;font-weight:600;margin-bottom:4px">🔧 Soldagem</div>';
+    if(e.welding_processes_recommended&&e.welding_processes_recommended.length)html+='<div style="font-size:10.5px;margin-bottom:2px">📋 <b>Processos:</b> '+e.welding_processes_recommended.join(', ')+'</div>';
+    if(e.preheat_required)html+='<div style="font-size:10.5px;margin-bottom:2px;color:var(--hw)">🌡️ <b>Pré-aquecimento:</b> '+(e.preheat_temp_c||'—')+' °C</div>';
+    else html+='<div style="font-size:10.5px;margin-bottom:2px;color:var(--hs)">✔ Pré-aquecimento não exigido</div>';
+    if(e.pwht_required)html+='<div style="font-size:10.5px;color:var(--hw)">⚠️ <b>PWHT (TTPS):</b> obrigatório</div>';
+    if(e.carbon_equivalent_estimate)html+='<div style="font-size:10.5px">⚗️ <b>CE (IIW):</b> '+e.carbon_equivalent_estimate+' ('+(e.weldability||'—')+')</div>';
+    html+='</div>';
+    html+='<div style="background:var(--bg2);padding:8px 10px;border-radius:6px;border-left:3px solid var(--hc)"><div style="font-size:9px;color:var(--hmu);text-transform:uppercase;font-weight:600;margin-bottom:4px">💧 TH &amp; END</div>';
+    if(e.hydrotest_pressure_bar)html+='<div style="font-size:10.5px;margin-bottom:2px">💦 <b>Pressão TH:</b> '+e.hydrotest_pressure_bar+' bar · '+(e.hydrotest_duration_min||10)+' min</div>';
+    if(e.ndt_sampling_rt_pct!=null)html+='<div style="font-size:10.5px;margin-bottom:2px">📷 <b>RT:</b> '+e.ndt_sampling_rt_pct+'% · <b>UT:</b> '+(e.ndt_sampling_ut_pct||0)+'% · <b>LP:</b> '+(e.ndt_sampling_lp_pct||0)+'% · <b>VT:</b> '+(e.ndt_sampling_vt_pct||100)+'%</div>';
+    if(e.inspection_notes)html+='<div style="font-size:10.5px;color:var(--hmu);margin-top:3px">📝 '+san(e.inspection_notes)+'</div>';
+    html+='</div></div>';
+    if(e.safety_warnings&&e.safety_warnings.length)html+='<div style="margin-top:6px;background:var(--hwl);padding:7px 10px;border-radius:5px;border-left:3px solid var(--hw);font-size:10.5px"><b>🦺 Atenção segurança:</b> '+e.safety_warnings.map(s=>san(s)).join(' · ')+'</div>';
+    html+='</div>';
+  }
+
+  // 5. PLANEJAMENTO
+  if(Object.keys(p).length){
+    html+='<div style="margin-top:10px;padding-top:8px;border-top:0.5px solid var(--hbr)"><div style="font-weight:600;color:var(--hb);margin-bottom:5px;font-size:11px">📅 Planejamento &amp; produtividade</div><div style="display:grid;grid-template-columns:repeat(5,1fr);gap:5px">';
+    const k2=(l,v,u,c)=>(v!=null&&v!=='')?'<div style="background:'+(c||'var(--bg2)')+';padding:7px 9px;border-radius:5px;border:0.5px solid var(--hbr);text-align:center"><div style="font-size:8.5px;color:var(--hmu);text-transform:uppercase;letter-spacing:.4px">'+l+'</div><div style="font-size:14px;font-weight:600;color:var(--hb);font-family:monospace">'+v+(u?' <span style="font-size:9px">'+u+'</span>':'')+'</div></div>':'';
+    html+=k2('HH fab',p.estimated_hh_fabrication,'hh','#e8f0fb');
+    html+=k2('HH mont',p.estimated_hh_assembly,'hh','#d6f1fc');
+    html+=k2('HH total',p.estimated_hh_total,'hh','#e6f5ed');
+    html+=k2('Duração',p.estimated_duration_days,'d','#fff3e0');
+    html+=k2('Equipe',p.recommended_crew_size,'pessoas','');
+    html+='</div>';
+    if(p.recommended_crew_composition)html+='<div style="font-size:10.5px;color:var(--hmu);margin-top:5px">👥 <b>Equipe sugerida:</b> '+san(p.recommended_crew_composition)+'</div>';
+    if(p.predecessor_activities&&p.predecessor_activities.length)html+='<div style="font-size:10.5px;margin-top:3px">⬅️ <b>Predecessoras:</b> '+p.predecessor_activities.map(s=>san(s)).join(' · ')+'</div>';
+    if(p.successor_activities&&p.successor_activities.length)html+='<div style="font-size:10.5px;margin-top:3px">➡️ <b>Sucessoras:</b> '+p.successor_activities.map(s=>san(s)).join(' · ')+'</div>';
+    if(p.critical_materials&&p.critical_materials.length)html+='<div style="font-size:10.5px;margin-top:3px;color:var(--hd)">⚠️ <b>Materiais críticos:</b> '+p.critical_materials.map(s=>san(s)).join(', ')+'</div>';
+    if(p.safety_nrs&&p.safety_nrs.length)html+='<div style="font-size:10.5px;margin-top:3px">🦺 <b>NRs aplicáveis:</b> '+p.safety_nrs.map(s=>san(s)).join(' · ')+'</div>';
+    html+='</div>';
+  }
+
+  return html;
+}
+
+
+// ═══════════════════════════════════════════════════
+// PRESETS DE IA (instruções customizadas reutilizáveis)
+// ═══════════════════════════════════════════════════
+let _aiPresets = [];
+async function loadPresets(){
+  const sel = document.getElementById('ai-preset-select');
+  if(!sel) return;
+  const {data, error} = await sb.from('ai_extraction_presets')
+    .select('id,name,description,custom_instructions,extra_fields,is_default')
+    .order('is_default',{ascending:false}).order('name');
+  if(error){console.error(error);return;}
+  _aiPresets = data || [];
+  sel.innerHTML = '<option value="">— Sem preset —</option>' + _aiPresets.map(p=>
+    `<option value="${p.id}" ${p.is_default?'selected':''}>${san(p.name)}${p.is_default?' (padrão)':''}</option>`
+  ).join('');
+  // Aplica o default automaticamente
+  const def = _aiPresets.find(p=>p.is_default);
+  if(def) loadPreset(def.id);
+}
+function loadPreset(id){
+  if(!id){
+    document.getElementById('ai-custom-instructions').placeholder = 'Ex: Identifique todos os pontos de TIE-IN; verifique se há HOT TAPPING...';
+    return;
+  }
+  const p = _aiPresets.find(x=>x.id===id);
+  if(!p) return;
+  const ta = document.getElementById('ai-custom-instructions');
+  if(ta) ta.placeholder = `Preset "${p.name}" será aplicado. Você pode adicionar instruções extras aqui (opcional).`;
+}
+async function savePresetFromCurrent(){
+  const instr = document.getElementById('ai-custom-instructions')?.value.trim();
+  if(!instr || instr.length < 20){toast('Escreva pelo menos 20 caracteres de instruções','warn');return;}
+  const name = prompt('Nome do preset:');
+  if(!name) return;
+  const {error} = await sb.from('ai_extraction_presets').insert({
+    org_id: _org.id,
+    user_id: _user.id,
+    name: name.trim(),
+    custom_instructions: instr,
+    discipline_code: 'tubulacao',
+    is_shared: confirm('Compartilhar com toda a equipe? (Cancelar = só pra você)')
+  });
+  if(error){toast('Erro: '+error.message,'err');return;}
+  toast('Preset salvo','ok');
+  await loadPresets();
+}
+function openPresetModal(){
+  // Lista todos os presets em um modal simples
+  const html = `<div style="max-height:400px;overflow-y:auto">
+    ${_aiPresets.length ? _aiPresets.map(p=>`
+      <div style="background:var(--bg2);border:0.5px solid var(--hbr);border-radius:6px;padding:8px 10px;margin-bottom:6px">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <strong style="color:var(--hb)">${san(p.name)}${p.is_default?' ⭐':''}</strong>
+          <div style="display:flex;gap:4px">
+            <button class="sm-e" onclick="setDefaultPreset('${p.id}')" title="Marcar como padrão">⭐</button>
+            <button class="sm-d" onclick="deletePreset('${p.id}')" title="Excluir"><i data-lucide="trash-2"></i></button>
+          </div>
+        </div>
+        ${p.description?`<div style="font-size:10px;color:var(--hmu);margin-top:3px">${san(p.description)}</div>`:''}
+        <div style="font-size:9.5px;color:var(--hmu);margin-top:5px;font-family:monospace;background:#fff;padding:5px 7px;border-radius:4px;max-height:80px;overflow:auto">${san(p.custom_instructions.slice(0,300))}${p.custom_instructions.length>300?'…':''}</div>
+      </div>
+    `).join('') : '<div style="text-align:center;padding:20px;color:var(--hmu)">Nenhum preset ainda.<br>Escreva instruções na caixa e clique em "💾 Salvar como preset"</div>'}
+  </div>`;
+  alert('Gerenciar presets (versão simples):\n\n' + (_aiPresets.length ? _aiPresets.map(p=>`• ${p.name}${p.is_default?' (padrão)':''}`).join('\n') : 'Nenhum preset criado ainda.'));
+}
+async function setDefaultPreset(id){
+  await sb.from('ai_extraction_presets').update({is_default:false}).eq('org_id',_org.id);
+  await sb.from('ai_extraction_presets').update({is_default:true}).eq('id',id);
+  toast('Preset padrão atualizado','ok');await loadPresets();
+}
+async function deletePreset(id){
+  const _ok = await (window.PIAConfirm ? window.PIAConfirm.danger('Excluir preset?', 'Esta ação remove o preset. Não pode ser desfeito.', 'Excluir') : Promise.resolve(confirm('Excluir preset??'))); if(!_ok) return;
+  await sb.from('ai_extraction_presets').delete().eq('id',id);
+  toast('Excluído','ok');await loadPresets();
+}
+
+
+// ═══════════════════════════════════════════════════
+// EQUIPE & ACESSOS (admin gerencia membros e permissões)
+// ═══════════════════════════════════════════════════
+let _teamMembers = [];
+let _teamDisciplines = [];
+
+async function rTeam(){
+  if(_org.role !== 'admin' && _org.role !== 'gerente'){
+    document.getElementById('vteam').innerHTML = `
+      <div class="bc-row"><span style="font-weight:500">👥 Equipe &amp; Acessos</span></div>
+      <div class="empty-st" style="padding:40px">
+        ⛔ Apenas administradores e gerentes podem acessar esta área.<br>
+        <span style="font-size:10px;color:var(--hmu)">Seu papel atual: <strong>${_org.role}</strong></span>
+      </div>`;
+    return;
+  }
+
+  document.getElementById('vteam').innerHTML = `
+    <div class="bc-row"><span style="font-weight:500">👥 Equipe &amp; Acessos</span><span style="margin-left:auto;font-size:10px;color:var(--hmu)">Gerencie quem acessa o quê</span></div>
+    <div style="padding:14px 16px;background:var(--bg);max-width:1200px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <div>
+          <div style="font-size:13px;font-weight:600;color:var(--t9)">Membros da organização</div>
+          <div style="font-size:10.5px;color:var(--t6)">Convide usuários e defina o que cada um pode acessar.</div>
+        </div>
+        <button class="btn bp" onclick="openInviteModal()"><i data-lucide="user-plus"></i>Convidar usuário</button>
+      </div>
+      <div id="team-table-wrap" class="tbl-wrap"><table>
+        <thead><tr><th>Usuário</th><th>Email</th><th>Papel</th><th>Modo</th><th>Disciplinas com acesso</th><th>Status</th><th></th></tr></thead>
+        <tbody id="team-tb"><tr><td colspan="7"><div class="empty-st">Carregando membros…</div></td></tr></tbody>
+      </table></div>
+
+      <!-- Bloco LGPD: portabilidade e exclusão -->
+      <div style="margin-top:28px;background:var(--t0);border:1px solid var(--t3);border-radius:14px;padding:20px 24px;box-shadow:var(--sh-sm)">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+          <i data-lucide="shield-check" style="width:18px;height:18px;color:var(--primary)"></i>
+          <div style="font-size:14px;font-weight:700;color:var(--t9);letter-spacing:-.2px">Privacidade e seus dados (LGPD)</div>
+        </div>
+        <div style="font-size:12px;color:var(--t6);line-height:1.6;margin-bottom:14px;max-width:680px">
+          A Lei Geral de Proteção de Dados (Lei nº 13.709/2018) garante a você o direito à <strong>portabilidade</strong> e ao <strong>esquecimento</strong> dos seus dados. Use os botões abaixo para baixar um backup completo da sua organização em JSON, ou solicitar a exclusão definitiva da sua conta.
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn bp" onclick="exportOrgData()" id="btn-export-lgpd"><i data-lucide="download"></i>Exportar meus dados (JSON)</button>
+          <button class="btn bg" onclick="alert('Para solicitar a exclusão definitiva da conta e de todos os dados da organização, envie um email para suporte@projectia.com.br com o assunto \\'Exclusão LGPD\\'.\\n\\nAtenderemos em até 15 dias úteis conforme prazo ANPD.')"><i data-lucide="user-x"></i>Solicitar exclusão da conta</button>
+        </div>
+        <div style="font-size:10.5px;color:var(--t5);margin-top:10px">Somente administradores e proprietários da organização podem exportar dados.</div>
+      </div>
+    </div>`;
+  await loadTeam();
+}
+
+// LGPD — Exportar dados da organização (Art. 18, V)
+async function exportOrgData(){
+  const btn = document.getElementById('btn-export-lgpd');
+  if(btn){ btn.disabled = true; btn.style.opacity='.7'; btn.innerHTML='<i data-lucide="loader" style="width:14px;height:14px"></i>Gerando export... (pode levar 30s-2min)'; _renderIcons(); }
+  try {
+    const {data:{session}} = await sb.auth.getSession();
+    if(!session){toast('Sessão inválida — faça login novamente','err'); return;}
+    const resp = await fetch(SUPABASE_URL+'/functions/v1/export-org-data', {
+      method:'GET',
+      headers:{'Authorization':'Bearer '+session.access_token, 'apikey':SUPABASE_KEY}
+    });
+    if(!resp.ok){
+      const err = await resp.json().catch(()=>({error:'HTTP '+resp.status}));
+      toast('Erro: '+(err.error||resp.status), 'err');
+      return;
+    }
+    const blob = await resp.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'projectia_export_'+_org.id.slice(0,8)+'_'+new Date().toISOString().slice(0,10)+'.json';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 250);
+    toast('Backup exportado com sucesso','ok');
+  } catch(e){
+    toast('Erro: '+(e.message||e), 'err');
+  } finally {
+    if(btn){ btn.disabled = false; btn.style.opacity='1'; btn.innerHTML='<i data-lucide="download"></i>Exportar meus dados (JSON)'; _renderIcons(); }
+  }
+}
+
+async function loadTeam(){
+  const {data: members, error} = await sb.from('org_members')
+    .select('id, role, user_id, is_billing_owner, uses_custom_permissions, joined_at, invited_at, last_active_at')
+    .eq('org_id', _org.id);
+  if(error){toast('Erro: '+error.message,'err');return;}
+
+  // Pega disciplinas ativas da org
+  const {data: discs} = await sb.from('org_discipline_subscriptions')
+    .select('discipline_code, disciplines(code, name, icon)')
+    .eq('org_id', _org.id).eq('active', true);
+  _teamDisciplines = (discs||[]).map(d=>d.disciplines).filter(Boolean).sort((a,b)=>(a.name||'').localeCompare(b.name||''));
+
+  // Pega permissões granulares
+  const {data: perms} = await sb.from('user_module_access')
+    .select('user_id, discipline_code, can_view, can_create, can_edit, can_delete, can_approve, can_export')
+    .eq('org_id', _org.id);
+  const permsByUser = {};
+  (perms||[]).forEach(p=>{
+    if(!permsByUser[p.user_id]) permsByUser[p.user_id] = {};
+    permsByUser[p.user_id][p.discipline_code] = p;
+  });
+
+  // Para pegar email, vamos usar uma função RPC ou agregação. Como auth.users não é acessível direto, vamos guardar email num campo virtual.
+  // No nosso caso, _user é o atual; pra outros membros podemos exibir o user_id curto
+  _teamMembers = members || [];
+
+  const rolesIcons = {admin:'👑', gerente:'⭐', engenheiro:'👷', inspetor:'🔍', viewer:'👁️'};
+  document.getElementById('team-tb').innerHTML = _teamMembers.length ? _teamMembers.map(m=>{
+    const userPerms = permsByUser[m.user_id] || {};
+    const isMe = m.user_id === _user.id;
+    const activeDiscCount = m.uses_custom_permissions
+      ? Object.keys(userPerms).filter(d=>userPerms[d].can_view).length
+      : _teamDisciplines.length;
+    return `<tr>
+      <td><strong>${isMe ? '(você)' : 'Usuário ' + m.user_id.slice(0,8)}</strong>${m.is_billing_owner?' <span class="badge b-sim" style="margin-left:4px">💳 TITULAR</span>':''}</td>
+      <td style="font-size:10px;color:var(--hmu);font-family:monospace">${isMe ? _user.email : '—'}</td>
+      <td>
+        <select onchange="changeRole('${m.id}',this.value)" ${isMe?'disabled':''} style="padding:3px 7px;font-size:11px;border:0.5px solid var(--hbr);border-radius:5px">
+          <option value="admin" ${m.role==='admin'?'selected':''}>${rolesIcons.admin} Admin</option>
+          <option value="gerente" ${m.role==='gerente'?'selected':''}>${rolesIcons.gerente} Gerente</option>
+          <option value="engenheiro" ${m.role==='engenheiro'?'selected':''}>${rolesIcons.engenheiro} Engenheiro</option>
+          <option value="inspetor" ${m.role==='inspetor'?'selected':''}>${rolesIcons.inspetor} Inspetor</option>
+          <option value="viewer" ${m.role==='viewer'?'selected':''}>${rolesIcons.viewer} Visualizador</option>
+        </select>
+      </td>
+      <td>
+        <label style="font-size:10px;cursor:pointer;display:flex;align-items:center;gap:4px">
+          <input type="checkbox" ${m.uses_custom_permissions?'checked':''} onchange="toggleCustomPerms('${m.id}',this.checked)" ${isMe?'disabled':''}>
+          ${m.uses_custom_permissions ? 'Custom' : 'Padrão'}
+        </label>
+      </td>
+      <td><span style="font-size:10.5px;color:${activeDiscCount > 0 ? 'var(--hs)':'var(--hd)'}">${activeDiscCount} de ${_teamDisciplines.length}</span></td>
+      <td><span class="badge ${m.last_active_at?'b-sim':'b-pen'}">${m.last_active_at?'Ativo':'Pendente'}</span></td>
+      <td><div class="act-col">
+        ${m.uses_custom_permissions ? `<button class="sm-e" onclick="openPermsModal('${m.user_id}','${m.id}')">🔐 Permissões</button>` : ''}
+        ${!isMe && !m.is_billing_owner ? `<button class="sm-d" onclick="removeMember('${m.id}')" title="Excluir"><i data-lucide="trash-2"></i></button>` : ''}
+      </div></td>
+    </tr>`;
+  }).join('') : '<tr><td colspan="7"><div class="empty-st">Você é o único membro. Convide a equipe!</div></td></tr>';
+}
+
+function openInviteModal(){
+  closeAllDynamicOverlays();
+  const html = `<div class="overlay open" id="invite-overlay" onclick="if(event.target===this)closeInviteModal()">
+    <div class="msm">
+      <button class="mclose" onclick="closeInviteModal()" title="Fechar"><i data-lucide="x"></i></button>
+      <div class="mtitle"><i data-lucide="user-plus" style="width:18px;height:18px;color:var(--primary)"></i>Convidar usuário</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div class="field"><label>Email do usuário</label><input id="inv-email" type="email" placeholder="usuario@empresa.com" autofocus></div>
+        <div class="field"><label>Papel (role base)</label>
+          <select id="inv-role">
+            <option value="engenheiro">👷 Engenheiro (cria/edita)</option>
+            <option value="inspetor">🔍 Inspetor (foca em inspeção/qualidade)</option>
+            <option value="gerente">⭐ Gerente (tudo exceto admin)</option>
+            <option value="viewer">👁️ Visualizador (só leitura)</option>
+            <option value="admin">👑 Administrador (acesso total)</option>
+          </select>
+        </div>
+        <div class="field"><label style="display:flex;align-items:center;gap:5px;cursor:pointer">
+          <input type="checkbox" id="inv-custom"> Usar permissões customizadas (definir manualmente quais módulos pode acessar)
+        </label></div>
+        <div class="info" style="background:var(--hbl);padding:8px 10px;font-size:10.5px;border-left:3px solid var(--hbm);border-radius:4px">
+          ⚠️ O usuário precisa <strong>já ter cadastro</strong> no sistema com esse email. Ainda não há envio automático de convite por email — peça pra ele criar conta primeiro em <code>index.html</code>.
+        </div>
+      </div>
+      <div class="mfooter">
+        <button class="bg" onclick="closeInviteModal()">Cancelar</button>
+        <button class="bp" onclick="sendInvite()">📩 Adicionar à equipe</button>
+      </div>
+    </div>
+  </div>`;
+  document.body.insertAdjacentHTML('beforeend', html);
+}
+function closeInviteModal(){const o=document.getElementById('invite-overlay');if(o)o.remove();}
+
+async function sendInvite(){
+  const email = document.getElementById('inv-email').value.trim();
+  const role = document.getElementById('inv-role').value;
+  const custom = document.getElementById('inv-custom').checked;
+  if(!email){toast('Email obrigatório','warn');return;}
+  const {data, error} = await sb.rpc('hyd_invite_user', {p_email: email, p_role: role, p_uses_custom: custom});
+  if(error){toast('Erro: '+error.message,'err');return;}
+  if(data?.error){toast(data.error,'warn');return;}
+  toast('Usuário adicionado à equipe','ok');
+  closeInviteModal();
+  await loadTeam();
+}
+
+async function changeRole(memberId, newRole){
+  const {error} = await sb.from('org_members').update({role: newRole}).eq('id', memberId);
+  if(error){toast('Erro: '+error.message,'err');return;}
+  toast('Papel atualizado','ok');
+}
+
+async function toggleCustomPerms(memberId, useCustom){
+  const member = _teamMembers.find(m=>m.id===memberId);
+  const {error} = await sb.from('org_members').update({uses_custom_permissions: useCustom}).eq('id', memberId);
+  if(error){toast('Erro: '+error.message,'err');return;}
+  if(useCustom && member){
+    // Aplica permissões default
+    await sb.rpc('hyd_apply_default_permissions', {p_user_id: member.user_id, p_org_id: _org.id, p_role: member.role});
+  }
+  toast('Modo de permissões atualizado','ok');
+  await loadTeam();
+}
+
+async function removeMember(memberId){
+  const _ok = await (window.PIAConfirm ? window.PIAConfirm.danger('Remover usuário?', 'Esta ação remove o usuário da equipe. Ele perderá acesso ao projeto.', 'Remover') : Promise.resolve(confirm('Remover usuário??'))); if(!_ok) return;
+  const {error} = await sb.from('org_members').delete().eq('id', memberId);
+  if(error){toast('Erro: '+error.message,'err');return;}
+  toast('Usuário removido','ok');
+  await loadTeam();
+}
+
+async function openPermsModal(userId, memberId){
+  closeAllDynamicOverlays();
+  // Carrega permissões atuais
+  const {data: perms} = await sb.from('user_module_access')
+    .select('discipline_code, can_view, can_create, can_edit, can_delete, can_approve, can_export')
+    .eq('org_id', _org.id).eq('user_id', userId);
+  const permsMap = {};
+  (perms||[]).forEach(p=>permsMap[p.discipline_code]=p);
+
+  const html = `<div class="overlay open" id="perms-overlay" onclick="if(event.target===this)closePermsModal()">
+    <div class="mbox" style="max-width:900px">
+      <button class="mclose" onclick="closePermsModal()" title="Fechar"><i data-lucide="x"></i></button>
+      <div class="mtitle"><i data-lucide="shield-check" style="width:18px;height:18px;color:var(--primary)"></i>Permissões granulares</div>
+      <div style="font-size:11px;color:var(--hmu);margin-bottom:12px">
+        Marque o que este usuário pode fazer em cada disciplina. Ver = ler, Criar = inserir, Editar = alterar, Apr. = aprovar, Exp. = exportar.
+      </div>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>Disciplina</th><th>Ver</th><th>Criar</th><th>Editar</th><th>Excluir</th><th>Aprovar</th><th>Exportar</th></tr></thead>
+        <tbody>
+          ${_teamDisciplines.map(d=>{
+            const p = permsMap[d.code] || {};
+            return `<tr>
+              <td><strong>${d.icon||'•'} ${san(d.name)}</strong></td>
+              ${['can_view','can_create','can_edit','can_delete','can_approve','can_export'].map(k=>`
+                <td style="text-align:center"><input type="checkbox" ${p[k]?'checked':''} data-disc="${d.code}" data-action="${k}" onchange="markDirtyPerm()"></td>
+              `).join('')}
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table></div>
+      <div class="mfooter">
+        <button class="bg" onclick="closePermsModal()">Cancelar</button>
+        <button class="bp" onclick="savePerms('${userId}')"><i data-lucide="check"></i>Salvar permissões</button>
+      </div>
+    </div>
+  </div>`;
+  document.body.insertAdjacentHTML('beforeend', html);
+}
+function closePermsModal(){const o=document.getElementById('perms-overlay');if(o)o.remove();}
+function markDirtyPerm(){/* placeholder pra futuro */}
+
+async function savePerms(userId){
+  const inputs = document.querySelectorAll('#perms-overlay input[type=checkbox]');
+  const byDisc = {};
+  inputs.forEach(i=>{
+    const d = i.dataset.disc;
+    const a = i.dataset.action;
+    if(!byDisc[d]) byDisc[d] = {};
+    byDisc[d][a] = i.checked;
+  });
+  // Upsert por disciplina
+  const rows = Object.keys(byDisc).map(d=>({
+    org_id: _org.id, user_id: userId, discipline_code: d,
+    can_view: byDisc[d].can_view, can_create: byDisc[d].can_create,
+    can_edit: byDisc[d].can_edit, can_delete: byDisc[d].can_delete,
+    can_approve: byDisc[d].can_approve, can_export: byDisc[d].can_export,
+    updated_at: new Date().toISOString()
+  }));
+  const {error} = await sb.from('user_module_access').upsert(rows, {onConflict:'user_id,org_id,discipline_code,module'});
+  if(error){toast('Erro: '+error.message,'err');return;}
+  toast('Permissões salvas','ok');
+  closePermsModal();
+  await loadTeam();
+}
+
+// ═══════════════════════════════════════════════════
+// MEU PLANO (consumo + upgrade)
+// ═══════════════════════════════════════════════════
+let _planBilling = 'mensal'; // 'mensal' | 'anual'
+async function rPlan(){
+  document.getElementById('vplan').innerHTML = `
+    <div class="bc-row"><i data-lucide="gem" style="width:14px;height:14px;color:var(--violet)"></i><span style="font-weight:600;color:var(--t9)">Meu Plano</span></div>
+    <div style="padding:24px 22px;background:var(--t0)">
+      <div id="plan-content"><div class="empty-st" style="padding:40px">Carregando…</div></div>
+    </div>`;
+  _renderIcons();
+  await loadPlan();
+}
+
+function setPlanBilling(v){_planBilling=v;loadPlan();}
+async function loadPlan(){
+  const {data: org} = await sb.from('organizations')
+    .select('id, name, subscription_plan_code, subscription_started_at, subscription_expires_at, max_users, max_iso_month, plan')
+    .eq('id', _org.id).single();
+  const curCode = org?.subscription_plan_code || 'pro';
+  const {data: plan} = await sb.from('subscription_plans').select('*').eq('code', curCode).single();
+  const {data: allPlans} = await sb.from('subscription_plans').select('*').order('monthly_price_brl');
+  const {data: usage} = await sb.from('usage_counters')
+    .select('iso_processed, period').eq('org_id', _org.id)
+    .gte('period', new Date().toISOString().slice(0,7)+'-01')
+    .maybeSingle();
+  const usedIA = usage?.iso_processed || 0;
+  const maxIA = plan?.max_ai_analyses_month || 0;
+  const pctIA = maxIA ? Math.min(100, Math.round(usedIA/maxIA*100)) : 0;
+  const colorIA = pctIA >= 80 ? 'var(--danger)' : pctIA >= 60 ? 'var(--warning)' : 'var(--success)';
+
+  const {data: members} = await sb.from('org_members').select('id').eq('org_id', _org.id);
+  const memberCount = members?.length || 0;
+  const maxUsers = plan?.max_users || 1;
+  const pctUsers = maxUsers ? Math.min(100, Math.round(memberCount/maxUsers*100)) : 0;
+
+  // Calcular preço anual com 20% off
+  const calcPrice = (p)=>{
+    const monthly = +p?.monthly_price_brl || 0;
+    if(_planBilling === 'anual') return Math.round(monthly * 0.8);
+    return monthly;
+  };
+  const curPrice = calcPrice(plan);
+  const economyYear = ((+plan?.monthly_price_brl||0) * 12 * 0.2);
+  const billingLabel = _planBilling === 'anual' ? '/usuário/mês (anual)' : '/usuário/mês';
+  const planTypePF = (allPlans||[]).filter(p=>['free','estudante','solo','solo_ia','solo_plus'].includes(p.code));
+  const planTypePJ = (allPlans||[]).filter(p=>['starter','pro','multi','enterprise'].includes(p.code));
+
+  document.getElementById('plan-content').innerHTML = `
+    <!-- Toggle Mensal / Anual -->
+    <div style="display:flex;justify-content:center;margin-bottom:24px">
+      <div style="display:inline-flex;background:var(--t1);border:1px solid var(--t3);border-radius:10px;padding:5px;gap:4px">
+        <button onclick="setPlanBilling('mensal')" style="padding:9px 18px;border:none;background:${_planBilling==='mensal'?'var(--ink)':'transparent'};color:${_planBilling==='mensal'?'#fff':'var(--t7)'};border-radius:7px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:600;box-shadow:${_planBilling==='mensal'?'var(--sh-1)':'none'};transition:all .12s">Mensal</button>
+        <button onclick="setPlanBilling('anual')" style="padding:9px 18px;border:none;background:${_planBilling==='anual'?'var(--ink)':'transparent'};color:${_planBilling==='anual'?'#fff':'var(--t7)'};border-radius:7px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:600;box-shadow:${_planBilling==='anual'?'var(--sh-1)':'none'};transition:all .12s;display:inline-flex;align-items:center;gap:6px">Anual <span style="background:${_planBilling==='anual'?'var(--success)':'var(--success-l)'};color:${_planBilling==='anual'?'#fff':'#065F46'};font-size:10px;padding:2px 7px;border-radius:10px;font-weight:700">−20%</span></button>
+      </div>
+    </div>
+
+    <!-- Card do plano atual -->
+    <div style="display:grid;grid-template-columns:1.3fr 1fr;gap:16px;margin-bottom:24px">
+      <div style="background:var(--grad-deep);color:#fff;border-radius:16px;padding:28px;position:relative;overflow:hidden">
+        <div style="position:absolute;top:0;right:0;width:240px;height:240px;background:radial-gradient(circle,rgba(6,182,212,.25),transparent 70%);pointer-events:none"></div>
+        <div style="position:relative">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+            <span style="font-size:11px;text-transform:uppercase;letter-spacing:1.2px;opacity:.85;font-weight:700">Plano atual</span>
+            <span style="background:var(--grad-ia);font-size:10px;padding:3px 10px;border-radius:12px;font-weight:700">ATIVO</span>
+          </div>
+          <div style="font-size:32px;font-weight:800;margin-bottom:4px;letter-spacing:-.8px">${san(plan?.name || 'Pro')}</div>
+          <div style="font-size:13px;opacity:.85;margin-bottom:20px;max-width:480px">${san(plan?.description || '')}</div>
+          <div style="display:flex;align-items:baseline;gap:6px;margin-bottom:6px">
+            <span style="font-size:14px;opacity:.8">R$</span>
+            <span style="font-size:42px;font-weight:800;font-family:'JetBrains Mono',monospace;letter-spacing:-1px">${curPrice.toLocaleString('pt-BR')}</span>
+            <span style="font-size:12px;opacity:.7">${billingLabel}</span>
+          </div>
+          ${_planBilling==='anual' && economyYear>0 ? `<div style="display:inline-flex;align-items:center;gap:5px;background:rgba(16,185,129,.18);color:#6EE7B7;padding:5px 11px;border-radius:8px;font-size:11.5px;font-weight:600;margin-bottom:16px"><i data-lucide="badge-check" style="width:13px;height:13px"></i>Você economiza R$ ${economyYear.toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0})} por ano</div>` : ''}
+          <div style="display:flex;gap:18px;font-size:13px;margin-top:14px">
+            <div><strong>${maxUsers === 99999 ? '∞' : maxUsers}</strong> <span style="opacity:.7">usuários</span></div>
+            <div><strong>${maxIA === 99999 ? '∞' : maxIA}</strong> <span style="opacity:.7">análises IA/mês</span></div>
+            <div><strong>${plan?.max_projects === 9999 ? '∞' : plan?.max_projects || '—'}</strong> <span style="opacity:.7">projetos</span></div>
+          </div>
+          <button class="btn" style="background:#fff;color:var(--ink);margin-top:20px;padding:11px 22px;font-weight:700;border-radius:9px;border:none;cursor:pointer;display:inline-flex;align-items:center;gap:7px;font-family:inherit" onclick="alert('Para upgrade, fale com vendas: contato@projectia.com')"><i data-lucide="arrow-up-right" style="width:14px;height:14px"></i>Fazer upgrade</button>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div style="background:var(--t0);border:1px solid var(--t3);border-radius:12px;padding:16px;box-shadow:var(--sh-1)">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><i data-lucide="sparkles" style="width:14px;height:14px;color:var(--accent)"></i><div style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--t6);font-weight:600">Análises IA · mês atual</div></div>
+          <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:7px">
+            <div style="font-size:26px;font-weight:800;color:${colorIA};font-family:'JetBrains Mono',monospace;letter-spacing:-.5px">${usedIA}</div>
+            <div style="font-size:13px;color:var(--t6);font-weight:500">de ${maxIA === 99999 ? '∞' : maxIA}</div>
+          </div>
+          <div style="height:6px;background:var(--t2);border-radius:3px;overflow:hidden">
+            <div style="height:100%;width:${pctIA}%;background:${colorIA};transition:width .4s"></div>
+          </div>
+        </div>
+        <div style="background:var(--t0);border:1px solid var(--t3);border-radius:12px;padding:16px;box-shadow:var(--sh-1)">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><i data-lucide="users" style="width:14px;height:14px;color:var(--primary)"></i><div style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--t6);font-weight:600">Usuários</div></div>
+          <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:7px">
+            <div style="font-size:26px;font-weight:800;color:var(--primary);font-family:'JetBrains Mono',monospace;letter-spacing:-.5px">${memberCount}</div>
+            <div style="font-size:13px;color:var(--t6);font-weight:500">de ${maxUsers === 99999 ? '∞' : maxUsers}</div>
+          </div>
+          <div style="height:6px;background:var(--t2);border-radius:3px;overflow:hidden">
+            <div style="height:100%;width:${pctUsers}%;background:var(--primary);transition:width .4s"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Comparativo de planos -->
+    ${planTypePJ.length>0 ? `
+    <div style="margin-top:24px">
+      <div style="font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:var(--t6);font-weight:700;margin-bottom:12px">Planos PJ (Empresa)</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px">
+        ${planTypePJ.map(p=>{
+          const price = calcPrice(p);
+          const isCur = p.code === curCode;
+          return `<div style="background:var(--t0);border:${isCur?'2px solid var(--primary)':'1px solid var(--t3)'};border-radius:14px;padding:20px;position:relative;transition:all .15s;box-shadow:${isCur?'var(--sh-2)':'var(--sh-1)'}">
+            ${isCur?'<div style="position:absolute;top:-10px;left:18px;background:var(--primary);color:#fff;padding:3px 10px;border-radius:6px;font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase">Seu plano</div>':''}
+            <div style="font-size:11px;color:var(--t5);text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:6px">${san(p.name)}</div>
+            <div style="display:flex;align-items:baseline;gap:3px;margin-bottom:4px">
+              <span style="font-size:11px;color:var(--t6)">R$</span>
+              <span style="font-size:30px;font-weight:800;color:var(--t9);font-family:'JetBrains Mono',monospace;letter-spacing:-.8px">${price.toLocaleString('pt-BR')}</span>
+            </div>
+            <div style="font-size:11px;color:var(--t5);margin-bottom:14px">${billingLabel}</div>
+            <div style="display:flex;flex-direction:column;gap:5px;font-size:12px;color:var(--t7);margin-bottom:14px">
+              <div style="display:flex;align-items:center;gap:6px"><i data-lucide="check" style="width:13px;height:13px;color:var(--success)"></i>${p.max_users===99999?'∞':p.max_users} usuário${p.max_users!==1?'s':''}</div>
+              <div style="display:flex;align-items:center;gap:6px"><i data-lucide="check" style="width:13px;height:13px;color:var(--success)"></i>${p.max_ai_analyses_month===99999?'∞':p.max_ai_analyses_month} análises IA/mês</div>
+              <div style="display:flex;align-items:center;gap:6px"><i data-lucide="check" style="width:13px;height:13px;color:var(--success)"></i>${p.max_projects===9999?'∞':p.max_projects} projeto${p.max_projects!==1?'s':''}</div>
+              <div style="display:flex;align-items:center;gap:6px"><i data-lucide="check" style="width:13px;height:13px;color:var(--success)"></i>${p.max_storage_gb} GB armazenamento</div>
+              ${p.has_priority_support?`<div style="display:flex;align-items:center;gap:6px"><i data-lucide="check" style="width:13px;height:13px;color:var(--success)"></i>Suporte prioritário</div>`:''}
+              ${p.has_powerbi_templates?`<div style="display:flex;align-items:center;gap:6px"><i data-lucide="check" style="width:13px;height:13px;color:var(--success)"></i>Templates Power BI</div>`:''}
+              ${p.has_primavera_sync?`<div style="display:flex;align-items:center;gap:6px"><i data-lucide="check" style="width:13px;height:13px;color:var(--success)"></i>Sync Primavera P6</div>`:''}
+              ${p.has_api_access?`<div style="display:flex;align-items:center;gap:6px"><i data-lucide="check" style="width:13px;height:13px;color:var(--success)"></i>API REST</div>`:''}
+              ${p.has_white_label?`<div style="display:flex;align-items:center;gap:6px"><i data-lucide="check" style="width:13px;height:13px;color:var(--success)"></i>White-label</div>`:''}
+            </div>
+            ${isCur?'<button class="bg" style="width:100%;justify-content:center" disabled style="opacity:.5;cursor:not-allowed"><i data-lucide="check-circle-2"></i>Plano atual</button>':`<button class="bp" style="width:100%;justify-content:center" onclick="alert('Contate vendas: contato@projectia.com')"><i data-lucide="arrow-up-right"></i>Mudar para ${san(p.name)}</button>`}
+          </div>`;
+        }).join('')}
+      </div>
+    </div>` : ''}
+
+    ${planTypePF.length>0 ? `
+    <div style="margin-top:24px">
+      <div style="font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:var(--t6);font-weight:700;margin-bottom:12px">Planos PF (Profissional autônomo)</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px">
+        ${planTypePF.map(p=>{
+          const price = calcPrice(p);
+          const isCur = p.code === curCode;
+          return `<div style="background:var(--t0);border:${isCur?'2px solid var(--primary)':'1px solid var(--t3)'};border-radius:12px;padding:16px">
+            <div style="font-size:10.5px;color:var(--t5);text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:5px">${san(p.name)}${isCur?' · ATIVO':''}</div>
+            <div style="display:flex;align-items:baseline;gap:3px;margin-bottom:3px">
+              <span style="font-size:11px;color:var(--t6)">R$</span>
+              <span style="font-size:24px;font-weight:800;color:var(--t9);font-family:'JetBrains Mono',monospace;letter-spacing:-.5px">${price.toLocaleString('pt-BR')}</span>
+            </div>
+            <div style="font-size:10.5px;color:var(--t5);margin-bottom:8px">${billingLabel}</div>
+            <div style="font-size:11.5px;color:var(--t6);line-height:1.5">${p.max_ai_analyses_month||0} análises IA · ${p.max_projects||0} projeto${p.max_projects!==1?'s':''}</div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>` : ''}
+
+    <div style="background:var(--violet-l);border:1px solid var(--violet);border-radius:12px;padding:18px;font-size:13px;color:#5B21B6;display:flex;align-items:center;gap:12px;margin-top:22px">
+      <i data-lucide="message-circle" style="width:24px;height:24px;flex-shrink:0"></i>
+      <div style="flex:1">
+        <strong>Precisa de mais?</strong> Empresas com 50+ usuários, multi-CNPJ, on-premise ou white-label: fale com nossa equipe.
+      </div>
+      <a class="bp" href="mailto:contato@projectia.com" style="text-decoration:none"><i data-lucide="mail"></i>Falar com vendas</a>
+    </div>`;
+  _renderIcons();
+}
+
+
+// ═══════════════════════════════════════════════════
+// EQUIPAMENTOS NR-13 (vasos, tanques, torres, fornos)
+// ═══════════════════════════════════════════════════
+let _equipments = [];
+let _equipInspections = [];
+let _equipUT = [];
+let _equipFilters = {status:'',type:'',nr13:'',project:'',search:''};
+
+async function rEquip(){
+  await loadEquipData();
+  const tot = _equipments.length;
+  const opt = _equipments.filter(e=>e.status==='operando').length;
+  const par = _equipments.filter(e=>e.status==='parado'||e.status==='manutencao').length;
+  const nr13 = _equipments.filter(e=>e.nr13_required).length;
+  // Próximas inspeções vencendo
+  const now = new Date();
+  const venc30 = _equipInspections.filter(i=>i.next_inspection_date && new Date(i.next_inspection_date) <= new Date(now.getTime()+30*86400000) && new Date(i.next_inspection_date) >= now).length;
+  const vencidas = _equipInspections.filter(i=>i.next_inspection_date && new Date(i.next_inspection_date) < now).length;
+  // Atualiza badge
+  const tb = document.getElementById('tb-eq'); if(tb) tb.textContent = tot;
+
+  const f = _equipFilters;
+  const filtered = _equipments.filter(e=>{
+    if(f.status && e.status!==f.status) return false;
+    if(f.type && e.equipment_type!==f.type) return false;
+    if(f.nr13==='sim' && !e.nr13_required) return false;
+    if(f.nr13==='nao' && e.nr13_required) return false;
+    if(f.project && e.project_id!==f.project) return false;
+    if(f.search){
+      const q=f.search.toLowerCase();
+      if(!(e.tag||'').toLowerCase().includes(q) && !(e.name||'').toLowerCase().includes(q) && !(e.manufacturer||'').toLowerCase().includes(q)) return false;
+    }
+    return true;
+  });
+
+  document.getElementById('vequip').innerHTML = `
+    <div class="sumbar">
+      <div class="sc"><div class="slbl">Equipamentos</div><div class="sval">${tot}</div></div>
+      <div class="sc"><div class="slbl">Operando</div><div class="sval" style="color:var(--hs)">${opt}</div></div>
+      <div class="sc"><div class="slbl">Parados/Manutenção</div><div class="sval" style="color:var(--hw)">${par}</div></div>
+      <div class="sc"><div class="slbl">NR-13 aplicável</div><div class="sval" style="color:var(--hbm)">${nr13}</div></div>
+      <div class="sc"><div class="slbl">Insp. vencendo 30d</div><div class="sval" style="color:${vencidas?'#c0392b':venc30?'#b85c00':'#1a8c4e'}">${vencidas?vencidas+' ⚠️':venc30}</div></div>
+    </div>
+    <div class="fbar">
+      🔍 <input type="text" id="eq-q" style="min-width:200px" placeholder="TAG, nome, fabricante..." value="${san(f.search||'')}" oninput="eqSet('search',this.value)">
+      <select id="eq-status" onchange="eqSet('status',this.value)">
+        <option value="">Todos status</option>
+        <option value="operando" ${f.status==='operando'?'selected':''}>Operando</option>
+        <option value="parado" ${f.status==='parado'?'selected':''}>Parado</option>
+        <option value="manutencao" ${f.status==='manutencao'?'selected':''}>Manutenção</option>
+        <option value="desativado" ${f.status==='desativado'?'selected':''}>Desativado</option>
+      </select>
+      <select id="eq-type" onchange="eqSet('type',this.value)">
+        <option value="">Todos tipos</option>
+        <option value="vaso_pressao" ${f.type==='vaso_pressao'?'selected':''}>🛢️ Vaso de pressão</option>
+        <option value="tanque" ${f.type==='tanque'?'selected':''}>🛢️ Tanque</option>
+        <option value="torre" ${f.type==='torre'?'selected':''}>🗼 Torre</option>
+        <option value="forno" ${f.type==='forno'?'selected':''}>🔥 Forno</option>
+        <option value="trocador_calor" ${f.type==='trocador_calor'?'selected':''}>♨️ Trocador de calor</option>
+        <option value="reator" ${f.type==='reator'?'selected':''}>⚗️ Reator</option>
+        <option value="separador" ${f.type==='separador'?'selected':''}>🔧 Separador</option>
+      </select>
+      <select id="eq-nr13" onchange="eqSet('nr13',this.value)">
+        <option value="">NR-13</option>
+        <option value="sim" ${f.nr13==='sim'?'selected':''}>Aplicável</option>
+        <option value="nao" ${f.nr13==='nao'?'selected':''}>Não aplicável</option>
+      </select>
+      <select id="eq-proj" onchange="eqSet('project',this.value)">
+        <option value="">Todos projetos</option>
+        ${projects.map(p=>`<option value="${p.id}" ${f.project===p.id?'selected':''}>${san(p.code)} · ${san(p.name)}</option>`).join('')}
+      </select>
+      <button class="bg" onclick="eqClearFilters()"><i data-lucide="x"></i>Limpar</button>
+      <span style="font-size:10px;color:var(--hmu);margin-left:auto"><strong>${filtered.length}</strong> de ${tot}</span>
+    </div>
+    <div class="tbl-wrap"><table>
+      <thead><tr>
+        <th>TAG</th><th>Nome</th><th>Tipo</th><th>Fabricante</th>
+        <th>P proj.</th><th>T proj.</th><th>Volume</th>
+        <th>NR-13</th><th>Status</th><th>Última insp.</th><th>Próxima</th><th></th>
+      </tr></thead>
+      <tbody>${!filtered.length?`<tr><td colspan="12" style="padding:0">
+        <div style="text-align:center;padding:50px 22px;background:var(--t1);border-radius:12px;margin:18px 22px">
+          <div style="width:64px;height:64px;border-radius:16px;background:var(--warning-l);display:inline-flex;align-items:center;justify-content:center;margin-bottom:14px"><i data-lucide="cylinder" style="width:32px;height:32px;color:var(--warning)"></i></div>
+          <div style="font-size:18px;font-weight:700;color:var(--t9);margin-bottom:6px;letter-spacing:-.3px">Nenhum equipamento NR-13 cadastrado</div>
+          <div style="font-size:13px;color:var(--t6);max-width:540px;margin:0 auto 22px;line-height:1.6">A IA pode ler um plot plan ou P&amp;ID e cadastrar automaticamente vasos, tanques, trocadores e tubulações sob pressão. Ou você cadastra manualmente.</div>
+          <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+            <button class="btn bia" onclick="openEquipAIModal()"><i data-lucide="sparkles"></i>Cadastrar via IA</button>
+            <button class="bp" onclick="oEquip(null)"><i data-lucide="plus"></i>Novo manualmente</button>
+            <button class="bo" onclick="goV('maint')"><i data-lucide="wrench"></i>Ver Manutenção</button>
+          </div>
+        </div>
+      </td></tr>`:filtered.map(e=>{
+        const last = _equipInspections.filter(i=>i.equipment_id===e.id).sort((a,b)=>(b.inspection_date||'').localeCompare(a.inspection_date||''))[0];
+        const nextStr = last?.next_inspection_date || '—';
+        const ageDays = last?.next_inspection_date ? Math.floor((new Date(last.next_inspection_date)-new Date())/86400000) : null;
+        const nextClr = ageDays===null?'var(--hmu)':ageDays<0?'#c0392b':ageDays<=30?'#b85c00':'#1a8c4e';
+        const typeIcons = {vaso_pressao:'🛢️',tanque:'🛢️',torre:'🗼',forno:'🔥',trocador_calor:'♨️',reator:'⚗️',separador:'🔧',filtro:'🔍',outros:'•'};
+        const statusBadges = {operando:'b-sim',parado:'b-pen',manutencao:'b-ny',desativado:'b-nn',sucateado:'b-nao'};
+        return `<tr>
+          <td><strong class="mono" style="color:var(--hb);font-size:11px">${san(e.tag)}</strong></td>
+          <td>${san(e.name)}</td>
+          <td><span class="badge b-fl">${typeIcons[e.equipment_type]||'•'} ${san((e.equipment_type||'').replace('_',' '))}</span></td>
+          <td style="font-size:10px">${san(e.manufacturer||'—')}</td>
+          <td class="mono">${e.design_pressure_bar?e.design_pressure_bar+' bar':'—'}</td>
+          <td class="mono">${e.design_temp_c?e.design_temp_c+' °C':'—'}</td>
+          <td class="mono">${e.volume_m3?e.volume_m3+' m³':'—'}</td>
+          <td>${e.nr13_required?'<span class="badge b-ny">'+(e.nr13_category||'SIM')+'</span>':'<span class="badge b-nn">—</span>'}</td>
+          <td><span class="badge ${statusBadges[e.status]||'b-nn'}">${san(e.status||'—')}</span></td>
+          <td class="mono" style="font-size:10px">${last?fmtD(last.inspection_date):'—'}</td>
+          <td class="mono" style="font-size:10px;color:${nextClr}">${fmtD(nextStr)}${ageDays!==null?'<div style="font-size:8.5px">'+(ageDays<0?'vencida '+(-ageDays)+'d':'em '+ageDays+'d')+'</div>':''}</td>
+          <td><div class="act-col">
+            <button class="sm-e" onclick="openEquipInsp('${e.id}','${san(e.tag).replace(/'/g,'')}','${san(e.name).replace(/'/g,'')}')">📋 Inspeção</button>
+            <button class="sm-e" onclick="openEquipUT('${e.id}','${san(e.tag).replace(/'/g,'')}')">📏 UT</button>
+            <button class="sm-e" onclick="genNR13PDF('${e.id}')">📄 NR-13 PDF</button>
+            <button class="sm-e" onclick="oEquip('${e.id}')" title="Editar"><i data-lucide="pencil"></i></button>
+            <button class="sm-d" onclick="delEquip('${e.id}','${san(e.tag).replace(/'/g,'')}')" title="Excluir"><i data-lucide="trash-2"></i></button>
+          </div></td>
+        </tr>`;
+      }).join('')}</tbody>
+    </table></div>`;
+}
+
+async function loadEquipData(){
+  const [eq, insp, ut] = await Promise.all([
+    sb.from('equipments').select('*').is('deleted_at',null).order('tag'),
+    sb.from('equipment_inspections').select('*').is('deleted_at',null).order('inspection_date',{ascending:false}),
+    sb.from('equipment_thickness_readings').select('*').order('reading_date',{ascending:false})
+  ]);
+  _equipments = eq.data || [];
+  _equipInspections = insp.data || [];
+  _equipUT = ut.data || [];
+}
+
+function eqSet(k,v){_equipFilters[k]=v;rEquip();}
+function eqClearFilters(){_equipFilters={status:'',type:'',nr13:'',project:'',search:''};rEquip();}
+
+// ═══ Modal de cadastro/edição de equipamento ═══
+function oEquip(id){
+  closeAllDynamicOverlays();
+  const e = id ? _equipments.find(x=>x.id===id) : null;
+  const html = `<div class="overlay open" id="equip-overlay" onclick="if(event.target===this)closeEquipModal()">
+    <div class="mbox">
+      <button class="mclose" onclick="closeEquipModal()" title="Fechar"><i data-lucide="x"></i></button>
+      <div class="mtitle"><i data-lucide="cylinder" style="width:18px;height:18px;color:var(--primary)"></i>${e?'Editar':'Novo'} Equipamento</div>
+      <div class="sec">📌 Identificação</div>
+      <div class="fg">
+        <div class="field"><label>TAG *</label><input id="eq-tag" placeholder="V-101" value="${san(e?.tag||'')}"></div>
+        <div class="field full"><label>Nome *</label><input id="eq-name" placeholder="Vaso separador de gás" value="${san(e?.name||'')}"></div>
+        <div class="field"><label>Tipo</label>
+          <select id="eq-etype">
+            ${[['vaso_pressao','Vaso de pressão'],['tanque','Tanque'],['torre','Torre'],['forno','Forno'],['trocador_calor','Trocador de calor'],['reator','Reator'],['separador','Separador'],['filtro','Filtro'],['outros','Outros']].map(([v,l])=>`<option value="${v}" ${e?.equipment_type===v?'selected':''}>${l}</option>`).join('')}
+          </select>
+        </div>
+        <div class="field"><label>Status</label>
+          <select id="eq-status-m">
+            ${['operando','parado','manutencao','desativado','sucateado'].map(s=>`<option value="${s}" ${(e?.status||'operando')===s?'selected':''}>${s}</option>`).join('')}
+          </select>
+        </div>
+        <div class="field"><label>Projeto</label>
+          <select id="eq-project">
+            <option value="">— Nenhum —</option>
+            ${projects.map(p=>`<option value="${p.id}" ${e?.project_id===p.id?'selected':''}>${san(p.code)}</option>`).join('')}
+          </select>
+        </div>
+        <div class="field"><label>Localização</label><input id="eq-loc" placeholder="Área 100" value="${san(e?.location_area||'')}"></div>
+      </div>
+
+      <div class="sec">🏭 Fabricação</div>
+      <div class="fg">
+        <div class="field"><label>Fabricante</label><input id="eq-mf" value="${san(e?.manufacturer||'')}"></div>
+        <div class="field"><label>Modelo</label><input id="eq-model" value="${san(e?.model||'')}"></div>
+        <div class="field"><label>Nº de série</label><input id="eq-sn" value="${san(e?.serial_number||'')}"></div>
+        <div class="field"><label>Ano</label><input type="number" id="eq-yr" value="${e?.fabrication_year||''}"></div>
+        <div class="field"><label>Data instalação</label><input type="date" id="eq-inst" value="${e?.installation_date||''}"></div>
+        <div class="field"><label>Código projeto</label><input id="eq-code" placeholder="ASME VIII Div.1" value="${san(e?.design_code||'')}"></div>
+      </div>
+
+      <div class="sec">🌡️ Dados de processo</div>
+      <div class="fg">
+        <div class="field"><label>P projeto (bar)</label><input type="number" step="0.1" id="eq-pp" value="${e?.design_pressure_bar||''}"></div>
+        <div class="field"><label>T projeto (°C)</label><input type="number" step="1" id="eq-tp" value="${e?.design_temp_c||''}"></div>
+        <div class="field"><label>P operação (bar)</label><input type="number" step="0.1" id="eq-po" value="${e?.operating_pressure_bar||''}"></div>
+        <div class="field"><label>T operação (°C)</label><input type="number" step="1" id="eq-to" value="${e?.operating_temp_c||''}"></div>
+        <div class="field"><label>Volume (m³)</label><input type="number" step="0.01" id="eq-vol" value="${e?.volume_m3||''}"></div>
+        <div class="field"><label>Diâmetro (mm)</label><input type="number" step="1" id="eq-d" value="${e?.diameter_mm||''}"></div>
+        <div class="field"><label>Altura/Comp. (mm)</label><input type="number" step="1" id="eq-h" value="${e?.height_or_length_mm||''}"></div>
+        <div class="field full"><label>Fluido</label><input id="eq-fl" placeholder="Propeno, vapor de baixa..." value="${san(e?.fluid_service||'')}"></div>
+      </div>
+
+      <div class="sec">📐 Construção</div>
+      <div class="fg">
+        <div class="field"><label>Espessura costado (mm)</label><input type="number" step="0.1" id="eq-st" value="${e?.shell_thickness_mm||''}"></div>
+        <div class="field"><label>Espessura tampo (mm)</label><input type="number" step="0.1" id="eq-ht" value="${e?.head_thickness_mm||''}"></div>
+        <div class="field full"><label>Especificação material</label><input id="eq-mat" placeholder="ASTM A516 Gr.70" value="${san(e?.material_spec||'')}"></div>
+        <div class="field"><label>Isolamento</label><input id="eq-iso" placeholder="Lã rocha 50mm" value="${san(e?.insulation_type||'')}"></div>
+        <div class="field"><label>Pintura externa</label><input id="eq-pe" placeholder="Alumin." value="${san(e?.external_paint||'')}"></div>
+      </div>
+
+      <div class="sec">📋 NR-13</div>
+      <div class="fg">
+        <div class="field"><label style="display:flex;align-items:center;gap:5px;cursor:pointer"><input type="checkbox" id="eq-nr13" ${e?.nr13_required?'checked':''}> Aplicável NR-13</label></div>
+        <div class="field"><label>Categoria</label>
+          <select id="eq-cat">
+            <option value="">—</option>
+            ${['I','II','III','IV','V','nao_aplicavel'].map(c=>`<option value="${c}" ${e?.nr13_category===c?'selected':''}>${c==='nao_aplicavel'?'N/A':c}</option>`).join('')}
+          </select>
+        </div>
+        <div class="field full"><label>Observações</label><input id="eq-notes" value="${san(e?.notes||'')}"></div>
+      </div>
+
+      <div class="mfooter">
+        <button class="bg" onclick="closeEquipModal()">Cancelar</button>
+        <button class="bp" onclick="saveEquip('${e?.id||''}')"><i data-lucide="check"></i>Salvar</button>
+      </div>
+    </div>
+  </div>`;
+  document.body.insertAdjacentHTML('beforeend', html);
+}
+function closeEquipModal(){const o=document.getElementById('equip-overlay');if(o)o.remove();}
+
+async function saveEquip(id){
+  const tag = document.getElementById('eq-tag').value.trim();
+  const name = document.getElementById('eq-name').value.trim();
+  if(!tag||!name){toast('TAG e nome são obrigatórios','warn');return;}
+  const payload = {
+    org_id: _org.id, tag, name,
+    equipment_type: document.getElementById('eq-etype').value,
+    status: document.getElementById('eq-status-m').value,
+    project_id: document.getElementById('eq-project').value || null,
+    location_area: document.getElementById('eq-loc').value.trim()||null,
+    manufacturer: document.getElementById('eq-mf').value.trim()||null,
+    model: document.getElementById('eq-model').value.trim()||null,
+    serial_number: document.getElementById('eq-sn').value.trim()||null,
+    fabrication_year: parseInt(document.getElementById('eq-yr').value)||null,
+    installation_date: document.getElementById('eq-inst').value||null,
+    design_code: document.getElementById('eq-code').value.trim()||null,
+    design_pressure_bar: parseFloat(document.getElementById('eq-pp').value)||null,
+    design_temp_c: parseFloat(document.getElementById('eq-tp').value)||null,
+    operating_pressure_bar: parseFloat(document.getElementById('eq-po').value)||null,
+    operating_temp_c: parseFloat(document.getElementById('eq-to').value)||null,
+    volume_m3: parseFloat(document.getElementById('eq-vol').value)||null,
+    diameter_mm: parseFloat(document.getElementById('eq-d').value)||null,
+    height_or_length_mm: parseFloat(document.getElementById('eq-h').value)||null,
+    fluid_service: document.getElementById('eq-fl').value.trim()||null,
+    shell_thickness_mm: parseFloat(document.getElementById('eq-st').value)||null,
+    head_thickness_mm: parseFloat(document.getElementById('eq-ht').value)||null,
+    material_spec: document.getElementById('eq-mat').value.trim()||null,
+    insulation_type: document.getElementById('eq-iso').value.trim()||null,
+    external_paint: document.getElementById('eq-pe').value.trim()||null,
+    nr13_required: document.getElementById('eq-nr13').checked,
+    nr13_category: document.getElementById('eq-cat').value||null,
+    notes: document.getElementById('eq-notes').value.trim()||null,
+    updated_at: new Date().toISOString()
+  };
+  let res;
+  if(id){
+    res = await sb.from('equipments').update(payload).eq('id',id);
+  } else {
+    res = await sb.from('equipments').insert(payload);
+  }
+  if(res.error){
+    const m = res.error.message || '';
+    if(m.includes('duplicate key') || m.includes('uq_equipments')){
+      toast(`Já existe equipamento com TAG "${tag}". Use outra TAG.`,'warn');
+    } else toast('Erro: '+m,'err');
+    return;
+  }
+  toast(id?'Atualizado':'Equipamento criado','ok');
+  closeEquipModal();
+  await rEquip();
+}
+
+async function delEquip(id,tag){
+  const _ok2 = await (w.PIAConfirm ? w.PIAConfirm.danger("Excluir equipamento", `"${tag}" será removido junto com inspeções e medições UT associadas. Esta ação não pode ser desfeita.`, "Excluir equipamento") : Promise.resolve(confirm(`Excluir equipamento "${tag}"?\nIsso também remove inspeções e medições UT associadas.`)));
+  if(!_ok2) return;
+  const {error} = await sb.from('equipments').update({deleted_at: new Date().toISOString()}).eq('id',id);
+  if(error){toast('Erro: '+error.message,'err');return;}
+  toast('Excluído','ok');
+  await rEquip();
+}
+
+// ═══ Modal Inspeção ═══
+function openEquipInsp(equipId, tag, name){
+  closeAllDynamicOverlays();
+  const list = _equipInspections.filter(i=>i.equipment_id===equipId);
+  const html = `<div class="overlay open" id="insp-overlay" onclick="if(event.target===this)closeInspModal()">
+    <div class="mbox" style="max-width:900px">
+      <button class="mclose" onclick="closeInspModal()" title="Fechar"><i data-lucide="x"></i></button>
+      <div class="mtitle"><i data-lucide="clipboard-check" style="width:18px;height:18px;color:var(--primary)"></i>Inspeções: ${san(tag)} · ${san(name)}</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <span style="font-size:11px;color:var(--hmu)">${list.length} inspeções registradas</span>
+        <button class="btn bp" onclick="toggleInspForm(true)"><i data-lucide="plus"></i>Nova inspeção</button>
+      </div>
+      <div id="insp-form" style="display:none;background:var(--bg2);border-radius:8px;padding:12px;margin-bottom:10px">
+        <div class="sec">Nova inspeção</div>
+        <div class="fg">
+          <div class="field"><label>Tipo *</label>
+            <select id="ni-type">
+              <option value="externa">Exame externo</option>
+              <option value="interna">Exame interno</option>
+              <option value="ut_espessura">UT espessura</option>
+              <option value="teste_hidrostatico">Teste hidrostático</option>
+              <option value="operacional">Operacional</option>
+              <option value="re_validacao_nr13">Re-validação NR-13</option>
+            </select>
+          </div>
+          <div class="field"><label>Data *</label><input type="date" id="ni-date" value="${new Date().toISOString().slice(0,10)}"></div>
+          <div class="field"><label>Inspetor</label><input id="ni-insp" placeholder="Nome"></div>
+          <div class="field"><label>CREA</label><input id="ni-crea"></div>
+          <div class="field"><label>SNQC</label><input id="ni-snqc" placeholder="N1, N2, N3"></div>
+          <div class="field"><label>Resultado *</label>
+            <select id="ni-res">
+              <option value="aprovado">✅ Aprovado</option>
+              <option value="aprovado_com_ressalva">⚠️ Aprovado c/ ressalva</option>
+              <option value="reprovado">❌ Reprovado</option>
+              <option value="pendente">⏳ Pendente</option>
+            </select>
+          </div>
+          <div class="field"><label>Próxima inspeção</label><input type="date" id="ni-next"></div>
+          <div class="field full"><label>Achados</label><input id="ni-find"></div>
+          <div class="field full"><label>Recomendações</label><input id="ni-rec"></div>
+        </div>
+        <div class="mfooter">
+          <button class="bg" onclick="toggleInspForm(false)">Cancelar</button>
+          <button class="bp" onclick="saveInsp('${equipId}')">✔ Registrar</button>
+        </div>
+      </div>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>Data</th><th>Tipo</th><th>Inspetor</th><th>Resultado</th><th>Próxima</th><th>Achados</th></tr></thead>
+        <tbody>${list.length?list.map(i=>{
+          const resColors = {aprovado:'b-sim',aprovado_com_ressalva:'b-pen',reprovado:'b-nao',pendente:'b-nn'};
+          return `<tr>
+            <td class="mono">${fmtD(i.inspection_date)}</td>
+            <td>${san(i.inspection_type)}</td>
+            <td>${san(i.inspector_name||'—')}${i.inspector_snqc?'<div style="font-size:9px;color:var(--hmu)">SNQC: '+san(i.inspector_snqc)+'</div>':''}</td>
+            <td><span class="badge ${resColors[i.result]||'b-nn'}">${san(i.result||'—')}</span></td>
+            <td class="mono">${fmtD(i.next_inspection_date)||'—'}</td>
+            <td style="font-size:10px">${san((i.findings||'').slice(0,60))}</td>
+          </tr>`;
+        }).join(''):'<tr><td colspan="6"><div class="empty-st">Sem inspeções. Adicione a primeira.</div></td></tr>'}</tbody>
+      </table></div>
+      <div class="mfooter"><button class="bg" onclick="closeInspModal()">Fechar</button></div>
+    </div>
+  </div>`;
+  document.body.insertAdjacentHTML('beforeend', html);
+}
+function closeInspModal(){const o=document.getElementById('insp-overlay');if(o)o.remove();}
+function toggleInspForm(show){document.getElementById('insp-form').style.display=show?'block':'none';}
+
+async function saveInsp(equipId){
+  const payload = {
+    org_id: _org.id, equipment_id: equipId,
+    inspection_type: document.getElementById('ni-type').value,
+    inspection_date: document.getElementById('ni-date').value,
+    inspector_name: document.getElementById('ni-insp').value.trim()||null,
+    inspector_crea: document.getElementById('ni-crea').value.trim()||null,
+    inspector_snqc: document.getElementById('ni-snqc').value.trim()||null,
+    result: document.getElementById('ni-res').value,
+    next_inspection_date: document.getElementById('ni-next').value||null,
+    findings: document.getElementById('ni-find').value.trim()||null,
+    recommendations: document.getElementById('ni-rec').value.trim()||null
+  };
+  if(!payload.inspection_date){toast('Data obrigatória','warn');return;}
+  const {error} = await sb.from('equipment_inspections').insert(payload);
+  if(error){toast('Erro: '+error.message,'err');return;}
+  toast('Inspeção registrada','ok');
+  closeInspModal();
+  await rEquip();
+}
+
+// ═══ Modal UT (Espessuras) ═══
+function openEquipUT(equipId, tag){
+  closeAllDynamicOverlays();
+  const list = _equipUT.filter(u=>u.equipment_id===equipId);
+  const eq = _equipments.find(x=>x.id===equipId);
+  const html = `<div class="overlay open" id="ut-overlay" onclick="if(event.target===this)closeUTModal()">
+    <div class="mbox" style="max-width:900px">
+      <button class="mclose" onclick="closeUTModal()" title="Fechar"><i data-lucide="x"></i></button>
+      <div class="mtitle"><i data-lucide="ruler" style="width:18px;height:18px;color:var(--primary)"></i>Medições UT: ${san(tag)}</div>
+      <div style="display:flex;gap:18px;font-size:11px;color:var(--hmu);margin-bottom:10px">
+        <span>📐 <strong>Espessura nominal:</strong> ${eq?.shell_thickness_mm||'—'} mm</span>
+        <span>📊 <strong>Pontos cadastrados:</strong> ${[...new Set(list.map(u=>u.point_code))].length}</span>
+        <span>📅 <strong>Medições:</strong> ${list.length}</span>
+      </div>
+      <div style="background:var(--bg2);border-radius:8px;padding:12px;margin-bottom:10px">
+        <div class="sec">+ Nova medição</div>
+        <div class="fg">
+          <div class="field"><label>Ponto *</label><input id="ut-pt" placeholder="P1, P2, P3..."></div>
+          <div class="field"><label>Data *</label><input type="date" id="ut-date" value="${new Date().toISOString().slice(0,10)}"></div>
+          <div class="field"><label>Espessura medida (mm) *</label><input type="number" step="0.01" id="ut-thick"></div>
+          <div class="field"><label>Parte</label>
+            <select id="ut-part">
+              <option value="costado">Costado</option>
+              <option value="tampo_superior">Tampo superior</option>
+              <option value="tampo_inferior">Tampo inferior</option>
+              <option value="bocal">Bocal</option>
+              <option value="solda">Solda</option>
+              <option value="outros">Outros</option>
+            </select>
+          </div>
+          <div class="field"><label>Mín. requerida (mm)</label><input type="number" step="0.01" id="ut-tmin"></div>
+          <div class="field"><label>Inspetor</label><input id="ut-insp"></div>
+          <div class="field full"><label>Posição</label><input id="ut-pos" placeholder="Costado 4m altura, azimute 0°"></div>
+        </div>
+        <div class="mfooter">
+          <button class="bp" onclick="saveUT('${equipId}')">✔ Registrar medição</button>
+        </div>
+      </div>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>Ponto</th><th>Data</th><th>Parte</th><th>Esp. medida</th><th>Mín. req.</th><th>Margem</th><th>Posição</th></tr></thead>
+        <tbody>${list.length?list.slice(0,30).map(u=>{
+          const margem = u.min_required_mm ? (u.thickness_mm - u.min_required_mm) : null;
+          const corM = margem===null?'var(--hmu)':margem<=0?'#c0392b':margem<=1?'#b85c00':'#1a8c4e';
+          return `<tr>
+            <td><strong>${san(u.point_code)}</strong></td>
+            <td class="mono">${fmtD(u.reading_date)}</td>
+            <td>${san((u.equipment_part||'').replace('_',' '))}</td>
+            <td class="mono"><b>${u.thickness_mm} mm</b></td>
+            <td class="mono">${u.min_required_mm||'—'}${u.min_required_mm?' mm':''}</td>
+            <td class="mono" style="color:${corM}">${margem!==null?(margem>=0?'+':'')+margem.toFixed(2)+' mm':'—'}</td>
+            <td style="font-size:10px;color:var(--hmu)">${san((u.position_description||'').slice(0,40))}</td>
+          </tr>`;
+        }).join(''):'<tr><td colspan="7"><div class="empty-st">Sem medições UT. Adicione a primeira.</div></td></tr>'}</tbody>
+      </table></div>
+      <div class="mfooter"><button class="bg" onclick="closeUTModal()">Fechar</button></div>
+    </div>
+  </div>`;
+  document.body.insertAdjacentHTML('beforeend', html);
+}
+function closeUTModal(){const o=document.getElementById('ut-overlay');if(o)o.remove();}
+
+async function saveUT(equipId){
+  const pt = document.getElementById('ut-pt').value.trim();
+  const thick = parseFloat(document.getElementById('ut-thick').value);
+  if(!pt||!thick){toast('Ponto e espessura obrigatórios','warn');return;}
+  const payload = {
+    org_id: _org.id, equipment_id: equipId,
+    point_code: pt,
+    reading_date: document.getElementById('ut-date').value,
+    thickness_mm: thick,
+    min_required_mm: parseFloat(document.getElementById('ut-tmin').value)||null,
+    equipment_part: document.getElementById('ut-part').value,
+    position_description: document.getElementById('ut-pos').value.trim()||null,
+    inspector_name: document.getElementById('ut-insp').value.trim()||null
+  };
+  const {error} = await sb.from('equipment_thickness_readings').insert(payload);
+  if(error){toast('Erro: '+error.message,'err');return;}
+  toast('Medição registrada','ok');
+  closeUTModal();
+  await rEquip();
+}
+
+
+// ═══════════════════════════════════════════════════
+// MANUTENÇÃO (Ordens de Serviço · Backlog · MTBF/MTTR)
+// ═══════════════════════════════════════════════════
+let _maintOS = [];
+let _maintFilters = {status:'',priority:'',type:'',equipment:'',view:'kanban'};
+
+async function rMaint(){
+  await loadMaintData();
+  // Calcular KPIs
+  const open = _maintOS.filter(o=>['solicitada','aberta','planejada','em_execucao'].includes(o.status)).length;
+  const planejada = _maintOS.filter(o=>o.status==='planejada').length;
+  const exec = _maintOS.filter(o=>o.status==='em_execucao').length;
+  const concl = _maintOS.filter(o=>o.status==='concluida').length;
+  const criticas = _maintOS.filter(o=>['critica','emergencial'].includes(o.priority) && !['concluida','cancelada'].includes(o.status)).length;
+  // MTBF / MTTR aproximado
+  const closedOS = _maintOS.filter(o=>o.actual_start && o.actual_end);
+  let mttr = 0;
+  if(closedOS.length){
+    const totalH = closedOS.reduce((s,o)=>s + ((new Date(o.actual_end)-new Date(o.actual_start))/3600000), 0);
+    mttr = totalH / closedOS.length;
+  }
+  document.getElementById('tb-os').textContent = open;
+  
+  const f = _maintFilters;
+  const filtered = _maintOS.filter(o=>{
+    if(f.status && o.status!==f.status) return false;
+    if(f.priority && o.priority!==f.priority) return false;
+    if(f.type && o.wo_type!==f.type) return false;
+    if(f.equipment && o.equipment_id!==f.equipment && o.rotating_equipment_id!==f.equipment) return false;
+    return true;
+  });
+  
+  document.getElementById('vmaint').innerHTML = `
+    <div class="sumbar">
+      <div class="sc"><div class="slbl">Em aberto</div><div class="sval" style="color:var(--hbm)">${open}</div></div>
+      <div class="sc"><div class="slbl">Planejadas</div><div class="sval">${planejada}</div></div>
+      <div class="sc"><div class="slbl">Em execução</div><div class="sval" style="color:var(--hc)">${exec}</div></div>
+      <div class="sc"><div class="slbl">Concluídas</div><div class="sval" style="color:var(--hs)">${concl}</div></div>
+      <div class="sc"><div class="slbl">Críticas em aberto</div><div class="sval" style="color:${criticas?'#c0392b':'var(--hs)'}">${criticas}</div></div>
+    </div>
+    <div class="fbar">
+      <button class="${f.view==='kanban'?'bp':'bg'}" onclick="maintSetView('kanban')" style="padding:4px 11px;font-size:11px">📋 Kanban</button>
+      <button class="${f.view==='list'?'bp':'bg'}" onclick="maintSetView('list')" style="padding:4px 11px;font-size:11px">📃 Lista</button>
+      <span style="border-left:0.5px solid var(--hbr);height:20px;margin:0 4px"></span>
+      <select onchange="maintSet('priority',this.value)">
+        <option value="">Todas prioridades</option>
+        <option value="emergencial" ${f.priority==='emergencial'?'selected':''}>🚨 Emergencial</option>
+        <option value="critica" ${f.priority==='critica'?'selected':''}>🔴 Crítica</option>
+        <option value="alta" ${f.priority==='alta'?'selected':''}>🟠 Alta</option>
+        <option value="media" ${f.priority==='media'?'selected':''}>🟡 Média</option>
+        <option value="baixa" ${f.priority==='baixa'?'selected':''}>🟢 Baixa</option>
+      </select>
+      <select onchange="maintSet('type',this.value)">
+        <option value="">Todos tipos</option>
+        <option value="preventiva" ${f.type==='preventiva'?'selected':''}>Preventiva</option>
+        <option value="preditiva" ${f.type==='preditiva'?'selected':''}>Preditiva</option>
+        <option value="corretiva_planejada" ${f.type==='corretiva_planejada'?'selected':''}>Corretiva planejada</option>
+        <option value="corretiva_emergencial" ${f.type==='corretiva_emergencial'?'selected':''}>Corretiva emergencial</option>
+        <option value="melhoria" ${f.type==='melhoria'?'selected':''}>Melhoria</option>
+        <option value="inspecao" ${f.type==='inspecao'?'selected':''}>Inspeção</option>
+      </select>
+      <span style="margin-left:auto;font-size:10.5px;color:var(--hmu)">MTTR médio: <strong>${mttr.toFixed(1)} h</strong> · ${closedOS.length} OS fechadas</span>
+    </div>
+    <div id="maint-body" style="padding:14px 16px">${f.view==='kanban' ? renderMaintKanban(filtered) : renderMaintList(filtered)}</div>
+  `;
+}
+
+async function loadMaintData(){
+  const {data} = await sb.from('maint_work_orders').select('*').is('deleted_at',null).order('created_at',{ascending:false}).limit(500);
+  _maintOS = data || [];
+}
+
+function maintSetView(v){_maintFilters.view=v;rMaint();}
+function maintSet(k,v){_maintFilters[k]=v;rMaint();}
+
+function renderMaintKanban(list){
+  const cols = [
+    {key:'solicitada', name:'Solicitada', color:'#5a6a85'},
+    {key:'aberta', name:'Aberta', color:'#0B3D91'},
+    {key:'planejada', name:'Planejada', color:'#1558cc'},
+    {key:'em_execucao', name:'Em execução', color:'#00A8E8'},
+    {key:'postergada', name:'Postergada', color:'#b85c00'},
+    {key:'concluida', name:'Concluída', color:'#1a8c4e'}
+  ];
+  return `<div style="display:grid;grid-template-columns:repeat(${cols.length},1fr);gap:10px;overflow-x:auto">
+    ${cols.map(c=>{
+      const items = list.filter(o=>o.status===c.key);
+      return `<div style="background:var(--bg2);border-radius:8px;padding:8px;min-height:200px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;padding:4px 6px;border-bottom:2px solid ${c.color}">
+          <strong style="color:${c.color};font-size:11px;text-transform:uppercase;letter-spacing:.4px">${c.name}</strong>
+          <span style="background:${c.color};color:#fff;font-size:10px;padding:1px 6px;border-radius:8px;font-weight:600">${items.length}</span>
+        </div>
+        ${items.length ? items.map(o=>renderMaintCard(o)).join('') : '<div style="text-align:center;padding:14px;color:var(--hmu);font-size:10px">—</div>'}
+      </div>`;
+    }).join('')}
+  </div>`;
+}
+
+function renderMaintCard(o){
+  const priColor = {emergencial:'#c0392b',critica:'#c0392b',alta:'#b85c00',media:'#1558cc',baixa:'#7a8aa3'}[o.priority];
+  const priIcon = {emergencial:'🚨',critica:'🔴',alta:'🟠',media:'🟡',baixa:'🟢'}[o.priority];
+  const eqInfo = o.equipment_id ? _equipments.find(e=>e.id===o.equipment_id) : null;
+  const eqTag = eqInfo ? eqInfo.tag : (o.rotating_equipment_id ? '(rotativo)' : '—');
+  return `<div style="background:#fff;border:0.5px solid var(--hbr);border-radius:6px;padding:9px 11px;margin-bottom:7px;cursor:pointer;border-left:3px solid ${priColor}" onclick="oMaintOS('${o.id}')">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+      <strong style="font-family:monospace;font-size:10.5px;color:var(--hb)">${san(o.wo_number)}</strong>
+      <span style="font-size:14px">${priIcon}</span>
+    </div>
+    <div style="font-size:11px;font-weight:500;margin-bottom:3px">${san(o.title).slice(0,55)}</div>
+    <div style="font-size:9.5px;color:var(--hmu);display:flex;gap:6px;flex-wrap:wrap">
+      <span>🏷️ ${san(eqTag)}</span>
+      <span>${san((o.wo_type||'').replace('_',' '))}</span>
+    </div>
+    ${o.scheduled_end ? `<div style="font-size:9px;color:var(--hmu);margin-top:3px;font-family:monospace">📅 ${fmtD(o.scheduled_end)}</div>` : ''}
+  </div>`;
+}
+
+function renderMaintList(list){
+  if(!list.length) return '<div class="empty-st" style="padding:30px">Nenhuma OS. Clique em <strong>+ Nova OS</strong>.</div>';
+  return `<div class="tbl-wrap"><table>
+    <thead><tr>
+      <th>OS</th><th>Título</th><th>Tipo</th><th>Prioridade</th><th>Equipamento</th>
+      <th>Status</th><th>Início prev.</th><th>Fim prev.</th><th>HH plan.</th><th></th>
+    </tr></thead>
+    <tbody>${list.map(o=>{
+      const priColors = {emergencial:'b-nao',critica:'b-nao',alta:'b-ny',media:'b-pen',baixa:'b-nn'};
+      const stColors = {solicitada:'b-nn',aberta:'b-fl',planejada:'b-in',em_execucao:'b-pen',postergada:'b-ny',concluida:'b-sim',cancelada:'b-nao'};
+      const eqInfo = o.equipment_id ? _equipments.find(e=>e.id===o.equipment_id) : null;
+      return `<tr>
+        <td><strong class="mono">${san(o.wo_number)}</strong></td>
+        <td>${san(o.title)}</td>
+        <td><span class="badge b-fl">${san((o.wo_type||'').replace('_',' '))}</span></td>
+        <td><span class="badge ${priColors[o.priority]||'b-nn'}">${san(o.priority||'—')}</span></td>
+        <td>${eqInfo?san(eqInfo.tag):'—'}</td>
+        <td><span class="badge ${stColors[o.status]||'b-nn'}">${san((o.status||'').replace('_',' '))}</span></td>
+        <td class="mono" style="font-size:10px">${fmtD(o.scheduled_start)}</td>
+        <td class="mono" style="font-size:10px">${fmtD(o.scheduled_end)}</td>
+        <td class="mono">${o.hh_planned||'—'}</td>
+        <td><div class="act-col">
+          <button class="sm-e" onclick="oMaintOS('${o.id}')"><i data-lucide="pencil"></i>Editar</button>
+          ${o.status==='concluida'?'':'<button class="sm-p" onclick="advanceMaintStatus(\''+o.id+'\')">▶</button>'}
+        </div></td>
+      </tr>`;
+    }).join('')}</tbody>
+  </table></div>`;
+}
+
+async function advanceMaintStatus(id){
+  const o = _maintOS.find(x=>x.id===id);
+  if(!o) return;
+  const order = ['solicitada','aberta','planejada','em_execucao','concluida'];
+  const idx = order.indexOf(o.status);
+  if(idx<0 || idx>=order.length-1) return;
+  const next = order[idx+1];
+  const updates = {status: next};
+  if(next==='em_execucao' && !o.actual_start) updates.actual_start = new Date().toISOString();
+  if(next==='concluida' && !o.actual_end){ updates.actual_end = new Date().toISOString(); updates.closed_at = new Date().toISOString();}
+  const {error} = await sb.from('maint_work_orders').update(updates).eq('id',id);
+  if(error){toast('Erro: '+error.message,'err');return;}
+  toast('Status: '+next,'ok');
+  await rMaint();
+}
+
+// ═══ Modal OS ═══
+function oMaintOS(id, defaultType){
+  closeAllDynamicOverlays();
+  const o = id ? _maintOS.find(x=>x.id===id) : null;
+  const html = `<div class="overlay open" id="mos-overlay" onclick="if(event.target===this)closeMOS()">
+    <div class="mbox">
+      <button class="mclose" onclick="closeMOS()" title="Fechar"><i data-lucide="x"></i></button>
+      <div class="mtitle"><i data-lucide="wrench" style="width:18px;height:18px;color:var(--primary)"></i>${o?'OS '+san(o.wo_number):'Nova Ordem de Serviço'}</div>
+      <div class="fg">
+        <div class="field"><label>Número OS</label><input id="os-num" placeholder="auto" value="${san(o?.wo_number||'OS-'+new Date().getFullYear()+'-'+String(_maintOS.length+1).padStart(5,'0'))}"></div>
+        <div class="field"><label>Tipo *</label>
+          <select id="os-type">
+            ${[['preventiva','Preventiva'],['preditiva','Preditiva'],['corretiva_planejada','Corretiva planejada'],['corretiva_emergencial','Corretiva emergencial'],['melhoria','Melhoria'],['inspecao','Inspeção']].map(([v,l])=>`<option value="${v}" ${(o?.wo_type||defaultType||'preventiva')===v?'selected':''}>${l}</option>`).join('')}
+          </select>
+        </div>
+        <div class="field"><label>Prioridade *</label>
+          <select id="os-pri">
+            ${[['baixa','🟢 Baixa'],['media','🟡 Média'],['alta','🟠 Alta'],['critica','🔴 Crítica'],['emergencial','🚨 Emergencial']].map(([v,l])=>`<option value="${v}" ${(o?.priority||'media')===v?'selected':''}>${l}</option>`).join('')}
+          </select>
+        </div>
+        <div class="field"><label>Status</label>
+          <select id="os-status">
+            ${['solicitada','aberta','planejada','em_execucao','postergada','concluida','cancelada'].map(s=>`<option value="${s}" ${(o?.status||'aberta')===s?'selected':''}>${s.replace('_',' ')}</option>`).join('')}
+          </select>
+        </div>
+        <div class="field full"><label>Título *</label><input id="os-title" placeholder="Troca de bomba P-101" value="${san(o?.title||'')}"></div>
+        <div class="field full"><label>Descrição</label><input id="os-desc" value="${san(o?.description||'')}"></div>
+        <div class="field"><label>Equipamento</label>
+          <select id="os-eq">
+            <option value="">— Selecione —</option>
+            ${_equipments.map(e=>`<option value="${e.id}" ${o?.equipment_id===e.id?'selected':''}>${san(e.tag)} · ${san(e.name).slice(0,30)}</option>`).join('')}
+          </select>
+        </div>
+        <div class="field"><label>Projeto</label>
+          <select id="os-proj">
+            <option value="">— Nenhum —</option>
+            ${projects.map(p=>`<option value="${p.id}" ${o?.project_id===p.id?'selected':''}>${san(p.code)}</option>`).join('')}
+          </select>
+        </div>
+        <div class="field"><label>Solicitante</label><input id="os-req" value="${san(o?.requested_by||'')}"></div>
+        <div class="field"><label>Responsável</label><input id="os-resp" value="${san(o?.responsible_person||'')}"></div>
+        <div class="field"><label>Equipe</label><input id="os-team" placeholder="Manutenção mecânica" value="${san(o?.responsible_team||'')}"></div>
+        <div class="field"><label>Início previsto</label><input type="date" id="os-ss" value="${o?.scheduled_start||''}"></div>
+        <div class="field"><label>Fim previsto</label><input type="date" id="os-se" value="${o?.scheduled_end||''}"></div>
+        <div class="field"><label>HH planejado</label><input type="number" step="0.5" id="os-hp" value="${o?.hh_planned||''}"></div>
+        <div class="field"><label>HH realizado</label><input type="number" step="0.5" id="os-ha" value="${o?.hh_actual||''}"></div>
+        <div class="field"><label>Custo plan. (R$)</label><input type="number" step="0.01" id="os-cp" value="${o?.cost_planned_brl||''}"></div>
+        <div class="field"><label>Custo real (R$)</label><input type="number" step="0.01" id="os-ca" value="${o?.cost_actual_brl||''}"></div>
+        <div class="field"><label>Downtime (h)</label><input type="number" step="0.1" id="os-dt" value="${o?.downtime_hours||''}"></div>
+        <div class="field full"><label>Achados / diagnóstico</label><input id="os-find" value="${san(o?.findings||'')}"></div>
+        <div class="field full"><label>Ações tomadas</label><input id="os-act" value="${san(o?.actions_taken||'')}"></div>
+      </div>
+      <div class="mfooter">
+        ${o ? '<button class="bg" style="margin-right:auto;color:var(--hd);border-color:#e0c8c8" onclick="delMaintOS(\''+o.id+'\')">🗑 Excluir</button>' : ''}
+        <button class="bg" onclick="closeMOS()">Cancelar</button>
+        <button class="bp" onclick="saveMaintOS('${o?.id||''}')"><i data-lucide="check"></i>Salvar</button>
+      </div>
+    </div>
+  </div>`;
+  document.body.insertAdjacentHTML('beforeend', html);
+}
+function closeMOS(){const o=document.getElementById('mos-overlay');if(o)o.remove();}
+
+async function saveMaintOS(id){
+  const title = document.getElementById('os-title').value.trim();
+  if(!title){toast('Título obrigatório','warn');return;}
+  const payload = {
+    org_id: _org.id,
+    wo_number: document.getElementById('os-num').value.trim(),
+    title,
+    description: document.getElementById('os-desc').value.trim()||null,
+    wo_type: document.getElementById('os-type').value,
+    priority: document.getElementById('os-pri').value,
+    status: document.getElementById('os-status').value,
+    equipment_id: document.getElementById('os-eq').value||null,
+    project_id: document.getElementById('os-proj').value||null,
+    requested_by: document.getElementById('os-req').value.trim()||null,
+    responsible_person: document.getElementById('os-resp').value.trim()||null,
+    responsible_team: document.getElementById('os-team').value.trim()||null,
+    scheduled_start: document.getElementById('os-ss').value||null,
+    scheduled_end: document.getElementById('os-se').value||null,
+    hh_planned: parseFloat(document.getElementById('os-hp').value)||null,
+    hh_actual: parseFloat(document.getElementById('os-ha').value)||null,
+    cost_planned_brl: parseFloat(document.getElementById('os-cp').value)||null,
+    cost_actual_brl: parseFloat(document.getElementById('os-ca').value)||null,
+    downtime_hours: parseFloat(document.getElementById('os-dt').value)||null,
+    findings: document.getElementById('os-find').value.trim()||null,
+    actions_taken: document.getElementById('os-act').value.trim()||null,
+    updated_at: new Date().toISOString()
+  };
+  let res;
+  if(id){
+    res = await sb.from('maint_work_orders').update(payload).eq('id',id);
+  } else {
+    payload.created_by = _user.id;
+    res = await sb.from('maint_work_orders').insert(payload);
+  }
+  if(res.error){toast('Erro: '+res.error.message,'err');return;}
+  toast(id?'Atualizada':'OS criada','ok');
+  closeMOS();
+  await rMaint();
+}
+
+async function delMaintOS(id){
+  const _ok = await (window.PIAConfirm ? window.PIAConfirm.danger('Excluir OS?', 'Esta ação remove a ordem de serviço. Não pode ser desfeito.', 'Excluir') : Promise.resolve(confirm('Excluir OS??'))); if(!_ok) return;
+  const {error} = await sb.from('maint_work_orders').update({deleted_at: new Date().toISOString()}).eq('id',id);
+  if(error){toast('Erro: '+error.message,'err');return;}
+  toast('Excluída','ok');
+  closeMOS();
+  await rMaint();
+}
+
+
+// ═══════════════════════════════════════════════════
+// PINTURA INDUSTRIAL (DFT, ponto orvalho, aderência)
+// ═══════════════════════════════════════════════════
+let _paintInsps = [];
+
+async function rPaint(){
+  const {data} = await sb.from('painting_inspections').select('*').is('deleted_at',null).order('inspection_date',{ascending:false}).limit(500);
+  _paintInsps = data || [];
+  const tot = _paintInsps.length;
+  const ok = _paintInsps.filter(p=>p.result==='aprovado').length;
+  const ress = _paintInsps.filter(p=>p.result==='aprovado_com_ressalva').length;
+  const rep = _paintInsps.filter(p=>p.result==='reprovado').length;
+  const avgDFT = tot ? Math.round(_paintInsps.reduce((s,p)=>s+(p.measured_dft_um||0),0)/tot) : 0;
+  
+  document.getElementById('vpaint').innerHTML = `
+    <div class="sumbar">
+      <div class="sc"><div class="slbl">Inspeções</div><div class="sval">${tot}</div></div>
+      <div class="sc"><div class="slbl">Aprovadas</div><div class="sval" style="color:var(--hs)">${ok}</div></div>
+      <div class="sc"><div class="slbl">Com ressalva</div><div class="sval" style="color:var(--hw)">${ress}</div></div>
+      <div class="sc"><div class="slbl">Reprovadas</div><div class="sval" style="color:var(--hd)">${rep}</div></div>
+      <div class="sc"><div class="slbl">DFT médio</div><div class="sval" style="color:var(--hbm)">${avgDFT} <span style="font-size:11px">µm</span></div></div>
+    </div>
+    <div style="padding:14px 16px;background:var(--bg)">
+      <div class="info" style="background:var(--hbl);border-left:3px solid var(--hbm);padding:9px 12px;font-size:11px;margin-bottom:14px">
+        💡 <strong>Pintura industrial:</strong> Use o ponto de orvalho calculado automaticamente. Aderência mínima 3 MPa (ASTM D4541). DFT por demão registrado por elcômetro.
+      </div>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>Data</th><th>Esquema</th><th>Inspetor</th><th>Preparação</th><th>DFT</th><th>Aderência</th><th>P. Orvalho</th><th>Umid.</th><th>Resultado</th><th></th></tr></thead>
+        <tbody>${tot?_paintInsps.map(p=>{
+          const dftOk = p.required_dft_um ? p.measured_dft_um >= p.required_dft_um*0.8 && p.measured_dft_um <= p.required_dft_um*1.2 : null;
+          const dewOk = (p.surface_temp_c && p.dew_point_c) ? (p.surface_temp_c - p.dew_point_c) >= 3 : null;
+          const resColors = {aprovado:'b-sim',aprovado_com_ressalva:'b-pen',reprovado:'b-nao'};
+          return `<tr>
+            <td class="mono">${fmtD(p.inspection_date)}</td>
+            <td>${san(p.paint_scheme||'—')}</td>
+            <td>${san(p.inspector_name||'—')}</td>
+            <td>${san(p.surface_preparation||'—')}</td>
+            <td class="mono" style="color:${dftOk===false?'#c0392b':dftOk?'#1a8c4e':'var(--hmu)'}"><b>${p.measured_dft_um||'—'}</b>${p.required_dft_um?'/'+p.required_dft_um:''} µm</td>
+            <td class="mono">${p.adhesion_pull_off_mpa?p.adhesion_pull_off_mpa+' MPa':'—'}</td>
+            <td class="mono" style="color:${dewOk===false?'#c0392b':dewOk?'#1a8c4e':'var(--hmu)'}" title="Diferença T_sup - T_orv deve ser >= 3°C">${p.dew_point_c?p.dew_point_c+' °C':'—'}${dewOk===false?' ⚠️':''}</td>
+            <td class="mono">${p.relative_humidity_pct?p.relative_humidity_pct+'%':'—'}</td>
+            <td><span class="badge ${resColors[p.result]||'b-nn'}">${san((p.result||'').replace('_',' '))}</span></td>
+            <td><div class="act-col"><button class="sm-e" onclick="oPaintInsp('${p.id}')" title="Editar"><i data-lucide="pencil"></i></button><button class="sm-d" onclick="delPaintInsp('${p.id}')" title="Excluir"><i data-lucide="trash-2"></i></button></div></td>
+          </tr>`;
+        }).join(''):'<tr><td colspan="10"><div class="empty-st">Sem inspeções. Clique em <strong>+ Nova Inspeção</strong>.</div></td></tr>'}</tbody>
+      </table></div>
+    </div>`;
+}
+
+function oPaintInsp(id){
+  closeAllDynamicOverlays();
+  const p = id ? _paintInsps.find(x=>x.id===id) : null;
+  const html = `<div class="overlay open" id="paint-overlay" onclick="if(event.target===this)closePaintModal()">
+    <div class="mbox">
+      <button class="mclose" onclick="closePaintModal()" title="Fechar"><i data-lucide="x"></i></button>
+      <div class="mtitle"><i data-lucide="paint-roller" style="width:18px;height:18px;color:var(--primary)"></i>${p?'Editar':'Nova'} Inspeção de Pintura</div>
+      <div class="sec">📌 Identificação</div>
+      <div class="fg">
+        <div class="field"><label>Data *</label><input type="date" id="pi-date" value="${p?.inspection_date||new Date().toISOString().slice(0,10)}"></div>
+        <div class="field"><label>Inspetor</label><input id="pi-insp" value="${san(p?.inspector_name||'')}"></div>
+        <div class="field"><label>Projeto</label><select id="pi-proj"><option value="">—</option>${projects.map(pr=>`<option value="${pr.id}" ${p?.project_id===pr.id?'selected':''}>${san(pr.code)}</option>`).join('')}</select></div>
+        <div class="field"><label>Equipamento</label><select id="pi-eq"><option value="">—</option>${_equipments.map(e=>`<option value="${e.id}" ${p?.equipment_id===e.id?'selected':''}>${san(e.tag)}</option>`).join('')}</select></div>
+        <div class="field full"><label>Esquema de pintura</label><input id="pi-sch" placeholder="Primer Z + Inter EP + Acab PU" value="${san(p?.paint_scheme||'')}"></div>
+      </div>
+      <div class="sec">🛁 Preparação de superfície</div>
+      <div class="fg">
+        <div class="field"><label>Padrão</label>
+          <select id="pi-prep">
+            <option value="">—</option>
+            <option ${p?.surface_preparation==='Sa 1'?'selected':''}>Sa 1 (escovamento)</option>
+            <option ${p?.surface_preparation==='Sa 2'?'selected':''}>Sa 2 (jato leve)</option>
+            <option ${p?.surface_preparation==='Sa 2½'?'selected':''}>Sa 2½ (comercial)</option>
+            <option ${p?.surface_preparation==='Sa 3'?'selected':''}>Sa 3 (metal branco)</option>
+          </select>
+        </div>
+        <div class="field"><label style="display:flex;gap:5px;align-items:center;cursor:pointer"><input type="checkbox" id="pi-sal" ${p?.salinity_test_passed?'checked':''}> Salinidade OK</label></div>
+      </div>
+      <div class="sec">📏 Medições</div>
+      <div class="fg">
+        <div class="field"><label>DFT medido (µm) *</label><input type="number" step="1" id="pi-dft" value="${p?.measured_dft_um||''}"></div>
+        <div class="field"><label>DFT requerido (µm)</label><input type="number" step="1" id="pi-dftr" value="${p?.required_dft_um||''}"></div>
+        <div class="field"><label>Aderência (MPa)</label><input type="number" step="0.1" id="pi-adh" placeholder="≥ 3 MPa" value="${p?.adhesion_pull_off_mpa||''}"></div>
+      </div>
+      <div class="sec">🌡️ Condições ambientais (importante!)</div>
+      <div class="fg">
+        <div class="field"><label>T ambiente (°C)</label><input type="number" step="0.1" id="pi-ta" oninput="calcPaintDew()" value="${p?.ambient_temp_c||''}"></div>
+        <div class="field"><label>T superfície (°C)</label><input type="number" step="0.1" id="pi-ts" oninput="calcPaintDew()" value="${p?.surface_temp_c||''}"></div>
+        <div class="field"><label>Umidade relativa (%)</label><input type="number" step="1" id="pi-uh" oninput="calcPaintDew()" value="${p?.relative_humidity_pct||''}"></div>
+        <div class="field"><label>Ponto orvalho (°C) <span style="font-size:9px;color:var(--hmu)">(auto)</span></label><input type="number" step="0.1" id="pi-do" value="${p?.dew_point_c||''}"></div>
+      </div>
+      <div id="pi-dew-warn" style="display:none;background:#fdecea;border-left:3px solid var(--hd);padding:8px 11px;font-size:11px;color:#7a1c12;border-radius:4px;margin-bottom:8px"></div>
+      <div class="sec">🎨 Produto</div>
+      <div class="fg">
+        <div class="field"><label>Marca tinta</label><input id="pi-pb" value="${san(p?.paint_brand||'')}"></div>
+        <div class="field"><label>Lote</label><input id="pi-pl" value="${san(p?.paint_lot||'')}"></div>
+      </div>
+      <div class="sec">✔ Resultado</div>
+      <div class="fg">
+        <div class="field"><label>Resultado *</label>
+          <select id="pi-res">
+            <option value="aprovado" ${p?.result==='aprovado'?'selected':''}>✅ Aprovado</option>
+            <option value="aprovado_com_ressalva" ${p?.result==='aprovado_com_ressalva'?'selected':''}>⚠️ Com ressalva</option>
+            <option value="reprovado" ${p?.result==='reprovado'?'selected':''}>❌ Reprovado</option>
+          </select>
+        </div>
+        <div class="field full"><label>Observações</label><input id="pi-notes" value="${san(p?.notes||'')}"></div>
+      </div>
+      <div class="mfooter"><button class="bg" onclick="closePaintModal()">Cancelar</button><button class="bp" onclick="savePaintInsp('${p?.id||''}')"><i data-lucide="check"></i>Salvar</button></div>
+    </div>
+  </div>`;
+  document.body.insertAdjacentHTML('beforeend', html);
+  setTimeout(calcPaintDew, 100);
+}
+function closePaintModal(){const o=document.getElementById('paint-overlay');if(o)o.remove();}
+
+// Cálculo de ponto de orvalho (Magnus-Tetens)
+function calcPaintDew(){
+  const ta = parseFloat(document.getElementById('pi-ta')?.value);
+  const ts = parseFloat(document.getElementById('pi-ts')?.value);
+  const uh = parseFloat(document.getElementById('pi-uh')?.value);
+  const warn = document.getElementById('pi-dew-warn');
+  if(!ta || !uh){if(warn)warn.style.display='none';return;}
+  // Fórmula Magnus-Tetens: γ = ln(RH/100) + (b·T)/(c+T); orvalho = c·γ/(b−γ)
+  const b = 17.625, c = 243.04;
+  const gamma = Math.log(uh/100) + (b*ta)/(c+ta);
+  const dew = (c*gamma)/(b-gamma);
+  document.getElementById('pi-do').value = dew.toFixed(1);
+  if(warn){
+    if(ts && (ts - dew) < 3){
+      warn.style.display='block';
+      warn.innerHTML = `⛔ <strong>ATENÇÃO:</strong> Diferença T_superfície − T_orvalho = ${(ts-dew).toFixed(1)} °C. Mínimo recomendado: 3 °C (ISO 12944). NÃO aplicar pintura.`;
+    } else if(ts && (ts - dew) < 5){
+      warn.style.display='block';
+      warn.style.background='#fff3e0';
+      warn.style.borderLeftColor='var(--hw)';
+      warn.style.color='#7c4400';
+      warn.innerHTML = `⚠️ Diferença T_sup − T_orvalho = ${(ts-dew).toFixed(1)} °C. Recomenda-se >5 °C para maior segurança.`;
+    } else if(uh > 85){
+      warn.style.display='block';
+      warn.innerHTML = `⚠️ Umidade relativa ${uh}% acima de 85%. Risco de aderência ruim.`;
+    } else {
+      warn.style.display='none';
+    }
+  }
+}
+
+async function savePaintInsp(id){
+  const date = document.getElementById('pi-date').value;
+  const dft = parseFloat(document.getElementById('pi-dft').value);
+  if(!date){toast('Data obrigatória','warn');return;}
+  const payload = {
+    org_id: _org.id,
+    project_id: document.getElementById('pi-proj').value||null,
+    equipment_id: document.getElementById('pi-eq').value||null,
+    inspection_date: date,
+    inspector_name: document.getElementById('pi-insp').value.trim()||null,
+    paint_scheme: document.getElementById('pi-sch').value.trim()||null,
+    surface_preparation: document.getElementById('pi-prep').value||null,
+    measured_dft_um: dft||null,
+    required_dft_um: parseFloat(document.getElementById('pi-dftr').value)||null,
+    adhesion_pull_off_mpa: parseFloat(document.getElementById('pi-adh').value)||null,
+    ambient_temp_c: parseFloat(document.getElementById('pi-ta').value)||null,
+    surface_temp_c: parseFloat(document.getElementById('pi-ts').value)||null,
+    dew_point_c: parseFloat(document.getElementById('pi-do').value)||null,
+    relative_humidity_pct: parseFloat(document.getElementById('pi-uh').value)||null,
+    salinity_test_passed: document.getElementById('pi-sal').checked,
+    paint_brand: document.getElementById('pi-pb').value.trim()||null,
+    paint_lot: document.getElementById('pi-pl').value.trim()||null,
+    result: document.getElementById('pi-res').value,
+    notes: document.getElementById('pi-notes').value.trim()||null
+  };
+  let res;
+  if(id) res = await sb.from('painting_inspections').update(payload).eq('id',id);
+  else res = await sb.from('painting_inspections').insert(payload);
+  if(res.error){toast('Erro: '+res.error.message,'err');return;}
+  toast(id?'Atualizada':'Inspeção registrada','ok');
+  closePaintModal();await rPaint();
+}
+
+async function delPaintInsp(id){
+  const _ok = await (window.PIAConfirm ? window.PIAConfirm.danger('Excluir inspeção?', 'Esta ação remove a inspeção. Não pode ser desfeito.', 'Excluir') : Promise.resolve(confirm('Excluir inspeção??'))); if(!_ok) return;
+  const {error} = await sb.from('painting_inspections').update({deleted_at:new Date().toISOString()}).eq('id',id);
+  if(error){toast('Erro: '+error.message,'err');return;}
+  toast('Excluída','ok');await rPaint();
+}
+
+// ═══════════════════════════════════════════════════
+// ANDAIME (Cartões verde/vermelho · NR-18)
+// ═══════════════════════════════════════════════════
+let _scaffolds = [];
+
+async function rScaf(){
+  const {data} = await sb.from('scaffolds').select('*').is('deleted_at',null).order('created_at',{ascending:false}).limit(500);
+  _scaffolds = data || [];
+  const tot = _scaffolds.length;
+  const verde = _scaffolds.filter(s=>s.status==='liberado_verde').length;
+  const vermelho = _scaffolds.filter(s=>s.status==='interditado_vermelho').length;
+  const montagem = _scaffolds.filter(s=>s.status==='em_montagem').length;
+  const now = new Date();
+  const venc7 = _scaffolds.filter(s=>s.status==='liberado_verde'&&s.expiry_date&&new Date(s.expiry_date)<=new Date(now.getTime()+7*86400000)&&new Date(s.expiry_date)>=now).length;
+  const venc = _scaffolds.filter(s=>s.status==='liberado_verde'&&s.expiry_date&&new Date(s.expiry_date)<now).length;
+
+  document.getElementById('vscaf').innerHTML = `
+    <div class="sumbar">
+      <div class="sc"><div class="slbl">Cartões</div><div class="sval">${tot}</div></div>
+      <div class="sc"><div class="slbl">🟢 Liberados</div><div class="sval" style="color:var(--hs)">${verde}</div></div>
+      <div class="sc"><div class="slbl">🔴 Interditados</div><div class="sval" style="color:var(--hd)">${vermelho}</div></div>
+      <div class="sc"><div class="slbl">Em montagem</div><div class="sval" style="color:var(--hw)">${montagem}</div></div>
+      <div class="sc"><div class="slbl">Vencidos / 7d</div><div class="sval" style="color:${venc?'#c0392b':venc7?'#b85c00':'#1a8c4e'}">${venc?venc+' ⛔':venc7}</div></div>
+    </div>
+    <div style="padding:14px 16px;background:var(--bg)">
+      <div class="info" style="background:var(--hbl);border-left:3px solid var(--hbm);padding:9px 12px;font-size:11px;margin-bottom:14px">
+        💡 <strong>NR-18 item 18.15:</strong> cartão verde = liberado pra uso. Vermelho = interditado. Inspeção semanal obrigatória.
+      </div>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>Cartão</th><th>Tipo</th><th>Local</th><th>Altura/Área</th><th>Carga máx</th><th>Status</th><th>Liberado por</th><th>Próx. inspeção</th><th>Vence</th><th></th></tr></thead>
+        <tbody>${tot?_scaffolds.map(s=>{
+          const stColors = {liberado_verde:'b-sim',interditado_vermelho:'b-nao',em_montagem:'b-pen',desmontagem:'b-ny',desmontado:'b-nn'};
+          const stIcons = {liberado_verde:'🟢',interditado_vermelho:'🔴',em_montagem:'🟡',desmontagem:'🟠',desmontado:'⚫'};
+          const expDays = s.expiry_date ? Math.floor((new Date(s.expiry_date)-new Date())/86400000) : null;
+          const expClr = expDays===null?'var(--hmu)':expDays<0?'#c0392b':expDays<=7?'#b85c00':'#1a8c4e';
+          return `<tr>
+            <td><strong class="mono">${san(s.card_number)}</strong></td>
+            <td>${san((s.scaffold_type||'').replace('_',' '))}</td>
+            <td style="font-size:10.5px">${san(s.location||'—')}${s.area?'<div style="font-size:9px;color:var(--hmu)">'+san(s.area)+'</div>':''}</td>
+            <td class="mono" style="font-size:10px">${s.height_m?s.height_m+'m':''}${s.area_m2?(s.height_m?' / ':'')+s.area_m2+'m²':''}</td>
+            <td class="mono">${s.max_load_kg?s.max_load_kg+' kg':'—'}</td>
+            <td><span class="badge ${stColors[s.status]||'b-nn'}">${stIcons[s.status]||'•'} ${san(s.status||'').replace('_',' ')}</span></td>
+            <td style="font-size:10px">${san(s.released_by||'—')}</td>
+            <td class="mono" style="font-size:10px">${fmtD(s.next_inspection_date)||'—'}</td>
+            <td class="mono" style="font-size:10px;color:${expClr}">${fmtD(s.expiry_date)||'—'}${expDays!==null?'<div style="font-size:8.5px">'+(expDays<0?'vencido':'em '+expDays+'d')+'</div>':''}</td>
+            <td><div class="act-col"><button class="sm-e" onclick="oScaf('${s.id}')" title="Editar"><i data-lucide="pencil"></i></button><button class="sm-d" onclick="delScaf('${s.id}')" title="Excluir"><i data-lucide="trash-2"></i></button></div></td>
+          </tr>`;
+        }).join(''):'<tr><td colspan="10"><div class="empty-st">Sem cartões. Clique em <strong>+ Novo Cartão</strong>.</div></td></tr>'}</tbody>
+      </table></div>
+    </div>`;
+}
+
+function oScaf(id){
+  closeAllDynamicOverlays();
+  const s = id ? _scaffolds.find(x=>x.id===id) : null;
+  const html = `<div class="overlay open" id="scaf-overlay" onclick="if(event.target===this)closeScaf()">
+    <div class="mbox">
+      <button class="mclose" onclick="closeScaf()" title="Fechar"><i data-lucide="x"></i></button>
+      <div class="mtitle"><i data-lucide="grid-3x3" style="width:18px;height:18px;color:var(--primary)"></i>${s?'Editar':'Novo'} Cartão de Andaime</div>
+      <div class="fg">
+        <div class="field"><label>Nº cartão *</label><input id="sc-n" value="${san(s?.card_number||'AND-'+new Date().getFullYear()+'-'+String(_scaffolds.length+1).padStart(4,'0'))}"></div>
+        <div class="field"><label>Tipo</label>
+          <select id="sc-t">
+            ${[['fachadeiro','Fachadeiro'],['suspenso','Suspenso'],['tubular','Tubular'],['torre','Torre'],['balancim','Balancim'],['outros','Outros']].map(([v,l])=>`<option value="${v}" ${s?.scaffold_type===v?'selected':''}>${l}</option>`).join('')}
+          </select>
+        </div>
+        <div class="field full"><label>Localização *</label><input id="sc-loc" value="${san(s?.location||'')}"></div>
+        <div class="field"><label>Área</label><input id="sc-area" value="${san(s?.area||'')}"></div>
+        <div class="field"><label>Solicitante</label><input id="sc-req" value="${san(s?.requestor||'')}"></div>
+        <div class="field"><label>Altura (m)</label><input type="number" step="0.1" id="sc-h" value="${s?.height_m||''}"></div>
+        <div class="field"><label>Área (m²)</label><input type="number" step="0.1" id="sc-a" value="${s?.area_m2||''}"></div>
+        <div class="field"><label>Carga máxima (kg)</label><input type="number" step="10" id="sc-cm" value="${s?.max_load_kg||''}"></div>
+        <div class="field"><label>Status *</label>
+          <select id="sc-st">
+            <option value="em_montagem" ${(s?.status||'em_montagem')==='em_montagem'?'selected':''}>🟡 Em montagem</option>
+            <option value="liberado_verde" ${s?.status==='liberado_verde'?'selected':''}>🟢 Liberado (verde)</option>
+            <option value="interditado_vermelho" ${s?.status==='interditado_vermelho'?'selected':''}>🔴 Interditado (vermelho)</option>
+            <option value="desmontagem" ${s?.status==='desmontagem'?'selected':''}>🟠 Em desmontagem</option>
+            <option value="desmontado" ${s?.status==='desmontado'?'selected':''}>⚫ Desmontado</option>
+          </select>
+        </div>
+        <div class="field"><label>Liberado por</label><input id="sc-rb" value="${san(s?.released_by||'')}"></div>
+        <div class="field"><label>CREA do liberador</label><input id="sc-cr" value="${san(s?.released_by_crea||'')}"></div>
+        <div class="field"><label>Data montagem</label><input type="date" id="sc-ad" value="${s?.assembly_date||''}"></div>
+        <div class="field"><label>Data liberação</label><input type="date" id="sc-rd" value="${s?.released_date||''}"></div>
+        <div class="field"><label>Vence em</label><input type="date" id="sc-exp" value="${s?.expiry_date||''}"></div>
+        <div class="field"><label>Última inspeção</label><input type="date" id="sc-li" value="${s?.last_inspection_date||''}"></div>
+        <div class="field"><label>Próxima inspeção</label><input type="date" id="sc-ni" value="${s?.next_inspection_date||''}"></div>
+        <div class="field full"><label>Observações</label><input id="sc-no" value="${san(s?.notes||'')}"></div>
+      </div>
+      <div class="mfooter"><button class="bg" onclick="closeScaf()">Cancelar</button><button class="bp" onclick="saveScaf('${s?.id||''}')"><i data-lucide="check"></i>Salvar</button></div>
+    </div>
+  </div>`;
+  document.body.insertAdjacentHTML('beforeend', html);
+}
+function closeScaf(){const o=document.getElementById('scaf-overlay');if(o)o.remove();}
+
+async function saveScaf(id){
+  const card = document.getElementById('sc-n').value.trim();
+  const loc = document.getElementById('sc-loc').value.trim();
+  if(!card||!loc){toast('Cartão e localização obrigatórios','warn');return;}
+  const payload = {
+    org_id: _org.id,
+    card_number: card,
+    scaffold_type: document.getElementById('sc-t').value,
+    location: loc,
+    area: document.getElementById('sc-area').value.trim()||null,
+    requestor: document.getElementById('sc-req').value.trim()||null,
+    height_m: parseFloat(document.getElementById('sc-h').value)||null,
+    area_m2: parseFloat(document.getElementById('sc-a').value)||null,
+    max_load_kg: parseFloat(document.getElementById('sc-cm').value)||null,
+    status: document.getElementById('sc-st').value,
+    released_by: document.getElementById('sc-rb').value.trim()||null,
+    released_by_crea: document.getElementById('sc-cr').value.trim()||null,
+    assembly_date: document.getElementById('sc-ad').value||null,
+    released_date: document.getElementById('sc-rd').value||null,
+    expiry_date: document.getElementById('sc-exp').value||null,
+    last_inspection_date: document.getElementById('sc-li').value||null,
+    next_inspection_date: document.getElementById('sc-ni').value||null,
+    notes: document.getElementById('sc-no').value.trim()||null,
+    updated_at: new Date().toISOString()
+  };
+  let res;
+  if(id) res = await sb.from('scaffolds').update(payload).eq('id',id);
+  else res = await sb.from('scaffolds').insert(payload);
+  if(res.error){toast('Erro: '+res.error.message,'err');return;}
+  toast(id?'Atualizado':'Cartão criado','ok');
+  closeScaf();await rScaf();
+}
+
+async function delScaf(id){
+  const _ok = await (window.PIAConfirm ? window.PIAConfirm.danger('Excluir cartão?', 'Esta ação remove o cartão. Não pode ser desfeito.', 'Excluir') : Promise.resolve(confirm('Excluir cartão??'))); if(!_ok) return;
+  const {error} = await sb.from('scaffolds').update({deleted_at:new Date().toISOString()}).eq('id',id);
+  if(error){toast('Erro: '+error.message,'err');return;}
+  toast('Excluído','ok');await rScaf();
+}
+
+// ═══════════════════════════════════════════════════
+// CALIBRAÇÃO DE INSTRUMENTOS
+// ═══════════════════════════════════════════════════
+let _instruments = [];
+let _calibrations = [];
+
+async function rCal(){
+  const [r1, r2] = await Promise.all([
+    sb.from('instruments').select('*').is('deleted_at',null).order('tag'),
+    sb.from('instrument_calibrations').select('*').order('calibrated_at',{ascending:false}).limit(500)
+  ]);
+  _instruments = r1.data || [];
+  _calibrations = r2.data || [];
+  const tot = _instruments.length;
+  const now = new Date();
+  // Próxima calibração por instrumento
+  const nextByInst = {};
+  _calibrations.forEach(c=>{
+    if(!nextByInst[c.instrument_id] || (c.calibrated_at > nextByInst[c.instrument_id].calibrated_at)){
+      nextByInst[c.instrument_id] = c;
+    }
+  });
+  const venc = _instruments.filter(i=>{const c=nextByInst[i.id];return c?.valid_until && new Date(c.next_calibration_date)<now;}).length;
+  const venc30 = _instruments.filter(i=>{const c=nextByInst[i.id];return c?.valid_until && new Date(c.next_calibration_date)>=now && new Date(c.next_calibration_date)<=new Date(now.getTime()+30*86400000);}).length;
+  const ok = tot - venc - venc30;
+
+  document.getElementById('vcal').innerHTML = `
+    <div class="sumbar">
+      <div class="sc"><div class="slbl">Instrumentos</div><div class="sval">${tot}</div></div>
+      <div class="sc"><div class="slbl">Em dia</div><div class="sval" style="color:var(--hs)">${Math.max(0,ok)}</div></div>
+      <div class="sc"><div class="slbl">Vence em 30d</div><div class="sval" style="color:var(--hw)">${venc30}</div></div>
+      <div class="sc"><div class="slbl">Vencidos</div><div class="sval" style="color:var(--hd)">${venc}</div></div>
+      <div class="sc"><div class="slbl">Calibrações registradas</div><div class="sval">${_calibrations.length}</div></div>
+    </div>
+    <div style="padding:14px 16px;background:var(--bg)">
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>TAG</th><th>Nome</th><th>Tipo</th><th>Faixa</th><th>Padrão</th><th>Próxima calibração</th><th>Status</th><th></th></tr></thead>
+        <tbody>${tot?_instruments.map(i=>{
+          const nc = nextByInst[i.id];
+          const nextDate = nc?.valid_until;
+          const days = nextDate ? Math.floor((new Date(nextDate)-now)/86400000) : null;
+          const sClr = days===null?'b-nn':days<0?'b-nao':days<=30?'b-pen':'b-sim';
+          const sTxt = days===null?'Sem calibração':days<0?'VENCIDO '+(-days)+'d':days<=30?'Vence em '+days+'d':'OK ('+days+'d)';
+          return `<tr>
+            <td><strong class="mono">${san(i.tag)}</strong></td>
+            <td>${san(i.description||'—')}</td>
+            <td>${san(i.type||'—')}</td>
+            <td class="mono" style="font-size:10px">${i.range_min!=null?i.range_min:'—'} a ${i.range_max!=null?i.range_max:'—'} ${san(i.range_unit||'')}</td>
+            <td style="font-size:10px">${san(i.location||'—')}</td>
+            <td class="mono">${fmtD(nextDate)||'—'}</td>
+            <td><span class="badge ${sClr}">${sTxt}</span></td>
+            <td><div class="act-col"><button class="sm-e" onclick="oCalForInst('${i.id}','${san(i.tag).replace(/'/g,'')}')">+ Calibrar</button><button class="sm-e" onclick="oCalHist('${i.id}','${san(i.tag).replace(/'/g,'')}')"><i data-lucide="history"></i>Hist.</button><button class="sm-d" onclick="delInstr('${i.id}')" title="Excluir"><i data-lucide="trash-2"></i></button></div></td>
+          </tr>`;
+        }).join(''):'<tr><td colspan="8"><div class="empty-st">Sem instrumentos. Clique em <strong>+ Nova Calibração</strong> para começar (cria o instrumento e a primeira calibração juntos).</div></td></tr>'}</tbody>
+      </table></div>
+    </div>`;
+}
+
+function oCal(){oCalForInst('','');}
+function oCalForInst(instId, tag){
+  closeAllDynamicOverlays();
+  // Monta HTML por concatenação (evita problemas de template aninhado)
+  let html = '<div class="overlay open" id="cal-overlay" onclick="if(event.target===this)closeCal()">';
+  html += '<div class="mbox">';
+  html += '<button class="mclose" onclick="closeCal()" title="Fechar"><i data-lucide="x"></i></button>';
+  html += '<div class="mtitle"><i data-lucide="ruler" style="width:18px;height:18px;color:var(--primary)"></i>' + (tag ? 'Nova Calibração: ' + san(tag) : 'Cadastrar Instrumento + Calibração') + '</div>';
+  if(!instId){
+    html += '<div class="sec">📌 Identificação do Instrumento</div>';
+    html += '<div class="fg">';
+    html += '<div class="field"><label>TAG *</label><input id="ci-tag" placeholder="PT-101"></div>';
+    html += '<div class="field full"><label>Nome *</label><input id="ci-name"></div>';
+    html += '<div class="field"><label>Tipo</label><input id="ci-type" placeholder="Transmissor pressão"></div>';
+    html += '<div class="field"><label>Marca</label><input id="ci-mf"></div>';
+    html += '<div class="field"><label>Modelo</label><input id="ci-model"></div>';
+    html += '<div class="field"><label>Nº série</label><input id="ci-sn"></div>';
+    html += '<div class="field"><label>Faixa mín</label><input type="number" step="0.001" id="ci-min"></div>';
+    html += '<div class="field"><label>Faixa máx</label><input type="number" step="0.001" id="ci-max"></div>';
+    html += '<div class="field"><label>Unidade</label><input id="ci-unit" placeholder="bar"></div>';
+    html += '</div>';
+  }
+  html += '<div class="sec">📏 Calibração</div>';
+  html += '<div class="fg">';
+  html += '<div class="field"><label>Data calibração *</label><input type="date" id="cl-date" value="' + new Date().toISOString().slice(0,10) + '"></div>';
+  html += '<div class="field"><label>Próxima calibração *</label><input type="date" id="cl-next" value="' + new Date(Date.now()+365*86400000).toISOString().slice(0,10) + '"></div>';
+  html += '<div class="field"><label>Resultado</label><select id="cl-res">';
+  html += '<option value="aprovado">✅ Aprovado</option>';
+  html += '<option value="aprovado_com_ajuste">⚙️ Aprovado c/ ajuste</option>';
+  html += '<option value="reprovado">❌ Reprovado</option>';
+  html += '</select></div>';
+  html += '<div class="field"><label>Erro máx (%)</label><input type="number" step="0.01" id="cl-err"></div>';
+  html += '<div class="field"><label>Padrão usado</label><input id="cl-std" placeholder="Manômetro padrão IPI..."></div>';
+  html += '<div class="field"><label>Certificado nº</label><input id="cl-cert"></div>';
+  html += '<div class="field"><label>Empresa</label><input id="cl-co"></div>';
+  html += '<div class="field full"><label>Observações</label><input id="cl-notes"></div>';
+  html += '</div>';
+  html += '<div class="mfooter"><button class="bg" onclick="closeCal()">Cancelar</button><button class="bp" onclick="saveCal(\''+(instId||'')+'\')"><i data-lucide="check"></i>Salvar</button></div>';
+  html += '</div></div>';
+  document.body.insertAdjacentHTML('beforeend', html);
+}
+
+function closeCal(){const o=document.getElementById('cal-overlay');if(o)o.remove();}
+
+async function saveCal(instId){
+  let useInstId = instId;
+  // Cria instrumento se necessário
+  if(!useInstId){
+    const tag = document.getElementById('ci-tag').value.trim();
+    const name = document.getElementById('ci-name').value.trim();
+    if(!tag||!name){toast('TAG e nome obrigatórios','warn');return;}
+    const {data, error} = await sb.from('instruments').insert({
+      org_id: _org.id, tag,
+      description: name,
+      type: document.getElementById('ci-type').value.trim()||null,
+      manufacturer: document.getElementById('ci-mf').value.trim()||null,
+      model: document.getElementById('ci-model').value.trim()||null,
+      serial_number: document.getElementById('ci-sn').value.trim()||null,
+      range_min: parseFloat(document.getElementById('ci-min').value)||null,
+      range_max: parseFloat(document.getElementById('ci-max').value)||null,
+      range_unit: document.getElementById('ci-unit').value.trim()||null
+    }).select('id').single();
+    if(error){toast('Erro instrumento: '+error.message,'err');return;}
+    useInstId = data.id;
+  }
+  const calPayload = {
+    org_id: _org.id, instrument_id: useInstId,
+    calibrated_at: document.getElementById('cl-date').value,
+    valid_until: document.getElementById('cl-next').value,
+    status: document.getElementById('cl-res').value === 'reprovado' ? 'vencida' : 'valida',
+    max_error_pct: parseFloat(document.getElementById('cl-err').value)||null,
+    reference_standard: document.getElementById('cl-std').value.trim()||null,
+    certificate_no: document.getElementById('cl-cert').value.trim()||null,
+    laboratory: document.getElementById('cl-co').value.trim()||null,
+    notes: document.getElementById('cl-notes').value.trim()||null
+  };
+  const {error} = await sb.from('instrument_calibrations').insert(calPayload);
+  if(error){toast('Erro calibração: '+error.message,'err');return;}
+  toast('Calibração registrada','ok');
+  closeCal();await rCal();
+}
+
+function oCalHist(instId, tag){
+  const list = _calibrations.filter(c=>c.instrument_id===instId);
+  alert('Histórico de '+tag+':\n\n'+(list.length?list.map(c=>`${c.calibrated_at} → próx ${c.valid_until} · ${c.status}`).join('\n'):'Sem calibrações.'));
+}
+
+async function delInstr(id){
+  const _ok = await (window.PIAConfirm ? window.PIAConfirm.danger('Excluir instrumento?', 'Esta ação remove o instrumento e todas as calibrações associadas. Não pode ser desfeito.', 'Excluir') : Promise.resolve(confirm('Excluir instrumento??'))); if(!_ok) return;
+  await sb.from('instrument_calibrations').delete().eq('instrument_id',id);
+  await sb.from('instruments').update({deleted_at:new Date().toISOString()}).eq('id',id);
+  toast('Excluído','ok');await rCal();
+}
+
+
+// ═══════════════════════════════════════════════════
+// PRIMAVERA P6 — Import XML bi-direcional
+// ═══════════════════════════════════════════════════
+function openP6ImportModal(){
+  closeAllDynamicOverlays();
+  const html = `<div class="overlay open" id="p6-overlay" onclick="if(event.target===this)closeP6Modal()">
+    <div class="mbox">
+      <button class="mclose" onclick="closeP6Modal()" title="Fechar"><i data-lucide="x"></i></button>
+      <div class="mtitle"><i data-lucide="upload" style="width:18px;height:18px;color:var(--primary)"></i>Importar XML do Primavera P6</div>
+      <div class="info" style="background:var(--hbl);border-left:3px solid var(--hbm);padding:9px 12px;font-size:11px;margin-bottom:12px;border-radius:5px">
+        💡 <strong>Como funciona:</strong> O sistema lê o XML exportado do P6 e atualiza automaticamente o % concluído das suas folhas iso. As atividades são pareadas pelo ID (ex: <code>FAB-PJ-2026.00001</code>).<br>
+        <strong>No P6:</strong> File → Export → Primavera XML (.xml).
+      </div>
+      <div class="dz" id="p6-dz" onclick="document.getElementById('p6-file').click()">
+        <div style="font-size:22px">📄</div>
+        <div style="font-size:11px;color:var(--hmu);font-weight:500">Clique ou arraste o XML exportado do P6</div>
+        <div style="font-size:9.5px;color:var(--hmu);opacity:.7;margin-top:2px">Aceita: .xml (Primavera P6 / Oracle Asta)</div>
+      </div>
+      <input type="file" id="p6-file" accept=".xml" style="display:none" onchange="processP6File(this)">
+      <div id="p6-msg" class="ext-msg" style="margin-top:10px"></div>
+      <div id="p6-result" style="display:none;margin-top:12px"></div>
+      <div class="mfooter">
+        <button class="bg" onclick="closeP6Modal()">Fechar</button>
+      </div>
+    </div>
+  </div>`;
+  document.body.insertAdjacentHTML('beforeend', html);
+}
+function closeP6Modal(){const o=document.getElementById('p6-overlay');if(o)o.remove();}
+
+async function processP6File(input){
+  const file = input.files?.[0];
+  if(!file) return;
+  const msgEl = document.getElementById('p6-msg');
+  msgEl.style.display='block';
+  msgEl.className='ext-msg em-load';
+  msgEl.textContent='Lendo XML…';
+
+  try {
+    const text = await file.text();
+    const parser = new DOMParser();
+    const xml = parser.parseFromString(text, 'application/xml');
+    const parseError = xml.querySelector('parsererror');
+    if(parseError){msgEl.className='ext-msg em-err';msgEl.textContent='Erro no XML: '+parseError.textContent.slice(0,100);return;}
+
+    // Coleta atividades — suporta Primavera P6 nativo e Oracle Asta
+    const activities = [];
+    xml.querySelectorAll('Activity').forEach(act=>{
+      const get = (tag)=>{const e=act.querySelector(tag);return e?e.textContent.trim():null;};
+      activities.push({
+        id: get('Id') || get('ID'),
+        name: get('Name'),
+        percent: parseFloat(get('PercentComplete') || get('Percent Complete') || '0'),
+        actStart: get('ActualStartDate') || get('ActualStart'),
+        actFinish: get('ActualFinishDate') || get('ActualFinish'),
+        plannedStart: get('PlannedStartDate') || get('PlannedStart'),
+        plannedFinish: get('PlannedFinishDate') || get('PlannedFinish'),
+        type: get('Type')
+      });
+    });
+
+    if(!activities.length){
+      msgEl.className='ext-msg em-err';
+      msgEl.textContent='Nenhuma <Activity> encontrada no XML. Verifique se é mesmo um export do P6.';
+      return;
+    }
+
+    // Match com folhas iso por ID
+    // Padrão esperado: FAB-{projCode}.{sheet} ou MON-{projCode}.{sheet}
+    let matchedFab = 0, matchedMon = 0, notFound = 0;
+    const updates = [];
+    for(const a of activities){
+      if(!a.id) continue;
+      const m = a.id.match(/^(FAB|MON)-([A-Z0-9_]+)\.(\d+)$/i);
+      if(!m){notFound++;continue;}
+      const tipo = m[1].toUpperCase();
+      const sheetCode = m[3];
+      // Procura folha (sheet_number === sheetCode, projects.code === decodeURIComponent)
+      const sheet = sheets.find(s=>(s.sheet||'').toString().padStart(5,'0')===sheetCode.padStart(5,'0'));
+      if(!sheet){notFound++;continue;}
+
+      const pct = Math.max(0,Math.min(100, a.percent));
+      // Distribui %: 30% pré, 50% solda, 20% end
+      // Assume crescimento proporcional: se PercentComplete = 60%, pré=100, solda=60, end=0
+      let pre, sol, end;
+      if(pct <= 30){pre = (pct/30)*100; sol=0; end=0;}
+      else if(pct <= 80){pre=100; sol=((pct-30)/50)*100; end=0;}
+      else {pre=100; sol=100; end=((pct-80)/20)*100;}
+      const round = v => Math.round(v);
+      const payload = {};
+      if(tipo==='FAB'){
+        payload.fab_pre = round(pre);
+        payload.fab_sol = round(sol);
+        payload.fab_end = round(end);
+        if(a.actStart) payload.fab_start = a.actStart.slice(0,10);
+        if(a.actFinish) payload.fab_finish = a.actFinish.slice(0,10);
+        matchedFab++;
+      } else {
+        payload.mon_pre = round(pre);
+        payload.mon_sol = round(sol);
+        payload.mon_end = round(end);
+        if(a.actStart) payload.mon_start = a.actStart.slice(0,10);
+        if(a.actFinish) payload.mon_finish = a.actFinish.slice(0,10);
+        matchedMon++;
+      }
+      updates.push(sb.from('isometric_sheets').update(payload).eq('id',sheet.id));
+    }
+
+    // Executa todos os updates em paralelo
+    msgEl.textContent='Atualizando '+(matchedFab+matchedMon)+' folhas no banco…';
+    const results = await Promise.allSettled(updates);
+    const ok = results.filter(r=>r.status==='fulfilled').length;
+    const err = results.filter(r=>r.status==='rejected').length;
+
+    // Marca timestamp e baseline do sync P6 no projeto atual (pra mostrar "Sincronizada · P6 há X min" no Painel)
+    if(curProj && (matchedFab+matchedMon) > 0){
+      try {
+        // Tenta extrair baseline name do XML (Project Name / Title)
+        const projNameEl = xml.querySelector('Project Name, Project Title, ProjectName');
+        const baselineName = projNameEl ? projNameEl.textContent.trim().slice(0,80) : (file.name.replace(/\.xml$/i,'') || 'baseline');
+        await sb.from('projects').update({
+          last_p6_sync_at: new Date().toISOString(),
+          last_p6_sync_baseline: baselineName
+        }).eq('id', curProj);
+      } catch(_){}
+    }
+
+    msgEl.className='ext-msg em-ok';
+    msgEl.textContent=`✔ Importado: ${matchedFab} fabricações + ${matchedMon} montagens atualizadas. ${notFound} atividades sem folha correspondente.`;
+
+    document.getElementById('p6-result').style.display='block';
+    document.getElementById('p6-result').innerHTML = `
+      <div style="background:var(--bg2);border-radius:8px;padding:12px;font-size:11.5px">
+        <div style="font-weight:600;margin-bottom:8px;color:var(--hb)">📊 Resultado da importação</div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
+          <div style="text-align:center"><div style="font-size:18px;font-weight:600;color:var(--hs)">${matchedFab}</div><div style="font-size:9px;color:var(--hmu)">FAB atualizadas</div></div>
+          <div style="text-align:center"><div style="font-size:18px;font-weight:600;color:var(--hc)">${matchedMon}</div><div style="font-size:9px;color:var(--hmu)">MON atualizadas</div></div>
+          <div style="text-align:center"><div style="font-size:18px;font-weight:600;color:${notFound?'var(--hw)':'var(--hmu)'}">${notFound}</div><div style="font-size:9px;color:var(--hmu)">Sem match</div></div>
+          <div style="text-align:center"><div style="font-size:18px;font-weight:600;color:${err?'var(--hd)':'var(--hmu)'}">${err}</div><div style="font-size:9px;color:var(--hmu)">Erros</div></div>
+        </div>
+        <div style="font-size:10px;color:var(--hmu);margin-top:8px">Total de atividades no XML: ${activities.length}</div>
+      </div>`;
+    
+    // Reload das sheets
+    await loadAll();
+    toast('Cronograma sincronizado','ok');
+  } catch(e){
+    console.error(e);
+    msgEl.className='ext-msg em-err';
+    msgEl.textContent='Erro: '+e.message;
+  }
+}
+
+// ═══════════════════════════════════════════════════
+// HUB POWER BI — 8 templates prontos por persona
+// ═══════════════════════════════════════════════════
+const POWERBI_TEMPLATES = [
+  {
+    id:'exec',           icon:'🎯', color:'#6c3fc5', persona:'Diretor / C-Level',
+    name:'Painel Executivo',
+    desc:'Visão consolidada: KPIs agregados, curva S, projetos em andamento, custos x orçado.',
+    datasets:['executive_kpis','executive_projects','planning_curva_s']
+  },
+  {
+    id:'planning',       icon:'📅', color:'#0B3D91', persona:'Planejador / PMO',
+    name:'Planejamento Detalhado',
+    desc:'Curva S mensal, histograma de HH, lookahead 21 dias, atrasos e desvios.',
+    datasets:['planning_curva_s','planning_histogram','planning_lookahead','planning_sheets']
+  },
+  {
+    id:'qualidade',      icon:'✅', color:'#1a8c4e', persona:'Qualidade / Inspeção',
+    name:'Controle de Qualidade',
+    desc:'END, T.H., torque, pendências, ranking de soldadores, taxa de reprovação.',
+    datasets:['quality_welders','quality_welder_workload','quality_pendings','quality_paint_th_torque']
+  },
+  {
+    id:'manutencao',     icon:'🛠️', color:'#b85c00', persona:'Manutenção',
+    name:'Manutenção Industrial',
+    desc:'Backlog OS, MTBF/MTTR, OEE, top equipamentos críticos, custo por OS.',
+    datasets:['executive_projects']  // futuro: maint datasets
+  },
+  {
+    id:'budget',         icon:'💰', color:'#1a8c4e', persona:'Compras / Orçamento',
+    name:'Orçamento &amp; Materiais',
+    desc:'Curva ABC, materiais críticos lead-time, valor R$ comprometido, % comprado.',
+    datasets:['budget_actual','budget_critical_materials','budget_materials_full']
+  },
+  {
+    id:'tubulacao',      icon:'🔧', color:'#1558cc', persona:'Coord. Tubulação',
+    name:'Tubulação Operacional',
+    desc:'Status por folha, juntas RT/UT, T.H. pendentes, mapa de juntas.',
+    datasets:['planning_sheets','quality_paint_th_torque']
+  },
+  {
+    id:'equipamentos',   icon:'🛢️', color:'#00A8E8', persona:'Inspetor NR-13',
+    name:'Equipamentos NR-13',
+    desc:'Próximas inspeções, vida residual UT, equipamentos críticos, mapa de espessuras.',
+    datasets:[]  // próximo: equip datasets
+  },
+  {
+    id:'seguranca',      icon:'🦺', color:'#c0392b', persona:'SSMA',
+    name:'Segurança &amp; SSMA',
+    desc:'PTs ativas, treinamentos vencendo, NRs aplicadas, índice de acidentes.',
+    datasets:[]
+  }
+];
+
+// Sobrescreve a função rInt do v9 com hub mais rico
+const _origRInt = window.rInt;
+window.rInt = function(){
+  document.getElementById('vint').innerHTML = `
+    <div class="bc-row"><span style="font-weight:500">🔌 Integrações &amp; Power BI Hub</span></div>
+    <div style="padding:14px 16px;background:var(--bg);max-width:1200px">
+      
+      <!-- POWER BI HUB -->
+      <div style="background:#fff;border:0.5px solid var(--hbr);border-radius:12px;padding:18px;margin-bottom:14px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+          <div style="font-size:28px">📊</div>
+          <div style="flex:1">
+            <div style="font-size:15px;font-weight:600;color:var(--hb)">Power BI · Hub de Dashboards por Persona</div>
+            <div style="font-size:11px;color:var(--hmu)">8 templates prontos. Cada persona tem o dashboard que precisa, com link único pra sua organização.</div>
+          </div>
+          <button class="btn bp" onclick="connectPowerBI()"><i data-lucide="link"></i>${_pbToken?'Regenerar link':'Gerar link Power BI'}</button>
+        </div>
+        ${!_pbToken ? `
+          <div class="info" style="background:var(--hbl);border-left:3px solid var(--hbm);padding:10px 12px;font-size:11px;border-radius:5px">
+            Clique em <strong>"Gerar link Power BI"</strong> acima para criar o token único da sua org. Você só precisa fazer isso uma vez.
+          </div>
+        ` : `
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px">
+            ${POWERBI_TEMPLATES.map(t=>{
+              const urls = t.datasets.map(d=>SUPABASE_URL+'/functions/v1/powerbi-feed?token='+_pbToken+'&dataset='+d);
+              return `<div style="background:#fff;border:0.5px solid var(--hbr);border-radius:10px;padding:12px;border-left:3px solid ${t.color}">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+                  <div style="font-size:20px">${t.icon}</div>
+                  <div style="flex:1">
+                    <div style="font-size:12px;font-weight:600;color:${t.color}">${t.name}</div>
+                    <div style="font-size:9.5px;color:var(--hmu)">${t.persona}</div>
+                  </div>
+                  <span style="font-size:9.5px;background:var(--bg2);padding:2px 6px;border-radius:5px;color:var(--hmu)">${t.datasets.length} ds</span>
+                </div>
+                <div style="font-size:10.5px;color:var(--hmu);margin-bottom:8px;line-height:1.45">${t.desc}</div>
+                ${t.datasets.length ? `
+                  <details style="font-size:10px">
+                    <summary style="cursor:pointer;color:var(--hbm);font-weight:500">Ver ${t.datasets.length} URL(s) →</summary>
+                    <div style="margin-top:6px">
+                      ${t.datasets.map((d,i)=>`
+                        <div style="display:flex;gap:5px;margin-bottom:4px;align-items:center">
+                          <input readonly value="${SUPABASE_URL}/functions/v1/powerbi-feed?token=${_pbToken}&amp;dataset=${d}" id="pbt-${t.id}-${i}" style="flex:1;font-family:monospace;font-size:9.5px;padding:3px 6px;border:0.5px solid var(--hbr);border-radius:4px;background:var(--bg2)" onclick="this.select()">
+                          <button class="sm-e" onclick="copyVal('pbt-${t.id}-${i}')" title="Copiar">📋</button>
+                        </div>
+                      `).join('')}
+                    </div>
+                  </details>
+                ` : '<div style="font-size:10px;color:var(--hmu);font-style:italic">⏳ Em desenvolvimento</div>'}
+              </div>`;
+            }).join('')}
+          </div>
+          <div style="background:var(--bg2);border-radius:8px;padding:12px;margin-top:14px;font-size:10.5px;line-height:1.7">
+            <strong>📘 Como usar no Power BI Desktop:</strong>
+            <ol style="margin-left:20px;margin-top:6px">
+              <li>Abra o Power BI Desktop</li>
+              <li>Vá em <strong>Obter Dados → Web</strong></li>
+              <li>Cole o link de um dataset da template desejada</li>
+              <li>Detecta JSON automaticamente → expanda <strong>rows</strong> → <strong>Para Tabela</strong></li>
+              <li>Crie seus visuais (gráficos, mapas, slicers, drill-down)</li>
+              <li>Para múltiplas tabelas no mesmo arquivo, repita com cada link</li>
+              <li><strong>Atualizar</strong> sempre puxa dados frescos da sua org</li>
+            </ol>
+            <div style="color:var(--hd);margin-top:6px"><strong>⚠️ Segurança:</strong> esses links são privados da sua org. Quem tem, vê seus dados.</div>
+          </div>
+        `}
+      </div>
+
+      <!-- PRIMAVERA -->
+      <div style="background:#fff;border:0.5px solid var(--hbr);border-radius:12px;padding:18px;margin-bottom:14px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+          <div style="font-size:28px">🗓️</div>
+          <div style="flex:1">
+            <div style="font-size:15px;font-weight:600;color:var(--hb)">Oracle Primavera P6 · Sync bi-direcional</div>
+            <div style="font-size:11px;color:var(--hmu)">Exporta o cronograma → trabalha no P6 → reimporta o XML pra sincronizar % concluído e datas reais.</div>
+          </div>
+          <span class="badge b-sim">ATIVO</span>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button class="btn bo" onclick="goV('gantt')"><i data-lucide="calendar-days"></i>Abrir Gantt</button>
+          <button class="btn bg" onclick="openP6ImportModal()"><i data-lucide="upload"></i>Importar XML do P6</button>
+        </div>
+      </div>
+
+      <!-- MS PROJECT -->
+      <div style="background:#fff;border:0.5px solid var(--hbr);border-radius:12px;padding:18px;margin-bottom:14px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+          <div style="font-size:28px">📘</div>
+          <div style="flex:1">
+            <div style="font-size:15px;font-weight:600;color:var(--hb)">Microsoft Project · XLSX</div>
+            <div style="font-size:11px;color:var(--hmu)">Export padrão MS Project: ID, Nome, Duração, Início, Término, % Concluído, Predecessores, Recursos.</div>
+          </div>
+          <span class="badge b-sim">ATIVO</span>
+        </div>
+        <button class="btn bp" onclick="goV('gantt')">📅 Abrir Gantt e exportar</button>
+      </div>
+
+      <!-- WEBHOOK / EMAIL -->
+      <div style="background:#fff;border:0.5px solid var(--hbr);border-radius:12px;padding:18px;opacity:.7">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+          <div style="font-size:28px">📧</div>
+          <div style="flex:1">
+            <div style="font-size:15px;font-weight:600;color:var(--hb)">E-mail &amp; Webhook</div>
+            <div style="font-size:11px;color:var(--hmu)">Notificações automáticas: pendências críticas, prazos, calibrações vencendo, etc.</div>
+          </div>
+          <span class="badge b-pen">EM BREVE</span>
+        </div>
+      </div>
+
+      <!-- API REST -->
+      <div style="background:#fff;border:0.5px solid var(--hbr);border-radius:12px;padding:18px;opacity:.7;margin-top:14px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+          <div style="font-size:28px">🔗</div>
+          <div style="flex:1">
+            <div style="font-size:15px;font-weight:600;color:var(--hb)">API REST &amp; Webhook</div>
+            <div class="font-size:15px;font-weight:600;color:var(--hb)">API REST &amp; Webhook</div>
+            <div style="font-size:11px;color:var(--hmu)">Integração customizada com ERP, SAP, Maximo, etc. Disponível no plano Multi/Enterprise.</div>
+          </div>
+          <span class="badge b-pen">EM BREVE</span>
+        </div>
+      </div>
+    </div>`;
+}
+
+
+
+// ============================================================
+// FERRAMENTAS NATIVAS (antes em iframe no Hub clássico)
+// ============================================================
+function rCalcHH(){
+  const el = document.getElementById('vcalchh');
+  if(!el) return;
+  el.innerHTML = `
+    <div class="bc-row">
+      <i data-lucide="calculator" style="width:14px;height:14px;color:var(--primary)"></i>
+      <span style="font-weight:600;color:var(--t9)">Calculadora HH</span>
+      <span style="margin-left:8px;font-size:11px;color:var(--t6)">HH por atividade · padrão Petrobras · NORSOK</span>
+      <div style="flex:1"></div>
+      <button class="bp" onclick="goV('prod')" title="Abrir tabela de parâmetros"><i data-lucide="settings" style="width:14px;height:14px;display:inline-block;vertical-align:-2px;margin-right:4px"></i>Parâmetros HH</button>
+    </div>
+    <div style="padding:22px;max-width:780px">
+      <div style="background:var(--t0);border:1px solid var(--t3);border-radius:10px;padding:18px;margin-bottom:14px">
+        <div style="font-size:13px;font-weight:700;color:var(--t9);margin-bottom:10px">Cálculo rápido — junta soldada</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px">
+          <div><label style="font-size:11px;color:var(--t6);font-weight:600">Diâmetro (pol)</label><input id="ch-dn" type="number" step="0.5" value="6" style="width:100%;padding:7px 10px;border:1px solid var(--t3);border-radius:6px;font-size:13px;background:var(--bg)"></div>
+          <div><label style="font-size:11px;color:var(--t6);font-weight:600">Schedule</label><select id="ch-sch" style="width:100%;padding:7px 10px;border:1px solid var(--t3);border-radius:6px;font-size:13px;background:var(--bg)"><option>40</option><option>80</option><option>STD</option><option>XS</option></select></div>
+          <div><label style="font-size:11px;color:var(--t6);font-weight:600">Material</label><select id="ch-mat" style="width:100%;padding:7px 10px;border:1px solid var(--t3);border-radius:6px;font-size:13px;background:var(--bg)"><option>Carbono A106</option><option>Inox 304</option><option>Inox 316</option><option>Liga Cr-Mo</option></select></div>
+        </div>
+        <button class="btn bp" onclick="calcHH()"><i data-lucide="calculator" style="width:14px;height:14px"></i>Calcular</button>
+        <div id="ch-result" style="margin-top:14px;font-size:13.5px"></div>
+      </div>
+      <div style="background:var(--t1);border:1px solid var(--t3);border-radius:10px;padding:14px;font-size:12px;color:var(--t6)">
+        <strong style="color:var(--t9)">Referência:</strong> tabela completa em <a href="#" onclick="goV('prod');return false" style="color:var(--primary)">Parâmetros HH</a>. Valores baseados em NORSOK Z-014 (revisão 4).
+      </div>
+    </div>`;
+  if(typeof _renderIcons === 'function') _renderIcons();
+}
+function calcHH(){
+  const dn = parseFloat(document.getElementById('ch-dn').value)||6;
+  const sch = document.getElementById('ch-sch').value;
+  const mat = document.getElementById('ch-mat').value;
+  // Coeficiente base por polegada (Carbono A106)
+  let coef = 0.6 + dn*0.18 + (sch==='80'||sch==='XS'?0.15:0);
+  if(mat==='Inox 304') coef *= 1.35;
+  else if(mat==='Inox 316') coef *= 1.42;
+  else if(mat==='Liga Cr-Mo') coef *= 1.55;
+  const out = document.getElementById('ch-result');
+  if(out) out.innerHTML = '<div style="background:#DBEAFE;border:1px solid #1E40AF;border-radius:8px;padding:12px"><strong style="color:#1E40AF">HH estimado por junta:</strong> <span style="font-size:18px;font-weight:800;color:#1E40AF;font-family:JetBrains Mono,monospace">'+coef.toFixed(2)+' h</span><div style="font-size:11px;color:#475569;margin-top:4px">Ø'+dn+'" · SCH '+sch+' · '+mat+'</div></div>';
+}
+
+function rRefs(){
+  const el = document.getElementById('vrefs'); if(!el) return;
+  const normas = [
+    { codigo:'ASME B31.3', titulo:'Process Piping', area:'Tubulação' },
+    { codigo:'ASME VIII-1', titulo:'Vasos de Pressão (regras)', area:'Equipamentos' },
+    { codigo:'API 510', titulo:'Pressure Vessel Inspection', area:'Inspeção' },
+    { codigo:'API 570', titulo:'Piping Inspection Code', area:'Inspeção' },
+    { codigo:'NR-13', titulo:'Caldeiras, Vasos de Pressão, Tubulações', area:'Segurança' },
+    { codigo:'NR-18', titulo:'Condições de Segurança na Construção', area:'Segurança' },
+    { codigo:'NBR 5410', titulo:'Instalações Elétricas Baixa Tensão', area:'Elétrica' },
+    { codigo:'NBR 5419', titulo:'Proteção contra Descargas Atmosféricas (SPDA)', area:'Elétrica' },
+    { codigo:'NBR 6118', titulo:'Projeto de Estruturas de Concreto', area:'Civil' },
+    { codigo:'PETROBRAS N-1592', titulo:'Ensaios Não-Destrutivos', area:'Qualidade' },
+    { codigo:'PETROBRAS N-2912', titulo:'Pintura Industrial', area:'Pintura' },
+    { codigo:'ASTM D4541', titulo:'Aderência de Tinta — Pull-Off', area:'Pintura' }
+  ];
+  el.innerHTML = `
+    <div class="bc-row">
+      <i data-lucide="book" style="width:14px;height:14px;color:var(--primary)"></i>
+      <span style="font-weight:600;color:var(--t9)">Normas Técnicas</span>
+      <span style="margin-left:8px;font-size:11px;color:var(--t6)">${normas.length} referências · ASME, PETROBRAS, ABNT, API</span>
+    </div>
+    <div style="padding:18px 22px">
+      <div class="tbl-wrap"><table style="width:100%;border-collapse:collapse">
+        <thead><tr style="background:var(--t1)"><th style="padding:8px 12px;text-align:left;font-size:11px;color:var(--t6);text-transform:uppercase">Código</th><th style="padding:8px 12px;text-align:left;font-size:11px;color:var(--t6);text-transform:uppercase">Título</th><th style="padding:8px 12px;text-align:left;font-size:11px;color:var(--t6);text-transform:uppercase">Área</th></tr></thead>
+        <tbody>${normas.map(n=>`<tr style="border-bottom:1px solid var(--t3)"><td style="padding:9px 12px;font-family:JetBrains Mono,monospace;font-weight:700;color:var(--primary)">${n.codigo}</td><td style="padding:9px 12px;font-size:13px;color:var(--t9)">${n.titulo}</td><td style="padding:9px 12px"><span class="badge b-info">${n.area}</span></td></tr>`).join('')}</tbody>
+      </table></div>
+    </div>`;
+  if(typeof _renderIcons === 'function') _renderIcons();
+}
+
+function rCablecat(){
+  const el = document.getElementById('vcablecat'); if(!el) return;
+  const cabos = [
+    { tipo:'PP 750V', secao:'1.5 mm²', amp:'17 A', fabricante:'Prysmian Afumex Plus', uso:'Comando/Sinal' },
+    { tipo:'PP 750V', secao:'2.5 mm²', amp:'24 A', fabricante:'Prysmian Afumex Plus', uso:'Iluminação' },
+    { tipo:'PP 750V', secao:'4.0 mm²', amp:'32 A', fabricante:'Prysmian Afumex Plus', uso:'Tomadas' },
+    { tipo:'EPR 0.6/1kV', secao:'6.0 mm²', amp:'46 A', fabricante:'Prysmian Eprotenax', uso:'Força' },
+    { tipo:'EPR 0.6/1kV', secao:'10 mm²', amp:'64 A', fabricante:'Prysmian Eprotenax', uso:'Força' },
+    { tipo:'EPR 0.6/1kV', secao:'16 mm²', amp:'85 A', fabricante:'Prysmian Eprotenax', uso:'Força' },
+    { tipo:'EPR 0.6/1kV', secao:'25 mm²', amp:'112 A', fabricante:'Prysmian Eprotenax', uso:'Alimentador' },
+    { tipo:'EPR 0.6/1kV', secao:'35 mm²', amp:'138 A', fabricante:'Prysmian Eprotenax', uso:'Alimentador' },
+    { tipo:'EPR 0.6/1kV', secao:'50 mm²', amp:'168 A', fabricante:'Prysmian Eprotenax', uso:'Alimentador' },
+    { tipo:'EPR 0.6/1kV', secao:'70 mm²', amp:'213 A', fabricante:'Prysmian Eprotenax', uso:'Tronco' },
+    { tipo:'EPR 0.6/1kV', secao:'95 mm²', amp:'258 A', fabricante:'Prysmian Eprotenax', uso:'Tronco' },
+    { tipo:'EPR 8.7/15kV', secao:'25 mm²', amp:'130 A', fabricante:'Prysmian MV', uso:'Média Tensão' }
+  ];
+  el.innerHTML = `
+    <div class="bc-row">
+      <i data-lucide="cable" style="width:14px;height:14px;color:var(--primary)"></i>
+      <span style="font-weight:600;color:var(--t9)">Catálogo de Cabos</span>
+      <span style="margin-left:8px;font-size:11px;color:var(--t6)">${cabos.length} bitolas · Prysmian · NBR 5410</span>
+    </div>
+    <div style="padding:18px 22px">
+      <div class="tbl-wrap"><table style="width:100%;border-collapse:collapse">
+        <thead><tr style="background:var(--t1)"><th style="padding:8px 12px;text-align:left;font-size:11px;color:var(--t6);text-transform:uppercase">Tipo</th><th style="padding:8px 12px;text-align:left;font-size:11px;color:var(--t6);text-transform:uppercase">Seção</th><th style="padding:8px 12px;text-align:left;font-size:11px;color:var(--t6);text-transform:uppercase">Capacidade</th><th style="padding:8px 12px;text-align:left;font-size:11px;color:var(--t6);text-transform:uppercase">Fabricante</th><th style="padding:8px 12px;text-align:left;font-size:11px;color:var(--t6);text-transform:uppercase">Uso típico</th></tr></thead>
+        <tbody>${cabos.map(c=>`<tr style="border-bottom:1px solid var(--t3)"><td style="padding:8px 12px;font-size:12px"><span class="badge b-info">${c.tipo}</span></td><td style="padding:8px 12px;font-family:JetBrains Mono,monospace;font-weight:700;color:var(--t9)">${c.secao}</td><td style="padding:8px 12px;font-family:JetBrains Mono,monospace;color:var(--primary)">${c.amp}</td><td style="padding:8px 12px;font-size:12px;color:var(--t7)">${c.fabricante}</td><td style="padding:8px 12px;font-size:12px;color:var(--t6)">${c.uso}</td></tr>`).join('')}</tbody>
+      </table></div>
+    </div>`;
+  if(typeof _renderIcons === 'function') _renderIcons();
+}
+
+function rPerfis(){
+  const el = document.getElementById('vperfis'); if(!el) return;
+  const perfis = [
+    { tipo:'W (Viga I)', desig:'W 150x13', peso:'13 kg/m', d:'148 mm', bf:'100 mm', fabricante:'Gerdau' },
+    { tipo:'W (Viga I)', desig:'W 200x22.5', peso:'22.5 kg/m', d:'206 mm', bf:'102 mm', fabricante:'Gerdau' },
+    { tipo:'W (Viga I)', desig:'W 250x32.7', peso:'32.7 kg/m', d:'258 mm', bf:'146 mm', fabricante:'Gerdau' },
+    { tipo:'W (Viga I)', desig:'W 310x38.7', peso:'38.7 kg/m', d:'310 mm', bf:'165 mm', fabricante:'Gerdau' },
+    { tipo:'W (Viga I)', desig:'W 360x44', peso:'44 kg/m', d:'351 mm', bf:'171 mm', fabricante:'Gerdau' },
+    { tipo:'HP (Pilar)', desig:'HP 250x62', peso:'62 kg/m', d:'246 mm', bf:'256 mm', fabricante:'ArcelorMittal' },
+    { tipo:'HP (Pilar)', desig:'HP 310x79', peso:'79 kg/m', d:'299 mm', bf:'306 mm', fabricante:'ArcelorMittal' },
+    { tipo:'U (Canal)', desig:'U 152x12.2', peso:'12.2 kg/m', d:'152 mm', bf:'48 mm', fabricante:'Gerdau' },
+    { tipo:'U (Canal)', desig:'U 203x17.1', peso:'17.1 kg/m', d:'203 mm', bf:'57 mm', fabricante:'Gerdau' },
+    { tipo:'L (Cantoneira)', desig:'L 51x4.8', peso:'3.7 kg/m', d:'51 mm', bf:'51 mm', fabricante:'Gerdau' },
+    { tipo:'L (Cantoneira)', desig:'L 76x6.4', peso:'7.3 kg/m', d:'76 mm', bf:'76 mm', fabricante:'Gerdau' },
+    { tipo:'L (Cantoneira)', desig:'L 102x9.5', peso:'14.6 kg/m', d:'102 mm', bf:'102 mm', fabricante:'Gerdau' }
+  ];
+  el.innerHTML = `
+    <div class="bc-row">
+      <i data-lucide="layers" style="width:14px;height:14px;color:var(--primary)"></i>
+      <span style="font-weight:600;color:var(--t9)">Perfis Estruturais</span>
+      <span style="margin-left:8px;font-size:11px;color:var(--t6)">${perfis.length} perfis · Gerdau · ArcelorMittal</span>
+    </div>
+    <div style="padding:18px 22px">
+      <div class="tbl-wrap"><table style="width:100%;border-collapse:collapse">
+        <thead><tr style="background:var(--t1)"><th style="padding:8px 12px;text-align:left;font-size:11px;color:var(--t6);text-transform:uppercase">Tipo</th><th style="padding:8px 12px;text-align:left;font-size:11px;color:var(--t6);text-transform:uppercase">Designação</th><th style="padding:8px 12px;text-align:left;font-size:11px;color:var(--t6);text-transform:uppercase">Peso</th><th style="padding:8px 12px;text-align:left;font-size:11px;color:var(--t6);text-transform:uppercase">d (alt.)</th><th style="padding:8px 12px;text-align:left;font-size:11px;color:var(--t6);text-transform:uppercase">bf (larg.)</th><th style="padding:8px 12px;text-align:left;font-size:11px;color:var(--t6);text-transform:uppercase">Fabricante</th></tr></thead>
+        <tbody>${perfis.map(p=>`<tr style="border-bottom:1px solid var(--t3)"><td style="padding:8px 12px;font-size:12px"><span class="badge b-info">${p.tipo}</span></td><td style="padding:8px 12px;font-family:JetBrains Mono,monospace;font-weight:700;color:var(--primary)">${p.desig}</td><td style="padding:8px 12px;font-family:JetBrains Mono,monospace;color:var(--t9)">${p.peso}</td><td style="padding:8px 12px;font-family:JetBrains Mono,monospace;color:var(--t7)">${p.d}</td><td style="padding:8px 12px;font-family:JetBrains Mono,monospace;color:var(--t7)">${p.bf}</td><td style="padding:8px 12px;font-size:12px;color:var(--t7)">${p.fabricante}</td></tr>`).join('')}</tbody>
+      </table></div>
+    </div>`;
+  if(typeof _renderIcons === 'function') _renderIcons();
+}
+
+// Expor pro hub-unified.js poder chamar
+try {
+  window.rCalcHH = rCalcHH;
+  window.rRefs = rRefs;
+  window.rCablecat = rCablecat;
+  window.rPerfis = rPerfis;
+  window.calcHH = calcHH;
+} catch(_){}
+
+// genNR13PDF removida temporariamente (arquivo estava truncado - sera restaurada depois)
+function genNR13PDF(){alert("Funcao em manutencao - sera restaurada em breve.");}

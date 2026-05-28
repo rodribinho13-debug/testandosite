@@ -1,0 +1,19 @@
+{
+  "name": "project-ia",
+  "version": "4.4.0",
+  "description": "PROJECT.IA - Plataforma de Engenharia Multi-Disciplinar",
+  "private": true,
+  "scripts": {
+    "validate": "node tools/validate.mjs && node tools/check-truncation.mjs",
+    "build": "node tools/build.mjs",
+    "dev": "node tools/dev-server.mjs",
+    "minify": "node tools/minify.mjs",
+    "check-truncation": "node tools/check-truncation.mjs"
+  },
+  "devDependencies": {
+    "esbuild": "^0.21.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

@@ -1,0 +1,9 @@
+tag,discipline,origin,destination,diameter_mm,material,length_m,length_projected_m,length_fabricated_m,length_installed_m,pct_fabricated,pct_installed,supports_qty,notes
+ELD-001,Elétrica,QGBT-01,MCC-01,75,Aço galvanizado,12.5,12.5,12.5,12.5,100,100,8,Lance principal entrada
+ELD-002,Elétrica,MCC-01,Cx Passagem 01,50,Aço galvanizado,8.2,8.2,8.2,8.2,100,100,5,
+ELD-003,Elétrica,Cx Passagem 01,Sala Bombas,40,PVC rígido,15.5,15.5,15.5,0,100,0,9,Aguardando liberação de obra civil
+ELD-004,Elétrica,Cx Passagem 01,Sala Compressores,40,PVC rígido,18.0,18.0,18.0,0,100,0,11,
+ELD-005,Instrumentação,Painel Cmd,Campo Bomba P-01,32,Aço galvanizado,22.5,22.5,11.0,0,50,0,14,Em fabricação - 50%
+ELD-006,Instrumentação,Painel Cmd,Campo PT-101,25,Aço galvanizado,28.0,28.0,28.0,28.0,100,100,16,
+ELD-007,Elétrica,Subestação,Malha terra,75,PVC rígido,45.0,45.0,0,0,0,0,28,Apenas projetado
+ELD-008,Instrumentação,Sala controle,Campo FIC-203,32,Inox AISI 304,18.5,18.5,18.5,12.0,100,65,10,"Lance em área classificada - dificultou montagem"

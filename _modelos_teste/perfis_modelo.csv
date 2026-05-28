@@ -1,0 +1,11 @@
+code,profile_type,designation,material,weight_kg_m,height_mm,width_mm,thickness_mm,supplier,catalog_reference
+W360X44,Viga I,W 360 x 44,ASTM A572 Gr.50,44.0,352,171,7.9,Gerdau,Catálogo Gerdau 2024
+W360X51,Viga I,W 360 x 51,ASTM A572 Gr.50,51.0,355,171,9.8,Gerdau,Catálogo Gerdau 2024
+W200X22,Viga I,W 200 x 22,ASTM A572 Gr.50,21.5,206,102,6.2,Gerdau,Catálogo Gerdau 2024
+W200X26,Viga I,W 200 x 26,ASTM A572 Gr.50,25.7,207,133,5.8,Gerdau,Catálogo Gerdau 2024
+U200X76,Perfil U,U 200 x 76 x 8.0,ASTM A36,17.5,200,76,8.0,Gerdau,Tabela Gerdau aço perfilado
+L75X75X6,Cantoneira,L 75 x 75 x 6,ASTM A36,6.85,75,75,6,ArcelorMittal,Catálogo ArcelorMittal 2024
+L50X50X5,Cantoneira,L 50 x 50 x 5,ASTM A36,3.77,50,50,5,ArcelorMittal,
+L100X100X10,Cantoneira,L 100 x 100 x 10,ASTM A36,15.0,100,100,10,ArcelorMittal,
+TUBO114X3,Tubo industrial,Ø 114.3 x 3.0,ASTM A36,8.23,114,114,3.0,Tuper,Tubo redondo
+TUBO60X3,Tubo industrial,Ø 60.3 x 3.0,ASTM A36,4.24,60,60,3.0,Tuper,Tubo redondo

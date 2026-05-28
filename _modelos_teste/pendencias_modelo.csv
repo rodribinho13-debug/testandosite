@@ -1,0 +1,8 @@
+code,title,description,category,priority,status,responsible,opened_date,due_date,solved_date,notes
+PEN-001,Solicitação isométrico revisado L-101,"Iso CSC-PD-1500-IS-01-00010 está na revisão B, mas obra recebeu a revisão A. Verificar se há divergência no campo.",Documentação,critica,em_andamento,Eng. Roberto Lima,2026-05-10,2026-05-25,,Aguardando resposta da contratante
+PEN-002,Material faltante: parafusos M16x80,Recebido só 60% do lote previsto para a montagem do mês de maio,Suprimentos,alta,aberta,Comprador João,2026-05-12,2026-05-30,,Fornecedor alegou problema na expedição
+PEN-003,Suporte SUP-205 fora de especificação,Suporte recebido com perfil U 80 quando o iso pede U 100. Necessita retorno ao fornecedor,Qualidade,alta,em_andamento,Insp. Carlos,2026-05-15,2026-06-05,,Carta de não-conformidade emitida
+PEN-004,Reaperto torque flanges sistema TH-04,Foram identificadas 4 flanges com torque abaixo do especificado durante TH,Execução,media,resolvida,Encarregado MAS,2026-05-08,2026-05-15,2026-05-14,Reaperto realizado conforme procedimento PRO-TQ-001
+PEN-005,Falha no certificado lote eletrodos E7018,Lote 2401-A do E7018 sem certificado de qualidade - aguardando troca,Suprimentos,critica,em_andamento,Comprador João,2026-05-18,2026-05-25,,
+PEN-006,Inspetor soldagem ausente,Inspetor de soldagem com afastamento médico desde 20/05 - sem substituto programado,RH,alta,aberta,RH,2026-05-20,2026-05-30,,Buscar substituto temporário
+PEN-007,SPDA da subestação fora de norma,Medição de continuidade em 3 pontos acima de 10Ω - revisar trecho aterramento,Qualidade,alta,aberta,Eng. Elétrica,2026-05-22,2026-06-10,,

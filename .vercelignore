@@ -1,0 +1,70 @@
+# PROJECT.IA — .vercelignore
+# Bloqueia upload de arquivos sensíveis e legados para o Vercel
+# ============================================================
+
+# CREDENCIAIS
+MINHAS_CREDENCIAIS.txt
+credentials*
+*.credentials
+*.secret
+*.env
+.env*
+!.env.example
+*.key
+*.pem
+
+# Backups (não precisam no Vercel)
+_backup_*/
+*_backup_*/
+_backups_auto/
+_archive_legacy/
+*.bak
+*.bkp
+*.backup
+hydrostec_v9.html.*
+hydrostec_planejador*.html.*
+
+# Documentação interna (não expor publicamente)
+_docs/
+README*.md
+NOTAS*.md
+TODO*.md
+*.todo
+HYDROSTEC_Blueprint_Produto.docx
+PROMPT_*.md
+ANALISE_*.md
+BENCHMARK_*.md
+ROADMAP_*.md
+
+# Amostras / modelos de teste (não expor)
+_amostras_teste/
+_modelos_teste/
+_tests/
+tests/
+
+# DB locals (migrations só rodam via supabase CLI)
+db/seed/
+db/migrations/
+
+# Tools de dev
+tools/
+*.test.js
+*.spec.js
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
+*.tmp
+.cache/
+
+# Diagnóstico (não expor publicamente)
+reset.html
+teste_login.html
+ABRIR_PROJECT_IA.bat
+PUSH_TO_GITHUB.ps1
+
+# Node
+node_modules/

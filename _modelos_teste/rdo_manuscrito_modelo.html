@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>RDO modelo manuscrito — PROJECT.IA</title>
+<style>
+  @page { size: A4 portrait; margin: 10mm; }
+  body { font-family: 'Courier New', Courier, monospace; font-size: 12px; background: #FAF8F2; padding: 18mm; max-width: 210mm; margin: 0 auto; }
+  h1 { text-align: center; font-size: 18px; margin: 0 0 4px; }
+  .subtitle { text-align: center; font-size: 11px; color: #666; margin-bottom: 14px; }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 14px; }
+  th, td { border: 1px solid #333; padding: 5px 8px; vertical-align: top; font-size: 11.5px; }
+  th { background: #DDD; font-weight: 700; text-align: left; }
+  .handwritten { font-family: 'Caveat', 'Comic Sans MS', cursive; font-size: 14.5px; color: #1A2540; }
+  .h2-section { background: #333; color: #fff; padding: 5px 9px; font-weight: 700; font-size: 12px; margin: 14px 0 0; text-transform: uppercase; letter-spacing: .8px; }
+  .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+  .field { padding: 6px 8px; border: 1px solid #333; }
+  .lbl { font-size: 9.5px; color: #555; text-transform: uppercase; font-weight: 700; }
+  .val { margin-top: 3px; font-size: 13px; }
+  .check { display: inline-block; width: 14px; height: 14px; border: 1px solid #333; margin-right: 3px; vertical-align: middle; line-height: 12px; text-align: center; font-size: 12px; }
+  .check.checked { background: #333; color: #fff; }
+  .obs { min-height: 60px; }
+</style>
+</head>
+<body>
+  <h1>RDO — RELATÓRIO DIÁRIO DE OBRA</h1>
+  <div class="subtitle">Obra: REFINARIA — Unidade U-1500 · Empresa: METAL MONTAGEM LTDA</div>
+
+  <div class="row-2">
+    <div class="field"><div class="lbl">Data do relatório</div><div class="val handwritten">23 / 05 / 2026</div></div>
+    <div class="field"><div class="lbl">Nº RDO</div><div class="val handwritten">RDO-0042</div></div>
+  </div>
+  <div class="row-2">
+    <div class="field"><div class="lbl">Turno</div><div class="val handwritten">[X] Integral &nbsp; [ ] Manhã &nbsp; [ ] Tarde &nbsp; [ ] Noite</div></div>
+    <div class="field"><div class="lbl">Clima</div><div class="val handwritten">Ensolarado de manhã, nublado à tarde</div></div>
+  </div>
+  <div class="row-2">
+    <div class="field"><div class="lbl">Encarregado</div><div class="val handwritten">José Carlos Mendes (Matr. 4521)</div></div>
+    <div class="field"><div class="lbl">Frente / Área</div><div class="val handwritten">Frente Norte — Cota +6.0m</div></div>
+  </div>
+
+  <div class="h2-section">EFETIVO DA EQUIPE</div>
+  <table>
+    <tr><th>Função</th><th>Qtd manhã</th><th>Qtd tarde</th><th>Observação</th></tr>
+    <tr><td>Soldadores</td><td class="handwritten">5</td><td class="handwritten">5</td><td class="handwritten">João, Pedro, Carlos, Roberto, Antônio</td></tr>
+    <tr><td>Caldeireiros</td><td class="handwritten">3</td><td class="handwritten">3</td><td class="handwritten">Auxiliando montagem de spools</td></tr>
+    <tr><td>Ajudantes</td><td class="handwritten">6</td><td class="handwritten">6</td><td></td></tr>
+    <tr><td>Encarregados</td><td class="handwritten">1</td><td class="handwritten">1</td><td class="handwritten">José Carlos</td></tr>
+    <tr><td>Inspetor de soldagem</td><td class="handwritten">1</td><td class="handwritten">1</td><td class="handwritten">Carlos Mendes</td></tr>
+    <tr><td><strong>TOTAL</strong></td><td class="handwritten"><strong>16</strong></td><td class="handwritten"><strong>16</strong></td><td></td></tr>
+  </table>
+
+  <div class="h2-section">ATIVIDADES REALIZADAS</div>
+  <table>
+    <tr><th>Atividade</th><th>HH</th><th>Qtd</th><th>Un.</th></tr>
+    <tr><td class="handwritten">Solda de raiz GTAW juntas J-110 a J-115 (Iso CSC-PD-1500-IS-01-00010)</td><td class="handwritten">32</td><td class="handwritten">6</td><td class="handwritten">jt</td></tr>
+    <tr><td class="handwritten">Acabamento solda flange F-25 (torque 340 Nm conforme procedimento)</td><td class="handwritten">8</td><td class="handwritten">1</td><td class="handwritten">jt</td></tr>
+    <tr><td class="handwritten">Montagem do suporte SUP-205 cota +9.0m</td><td class="handwritten">6</td><td class="handwritten">1</td><td class="handwritten">pç</td></tr>
+    <tr><td class="handwritten">END LP em juntas J-110, J-111 (todas aprovadas)</td><td class="handwritten">4</td><td class="handwritten">2</td><td class="handwritten">jt</td></tr>
+    <tr><td class="handwritten">Apoio ao TH-04 (acompanhamento)</td><td class="handwritten">6</td><td class="handwritten">1</td><td class="handwritten">sist</td></tr>
+  </table>
+
+  <div class="h2-section">EPI OBSERVADO</div>
+  <div style="padding: 8px 12px; border: 1px solid #333" class="handwritten">
+    <span class="check checked">✓</span> Capacete &nbsp;
+    <span class="check checked">✓</span> Óculos &nbsp;
+    <span class="check checked">✓</span> Bota &nbsp;
+    <span class="check checked">✓</span> Luva &nbsp;
+    <span class="check checked">✓</span> Cinto trava-quedas (para altura) &nbsp;
+    <span class="check checked">✓</span> Protetor auricular &nbsp;
+    <span class="check">  </span> Respirador (sem necessidade hoje)
+  </div>
+
+  <div class="h2-section">EQUIPAMENTOS UTILIZADOS</div>
+  <div style="padding: 8px 12px; border: 1px solid #333" class="handwritten">
+    Máquina de solda Esab LHN 250 (3 un) · Esmerilhadeira Bosch GWS 9-125 (2 un) ·<br>
+    Torquímetro Tramontina 40-450Nm · Calandra portátil · Andaime tubular ANDM-002
+  </div>
+
+  <div class="h2-section">OCORRÊNCIAS / EVENTOS</div>
+  <div class="field obs handwritten">
+    - Material recebido com atraso (lote eletrodos E7018) — registrar PEN-005<br>
+    - PT/PE para trabalho em altura emitida e válida até 30/05<br>
+    - Cliente em visita ao canteiro entre 10h e 11h — apresentado avanço da semana
+  </div>
+
+  <div class="h2-section">PENDÊNCIAS / NECESSIDADES</div>
+  <div class="field obs handwritten">
+    - Solicitar mais 2 caixas de eletrodos E7018 para a próxima semana<br>
+    - Andaime SC-12 precisa de inspeção (próxima inspeção: 27/05)<br>
+    - Renovação do PT/PE de altura — vence em 30/05
+  </div>
+
+  <div class="h2-section">OBSERVAÇÕES GERAIS</div>
+  <div class="field obs handwritten">
+    Boa produtividade no turno da manhã. À tarde, queda na temperatura permitiu trabalhos contínuos sem paradas.<br>
+    Próximas atividades para 24/05: continuação solda spool S-101-B e início montagem de suportes na frente LESTE.
+  </div>
+
+  <div style="margin-top: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px">
+    <div style="border-top: 1px solid #000; padding-top: 6px; text-align: center">
+      <div style="font-size: 11px">Assinatura do encarregado</div>
+      <div class="handwritten" style="margin-top: 18px; font-style: italic">José Carlos Mendes</div>
+    </div>
+    <div style="border-top: 1px solid #000; padding-top: 6px; text-align: center">
+      <div style="font-size: 11px">Visto da engenharia</div>
+      <div class="handwritten" style="margin-top: 18px; font-style: italic">Eng. Roberto Lima</div>
+    </div>
+  </div>
+
+  <div style="margin-top: 14px; text-align: center; font-size: 9px; color: #666">
+    PROJECT.IA — Modelo de RDO manuscrito · Ctrl+P → "Salvar como PDF" ou imprimir e tirar foto → testar IA por foto no RDO
+  </div>
+</body>
+</html>

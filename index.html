@@ -1,0 +1,704 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>PROJECT.IA · Engenharia Industrial 360° com IA</title>
+<meta name="description" content="A plataforma onde engenheiros civis, elétricos, mecânicos, de tubulação, NR-13 e segurança projetam, planejam e executam com IA especializada. Do isométrico ao handover."/>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<script>if(location.protocol==="file:"){/* manifest CORS bloqueia em file:// */}else{document.write('<link rel="manifest" href="manifest.json">');}</script>
+<meta name="theme-color" content="#0A1628"/>
+</head>
+<body>
+
+<!-- ═══════════════════ NAV ═══════════════════ -->
+<nav class="nav">
+  <div class="container-wide nav-inner">
+    <a href="#" class="brand">
+      <svg class="brand-mark" viewBox="0 0 72 72" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="brand-g" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#06B6D4"/>
+            <stop offset="100%" stop-color="#7C3AED"/>
+          </linearGradient>
+        </defs>
+        <path d="M 36 8 L 60 22 L 36 36 L 12 22 Z" fill="#0A1628" stroke="#0A1628" stroke-width="1.5" stroke-linejoin="round"/>
+        <path d="M 12 22 L 36 36 L 36 64 L 12 50 Z" fill="#1E40AF" stroke="#0A1628" stroke-width="1.5" stroke-linejoin="round"/>
+        <path d="M 60 22 L 36 36 L 36 64 L 60 50 Z" fill="#2563EB" stroke="#0A1628" stroke-width="1.5" stroke-linejoin="round"/>
+        <circle cx="36" cy="36" r="5" fill="url(#brand-g)"/>
+        <circle cx="36" cy="36" r="9" fill="none" stroke="url(#brand-g)" stroke-width="1.5" opacity=".7"/>
+      </svg>
+      <span class="wm">PROJECT<span class="dot">.</span><span class="ia">IA</span></span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="#produto">Produto</a></li>
+      <li><a href="#disciplinas">Disciplinas</a></li>
+      <li><a href="#integracoes">Integrações</a></li>
+      <li><a href="#precos">Preços</a></li>
+      <li><a href="#empresa">Empresa</a></li>
+    </ul>
+    <div class="nav-cta">
+      <a href="hydrostec_v9.html" class="btn-text">Entrar</a>
+      <a href="hydrostec_v9.html#signup" class="btn btn-primary">Começar grátis <span class="arr">→</span></a>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══════════════════ HERO ═══════════════════ -->
+<header class="hero">
+  <div class="container-wide hero-inner">
+    <div class="hero-copy">
+      <div class="hero-pill">
+        <span class="tag">BETA · 2026</span>
+        Plataforma multi-disciplinar em produção · Brasil
+      </div>
+      <h1>Engenharia industrial,<br/><span class="stroke">do esboço à entrega.</span></h1>
+      <p class="lead">Uma plataforma só pra civil, elétrica, mecânica, tubulação, pintura, NR&#8209;13 e segurança. 16 disciplinas trabalhando no mesmo dado — sem planilha solta, sem retrabalho de digitação.</p>
+      <div class="hero-cta">
+        <a href="#precos" class="btn btn-primary btn-lg">Começar grátis <span class="arr">→</span></a>
+        <a href="#produto" class="btn btn-ghost-dark btn-lg">Ver produto · 90s</a>
+      </div>
+      <div class="hero-meta">
+        <div class="hero-meta-item"><strong>7 <span class="pct">categorias</span></strong> de módulos no menu lateral</div>
+        <div class="hero-meta-item"><strong>R$&nbsp;0<span class="pct">/Free</span></strong> pra começar · sem cartão</div>
+        <div class="hero-meta-item"><strong>100% <span class="pct">cloud</span></strong> sem instalar nada · navegador</div>
+      </div>
+    </div>
+
+    <div class="hero-app">
+      <div class="app-window">
+        <div class="app-chrome">
+          <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+          <span class="url">app.project-ia.com.br/painel</span>
+        </div>
+        <div class="app-body">
+          <aside class="app-side">
+            <div class="app-side-head">
+              <svg width="22" viewBox="0 0 72 72">
+                <defs><linearGradient id="hg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#06B6D4"/><stop offset="1" stop-color="#7C3AED"/></linearGradient></defs>
+                <path d="M 36 8 L 60 22 L 36 36 L 12 22 Z" fill="#0A1628"/>
+                <path d="M 12 22 L 36 36 L 36 64 L 12 50 Z" fill="#1E40AF"/>
+                <path d="M 60 22 L 36 36 L 36 64 L 60 50 Z" fill="#2563EB"/>
+                <circle cx="36" cy="36" r="5" fill="url(#hg)"/>
+              </svg>
+              <span class="wm" style="font-size:13px">PROJECT<span class="dot">.</span><span class="ia">IA</span></span>
+            </div>
+            <div class="app-side-section">Planejamento</div>
+            <div class="app-side-item active"><span class="ico">▤</span>Painel (geral)</div>
+            <div class="app-side-item"><span class="ico">⬢</span>Folhas</div>
+            <div class="app-side-item"><span class="ico">▦</span>Mapa de Juntas</div>
+            <div class="app-side-item"><span class="ico">◧</span>Cronograma</div>
+            <div class="app-side-item"><span class="ico">◆</span>HUB Planejador <span class="badge-pro">PRO</span></div>
+            <div class="app-side-section">Qualidade</div>
+            <div class="app-side-item"><span class="ico">⚠</span>Pendências</div>
+            <div class="app-side-item"><span class="ico">◉</span>Soldadores</div>
+            <div class="app-side-section">Eng. Mecânica</div>
+            <div class="app-side-item"><span class="ico">▣</span>Equipamentos NR-13</div>
+            <div class="app-side-item"><span class="ico">◈</span>Manutenção</div>
+          </aside>
+          <div class="app-main">
+            <div class="app-h">
+              <div>
+                <h4>Projeto Exemplo · Unidade U-2200</h4>
+                <div class="sub">Atualizado há 2&nbsp;min · curva S sincronizada</div>
+              </div>
+              <span class="pill pill-ia">⚡ IA ativa</span>
+            </div>
+            <div class="app-kpis">
+              <div class="kpi"><div class="lbl">Avanço físico</div><div class="val">67,3<span style="font-size:11px;color:var(--slate-5);font-family:'Inter'">%</span></div><div class="delta">▲ 3,2 sem</div></div>
+              <div class="kpi"><div class="lbl">HH realizado</div><div class="val green">12.450</div><div class="delta">▲ vs plano</div></div>
+              <div class="kpi"><div class="lbl">Pendências</div><div class="val amber">23</div><div class="delta" style="color:var(--warning)">7 críticas</div></div>
+              <div class="kpi"><div class="lbl">Custo R$</div><div class="val">847k</div><div class="delta">−2,1% plano</div></div>
+            </div>
+            <div class="app-chart">
+              <div class="app-chart-head">
+                <span class="ttl">Curva S — Avanço físico vs planejado</span>
+                <div class="legend"><span style="color:var(--accent)">Real</span><span style="color:var(--slate-4)">Plano</span></div>
+              </div>
+              <svg class="curve-s" viewBox="0 0 400 120" preserveAspectRatio="none">
+                <defs>
+                  <linearGradient id="cs-fill" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stop-color="#06B6D4" stop-opacity=".30"/>
+                    <stop offset="1" stop-color="#06B6D4" stop-opacity="0"/>
+                  </linearGradient>
+                </defs>
+                <g stroke="#E2E8F0" stroke-width=".5">
+                  <line x1="0" y1="30" x2="400" y2="30"/>
+                  <line x1="0" y1="60" x2="400" y2="60"/>
+                  <line x1="0" y1="90" x2="400" y2="90"/>
+                </g>
+                <path d="M 0 115 C 60 110, 100 95, 140 75 S 240 30, 320 18 L 400 12" fill="none" stroke="#94A3B8" stroke-width="1.5" stroke-dasharray="3 3"/>
+                <path d="M 0 116 C 50 113, 90 102, 130 84 S 220 42, 280 30 L 280 30 L 280 120 L 0 120 Z" fill="url(#cs-fill)"/>
+                <path d="M 0 116 C 50 113, 90 102, 130 84 S 220 42, 280 30" fill="none" stroke="#06B6D4" stroke-width="2"/>
+                <circle cx="280" cy="30" r="4" fill="#06B6D4" stroke="#fff" stroke-width="2"/>
+                <line x1="280" y1="0" x2="280" y2="120" stroke="#06B6D4" stroke-width=".7" stroke-dasharray="2 3" opacity=".5"/>
+                <text x="285" y="14" font-size="9" font-family="JetBrains Mono" fill="#06B6D4" font-weight="700">HOJE</text>
+              </svg>
+            </div>
+            <table class="app-table">
+              <thead><tr><th>Junta</th><th>Linha</th><th>Solda</th><th>END</th><th>Status</th></tr></thead>
+              <tbody>
+                <tr><td class="tag">045/B</td><td class="mono" style="color:var(--slate-5)">PSF-001-A</td><td class="mono" style="color:var(--slate-5)">A1 · 12/05</td><td><span class="pill pill-ok">RT OK</span></td><td><span class="pill pill-ok">✓ Aprovada</span></td></tr>
+                <tr><td class="tag">046/B</td><td class="mono" style="color:var(--slate-5)">PSF-001-A</td><td class="mono" style="color:var(--slate-5)">A1 · 13/05</td><td><span class="pill pill-warn">VS pend</span></td><td><span class="pill pill-warn">Pendente</span></td></tr>
+                <tr><td class="tag">112/F</td><td class="mono" style="color:var(--slate-5)">PSF-003-C</td><td class="mono" style="color:var(--slate-5)">B7 · 12/05</td><td><span class="pill pill-danger">Reparo</span></td><td><span class="pill pill-danger">⚠ Crítica</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Floaters operacionais -->
+      <div class="ia-floater">
+        <div class="pulse"></div>
+        <div>
+          <div class="t1">Curva S sincronizada <span class="badge">P6</span></div>
+          <div class="t2">Avanço físico atualizado a partir do <b>Primavera P6</b> — baseline reconciliada há 2 min.</div>
+        </div>
+      </div>
+      <div class="ia-floater-2">
+        <div class="icon">N13</div>
+        <div class="t"><strong>NR-13: 4 inspeções</strong><span>vencendo nos próximos 30 dias</span></div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ═══════════════════ STRIP — Disciplinas atendidas ═══════════════════ -->
+<section class="strip">
+  <div class="container">
+    <div class="strip-label">Disciplinas que rodam no produto</div>
+    <div class="strip-row">
+      <div class="strip-logo">CIVIL</div>
+      <div class="strip-logo">ELÉTRICA</div>
+      <div class="strip-logo">TUBULAÇÃO</div>
+      <div class="strip-logo">NR-13</div>
+      <div class="strip-logo">SOLDAGEM</div>
+      <div class="strip-logo">PINTURA</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════ COMO FUNCIONA ═══════════════════ -->
+<section class="section" id="como-funciona" style="padding-bottom:0">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow">00 · Como funciona</span>
+      <h2>Três coisas que mudam no dia a dia.</h2>
+      <p class="lead">Sem jargão. Sem promessa de revolução. Três mudanças concretas que você sente na primeira semana — e que o resto da diretoria entende em duas frases.</p>
+    </div>
+
+    <div class="how-grid">
+      <div class="how">
+        <div class="how-num">01</div>
+        <h3>Tudo num lugar só</h3>
+        <p>Acaba a planilha solta no Drive de alguém. Civil, elétrica, mecânica e segurança trabalham no mesmo projeto — quando muda um dado, todo mundo enxerga.</p>
+      </div>
+      <div class="how">
+        <div class="how-num">02</div>
+        <h3>Cada um vê o que importa</h3>
+        <p>O inspetor vê seus laudos. O encarregado vê sua frente. O diretor vê o avanço em curva S. Sem treinamento longo, sem tela cheia de coisa que não usa.</p>
+      </div>
+      <div class="how">
+        <div class="how-num">03</div>
+        <h3>Acelera quando precisa</h3>
+        <p>Se o time tem tempo, faz no manual. Se está apertado, aponta o PDF e a plataforma faz o cadastro grosso — você só revisa e aprova. <em>O controle continua seu.</em></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════ MÓDULOS REAIS DO APP ═══════════════════ -->
+<section class="section" id="disciplinas">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow">01 · Plataforma</span>
+      <h2>Tudo que já está rodando.</h2>
+      <p class="lead">Os módulos abaixo são exatamente o que você encontra no menu lateral depois do login. Cada categoria tem o que precisa pra rodar o dia a dia — sem add-on, sem upgrade escondido.</p>
+    </div>
+
+    <div class="modules-grid">
+      <div class="mod-cat">
+        <div class="mod-cat-h"><span class="mod-cat-num">01</span><h4>Planejamento</h4></div>
+        <ul class="mod-list">
+          <li><span class="mod-ico">▤</span>Painel (geral)</li>
+          <li><span class="mod-ico">▣</span>Projetos</li>
+          <li><span class="mod-ico">⬢</span>Folhas</li>
+          <li><span class="mod-ico">▦</span>Mapa de Juntas</li>
+          <li><span class="mod-ico">◧</span>Cronograma (Gantt)</li>
+          <li><span class="mod-ico">⊟</span>Parâmetros HH</li>
+          <li><span class="mod-ico">▥</span>RDO / RDC</li>
+          <li><span class="mod-ico">◆</span>HUB Planejador <span class="mod-pro">PRO</span></li>
+        </ul>
+      </div>
+
+      <div class="mod-cat">
+        <div class="mod-cat-h"><span class="mod-cat-num">02</span><h4>Qualidade</h4></div>
+        <ul class="mod-list">
+          <li><span class="mod-ico">⚠</span>Pendências</li>
+          <li><span class="mod-ico">◉</span>Soldadores</li>
+          <li><span class="mod-ico">⚗</span>Comissionamento</li>
+        </ul>
+      </div>
+
+      <div class="mod-cat">
+        <div class="mod-cat-h"><span class="mod-cat-num">03</span><h4>Materiais &amp; Orçamento</h4></div>
+        <ul class="mod-list">
+          <li><span class="mod-ico">▥</span>Catálogo de materiais</li>
+        </ul>
+      </div>
+
+      <div class="mod-cat">
+        <div class="mod-cat-h"><span class="mod-cat-num">04</span><h4>Engenharia Mecânica</h4></div>
+        <ul class="mod-list">
+          <li><span class="mod-ico">▣</span>Equipamentos NR-13</li>
+          <li><span class="mod-ico">◈</span>Manutenção</li>
+          <li><span class="mod-ico">◐</span>Pintura Industrial</li>
+          <li><span class="mod-ico">▦</span>Andaime</li>
+          <li><span class="mod-ico">⊡</span>Calibração</li>
+        </ul>
+      </div>
+
+      <div class="mod-cat">
+        <div class="mod-cat-h"><span class="mod-cat-num">05</span><h4>Análise &amp; BI</h4></div>
+        <ul class="mod-list">
+          <li><span class="mod-ico">▤</span>Dashboard</li>
+          <li><span class="mod-ico">⊕</span>Integrações</li>
+        </ul>
+      </div>
+
+      <div class="mod-cat">
+        <div class="mod-cat-h"><span class="mod-cat-num">06</span><h4>Ferramentas</h4></div>
+        <ul class="mod-list">
+          <li><span class="mod-ico">∑</span>Caixa de Ferramentas <span class="mod-pro" style="background:var(--accent);color:#fff">17 calcs</span></li>
+        </ul>
+      </div>
+
+      <div class="mod-cat mod-cat-system">
+        <div class="mod-cat-h"><span class="mod-cat-num">07</span><h4>Sistema</h4></div>
+        <ul class="mod-list">
+          <li><span class="mod-ico">↥</span>Importar planilha</li>
+          <li><span class="mod-ico">◍</span>Equipe &amp; Acessos</li>
+          <li><span class="mod-ico">◆</span>Meu Plano</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════ DEMO + FUNCIONALIDADE EM DESTAQUE ═══════════════════ -->
+<section class="section" id="produto" style="padding-top:0">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow violet">02 · Demo</span>
+      <h2>90 segundos pra entender.</h2>
+      <p class="lead">Veja a plataforma rodando em projeto real — do upload do isométrico até o mapa de juntas pronto pra fabricação.</p>
+    </div>
+
+    <div class="demo-grid">
+      <div class="demo-video" role="button" tabindex="0">
+        <div class="demo-video-thumb">
+          <div class="demo-thumb-app">
+            <div class="demo-thumb-bar">
+              <span></span><span></span><span></span>
+              <em>app.project-ia.com.br / projeto-exemplo / painel</em>
+            </div>
+            <div class="demo-thumb-body">
+              <div class="demo-thumb-side"></div>
+              <div class="demo-thumb-main">
+                <div class="demo-thumb-h"></div>
+                <div class="demo-thumb-kpis"><div></div><div></div><div></div><div></div></div>
+                <svg class="demo-thumb-chart" viewBox="0 0 400 100" preserveAspectRatio="none">
+                  <defs><linearGradient id="dtg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#06B6D4" stop-opacity=".35"/><stop offset="1" stop-color="#06B6D4" stop-opacity="0"/></linearGradient></defs>
+                  <path d="M 0 95 C 50 90, 90 78, 130 62 S 220 22, 320 12 L 400 8 L 400 100 L 0 100 Z" fill="url(#dtg)"/>
+                  <path d="M 0 95 C 50 90, 90 78, 130 62 S 220 22, 320 12 L 400 8" fill="none" stroke="#06B6D4" stroke-width="2"/>
+                </svg>
+                <div class="demo-thumb-rows"><div></div><div></div><div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <button class="demo-play" aria-label="Reproduzir">
+          <svg viewBox="0 0 64 64" width="64" height="64" aria-hidden="true">
+            <circle cx="32" cy="32" r="32" fill="rgba(255,255,255,.96)"/>
+            <path d="M 26 20 L 46 32 L 26 44 Z" fill="#0A1628"/>
+          </svg>
+        </button>
+
+        <div class="demo-bar">
+          <div class="demo-bar-progress"><span></span></div>
+          <div class="demo-bar-meta">
+            <span class="demo-bar-time">Demo · 1:32</span>
+            <span class="demo-bar-cap">⚡ HD · sem áudio narrado</span>
+          </div>
+        </div>
+      </div>
+
+      <aside class="demo-feature">
+        <span class="eyebrow violet">Em destaque · Isométrico IA</span>
+        <h3>Do PDF ao mapa de juntas em segundos.</h3>
+        <p>Solta o isométrico — qualquer revisão, qualquer EPC. A plataforma estrutura juntas, spools, BOM, classe e NDT exigido. Você revisa cada item antes de qualquer coisa ir pra fabricação.</p>
+
+        <ul class="demo-feature-list">
+          <li><span class="dot"></span><div><strong>Reconhece padrões brasileiros</strong> — PSF, PWG, AVZ dos principais EPCs.</div></li>
+          <li><span class="dot"></span><div><strong>BOM já com classe e schedule</strong> — direto pro suprimentos, sem retrabalho.</div></li>
+          <li><span class="dot"></span><div><strong>NDT inferido pela especificação</strong> — RT 100%, UT 10%, LP em socket.</div></li>
+        </ul>
+
+        <div class="demo-stat">
+          <div><strong>−87%</strong><span>tempo de cadastro estimado</span></div>
+          <div><strong>~8s</strong><span>média por PDF</span></div>
+          <div><strong>16</strong><span>disciplinas com IA<br/>especializada</span></div>
+        </div>
+
+        <div class="demo-feature-cta">
+          <a href="hydrostec_v9.html" class="btn btn-primary">Testar com seu PDF <span class="arr">→</span></a>
+          <a href="#disciplinas" class="btn-text">Ver outras funcionalidades →</a>
+        </div>
+      </aside>
+    </div>
+
+    <p class="accel-note" style="margin-top:32px"><span>ⓘ</span><span>A IA sugere, você aprova. Nada é enviado pra fabricação sem revisão humana — em qualquer plano.</span></p>
+  </div>
+</section>
+
+<!-- ═══════════════════ INTEGRAÇÕES ═══════════════════ -->
+<section class="section integ" id="integracoes">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow">03 · Integrações</span>
+      <h2>Conversa com o que você já usa.</h2>
+      <p class="lead">Cronograma sincronizando com <strong>Primavera P6</strong> e <strong>MS Project</strong>. Curva S em <strong>Power BI</strong> direto do nosso feed — sem ETL, sem analista. WhatsApp, Slack e Teams entram no roadmap próximo.</p>
+    </div>
+
+    <div class="integ-strip">
+      <div class="integ-chip"><div class="ico">P6</div>Primavera P6</div>
+      <div class="integ-chip"><div class="ico">MSP</div>MS Project</div>
+      <div class="integ-chip"><div class="ico">PBI</div>Power BI</div>
+      <div class="integ-chip"><div class="ico">API</div>API REST</div>
+      <div class="integ-chip"><div class="ico">SAP</div>SAP S/4<span class="soon">EM BREVE</span></div>
+      <div class="integ-chip"><div class="ico">WA</div>WhatsApp<span class="soon">EM BREVE</span></div>
+      <div class="integ-chip"><div class="ico">SL</div>Slack<span class="soon">EM BREVE</span></div>
+      <div class="integ-chip"><div class="ico">TM</div>Teams<span class="soon">EM BREVE</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════ NR-13 / COMPLIANCE ═══════════════════ -->
+<section class="section">
+  <div class="container">
+    <div class="compl">
+      <div class="compl-grid">
+        <div>
+          <span class="eyebrow white">04 · Conformidade</span>
+          <h2>NR-13, ABNT, ASME, API.<br/>Já vem por dentro.</h2>
+          <p class="lead">Calculadora ASME VIII Div.1 completa, memorial de cálculo PDF, vida residual API-510 baseada em UT histórica. Você anexa, o engenheiro responsável assina, a auditoria fecha.</p>
+          <div class="compl-badges">
+            <div class="compl-badge"><h5>NR-13</h5><p>Inspeção de vasos, caldeiras, tubulações de processo.</p></div>
+            <div class="compl-badge"><h5>NBR 15417</h5><p>Vasos sob pressão · ensaios não destrutivos.</p></div>
+            <div class="compl-badge"><h5>ASME VIII Div.1</h5><p>PMTA, espessura mínima, projeto de vaso.</p></div>
+            <div class="compl-badge"><h5>API-510 / 570</h5><p>Vida residual, periodicidade de inspeção.</p></div>
+            <div class="compl-badge"><h5>AWS D1.1 / ASME IX</h5><p>Qualificação de soldadores e procedimentos.</p></div>
+            <div class="compl-badge"><h5>LGPD</h5><p>Dados em SP, criptografia AES-256, RBAC granular.</p></div>
+          </div>
+        </div>
+
+        <div class="compl-doc">
+          <div class="compl-doc-head">
+            <h5>Memorial NR-13 · V-2201</h5>
+            <span class="stamp">✓ ASSINADO</span>
+          </div>
+          <div class="compl-doc-row"><span class="lbl">Equipamento</span><span class="val">V-2201 · Vaso vertical</span></div>
+          <div class="compl-doc-row"><span class="lbl">Categoria NR-13</span><span class="val">II</span></div>
+          <div class="compl-doc-row"><span class="lbl">PMTA (P × V)</span><span class="val">14,2 bar · 32 m³</span></div>
+          <div class="compl-doc-row"><span class="lbl">Espessura nominal</span><span class="val">12,7 mm</span></div>
+          <div class="compl-doc-row"><span class="lbl">Espessura mínima</span><span class="val">8,4 mm</span></div>
+          <div class="compl-doc-row"><span class="lbl">Taxa corrosão (5a)</span><span class="val">0,12 mm/ano</span></div>
+          <div class="compl-doc-row"><span class="lbl">Vida residual</span><span class="val" style="color:var(--success)">35,8 anos</span></div>
+          <div class="compl-doc-row"><span class="lbl">Próxima inspeção</span><span class="val">2030-04-15</span></div>
+          <div class="compl-doc-foot">
+            <span class="sig">Espaço para ART do eng. responsável</span>
+            <a href="#" class="pdf-btn">📄 Baixar PDF</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════ PRICING ═══════════════════ -->
+<section class="section" id="precos" style="padding-top:0">
+  <div class="container-wide">
+    <div class="section-head">
+      <span class="eyebrow">05 · Preços</span>
+      <h2>Preço justo. Sem letra miúda.</h2>
+      <p class="lead">Comece grátis. Suba pra Solo IA quando precisar da IA. Vire Pro quando o time crescer. Enterprise é com a gente — preço por usuário cai conforme o volume.</p>
+    </div>
+
+    <div style="text-align:center">
+      <div class="pricing-toggle" role="tablist">
+        <button class="active" data-period="monthly">Mensal</button>
+        <button data-period="annual">Anual <span class="save">−20%</span></button>
+      </div>
+    </div>
+
+    <div class="price-grid">
+      <div class="price">
+        <span class="price-tag">PF · Grátis</span>
+        <div class="price-name">Free</div>
+        <p class="price-desc">Pra conhecer a plataforma e usar a Caixa de Ferramentas sem cartão.</p>
+        <div class="price-num" data-monthly="R$ 0" data-annual="R$ 0">R$ 0</div>
+        <div class="price-detail">/ mês · sem cartão</div>
+        <div class="price-divider"></div>
+        <ul class="price-feats">
+          <li class="price-feat"><span>1 usuário</span></li>
+          <li class="price-feat">Caixa de Ferramentas <strong>(17 calcs)</strong></li>
+          <li class="price-feat">1 análise IA grátis</li>
+          <li class="price-feat">1 projeto pessoal</li>
+        </ul>
+        <a href="hydrostec_v9.html#signup" class="price-btn">Criar conta grátis</a>
+      </div>
+
+      <div class="price">
+        <span class="price-tag">PF · Estudante</span>
+        <div class="price-name">Estudante</div>
+        <p class="price-desc">Pra graduação em engenharia — só pede e-mail <strong>.edu</strong> ou matrícula ativa.</p>
+        <div class="price-num" data-monthly="R$ 19" data-annual="R$ 15">R$ 19</div>
+        <div class="price-detail">/ mês · e-mail .edu</div>
+        <div class="price-divider"></div>
+        <ul class="price-feats">
+          <li class="price-feat"><span>1 usuário</span></li>
+          <li class="price-feat">Ferramentas + <strong>simulados</strong></li>
+          <li class="price-feat"><strong>5 análises IA</strong>/mês</li>
+          <li class="price-feat">Memorial PDF (sem ART)</li>
+        </ul>
+        <a href="hydrostec_v9.html#signup" class="price-btn">Verificar matrícula</a>
+      </div>
+
+      <div class="price featured">
+        <span class="price-tag">PF · Mais popular</span>
+        <div class="price-name">Solo IA</div>
+        <p class="price-desc">Pro inspetor freelance e engenheiro autônomo que vive de entregar laudo.</p>
+        <div class="price-num" data-monthly="R$ 89" data-annual="R$ 71">R$ 89</div>
+        <div class="price-detail">/ mês · 1 disciplina à escolha</div>
+        <div class="price-divider"></div>
+        <ul class="price-feats">
+          <li class="price-feat"><span>1 usuário</span></li>
+          <li class="price-feat"><strong>50 análises IA</strong>/mês</li>
+          <li class="price-feat">Isométrico IA + Equipamento IA</li>
+          <li class="price-feat">Memorial NR-13 PDF (ART do engenheiro responsável)</li>
+          <li class="price-feat">Power BI 2 templates</li>
+        </ul>
+        <a href="hydrostec_v9.html#signup" class="price-btn">Começar 14 dias grátis</a>
+      </div>
+
+      <div class="price">
+        <span class="price-tag">PJ · Médias</span>
+        <div class="price-name">Pro</div>
+        <p class="price-desc">Pra construtoras e EPCs médios — até 25 usuários, 1 disciplina principal.</p>
+        <div class="price-num" data-monthly="R$ 79" data-annual="R$ 63">R$ 79</div>
+        <div class="price-detail">/ usuário/mês · mín. 5</div>
+        <div class="price-divider"></div>
+        <ul class="price-feats">
+          <li class="price-feat"><strong>Até 25</strong> usuários</li>
+          <li class="price-feat"><strong>200 análises IA</strong>/mês</li>
+          <li class="price-feat">P6 + MS Project sync</li>
+          <li class="price-feat">Power BI <strong>8 templates</strong></li>
+          <li class="price-feat">API REST + OAuth</li>
+        </ul>
+        <a href="mailto:contato@project-ia.com.br" class="price-btn">Agendar demo</a>
+      </div>
+
+      <div class="price">
+        <span class="price-tag">PJ · EPCs</span>
+        <div class="price-name">Multi</div>
+        <p class="price-desc">Pra EPCs e operações multidisciplinares — até 50 usuários, 3 disciplinas.</p>
+        <div class="price-num" data-monthly="R$ 149" data-annual="R$ 119">R$ 149</div>
+        <div class="price-detail">/ usuário/mês · até 3 disc.</div>
+        <div class="price-divider"></div>
+        <ul class="price-feats">
+          <li class="price-feat"><strong>Até 50</strong> usuários</li>
+          <li class="price-feat"><strong>500 análises IA</strong>/mês</li>
+          <li class="price-feat">Permissões granulares por disciplina</li>
+          <li class="price-feat">API REST completa</li>
+          <li class="price-feat">Suporte prioritário</li>
+        </ul>
+        <a href="mailto:contato@project-ia.com.br" class="price-btn">Agendar demo</a>
+      </div>
+    </div>
+
+    <div class="price-enterprise">
+      <div class="price-enterprise-copy">
+        <h4>Enterprise — operadores industriais e EPCs grandes</h4>
+        <p>50+ usuários, ilimitado em tudo, deploy dedicado, integração SAP sob demanda, SLA contratual, suporte com engenheiro técnico. Preço por usuário cai conforme volume.</p>
+      </div>
+      <div class="price-enterprise-meta">
+        <div><strong>Sob consulta</strong>cotação</div>
+        <div><strong>SLA 99,9%</strong>uptime alvo</div>
+        <div><strong>LGPD</strong>dados em SP</div>
+      </div>
+      <a href="mailto:contato@project-ia.com.br" class="btn btn-primary btn-lg">Falar com vendas</a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════ PERSONAS (substituindo testimonials) ═══════════════════ -->
+<section class="section" style="padding-top:0">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow">06 · Para quem é</span>
+      <h2>Construído pra quem está em obra.</h2>
+      <p class="lead">Três perfis que tiramos das primeiras conversas com clientes. Se você se reconhece em algum deles, o produto foi feito pra você.</p>
+    </div>
+
+    <div class="tests">
+      <article class="test">
+        <p class="test-q">Coordenador de tubulação que abre o Excel toda segunda pra montar mapa de juntas. Vive trocando planilha entre obra, escritório e EPC. Aqui, o mapa entra uma vez e vira a fonte da verdade.</p>
+        <div class="test-kpi">
+          <div><div class="v">−87%</div><div class="l">tempo cadastro estimado</div></div>
+          <div><div class="v">1×</div><div class="l">única fonte de dados</div></div>
+        </div>
+        <div class="test-meta">
+          <div class="test-avatar">CT</div>
+          <div><div class="test-name">Coordenador de Tubulação</div><div class="test-role">EPCs · Refinarias · Petroquímica</div></div>
+        </div>
+      </article>
+
+      <article class="test">
+        <p class="test-q">Inspetor NR-13 autônomo que precisa entregar laudo profissional rápido. Memorial PDF padronizado, cálculo ASME pronto, anexar UT histórica, espaço pra ART do CREA — tudo no mesmo lugar.</p>
+        <div class="test-kpi">
+          <div><div class="v">14</div><div class="l">laudos/mês potenciais</div></div>
+          <div><div class="v">ASME</div><div class="l">VIII Div.1 + API-510</div></div>
+        </div>
+        <div class="test-meta">
+          <div class="test-avatar">IN</div>
+          <div><div class="test-name">Inspetor NR-13 Autônomo</div><div class="test-role">CREA · ART · Engenheiro responsável</div></div>
+        </div>
+      </article>
+
+      <article class="test">
+        <p class="test-q">Gerente de planejamento de uma obra industrial multi-EPC. Vive sincronizando Primavera com Excel e mandando print por WhatsApp. Aqui, curva S sai em tempo real direto pro Power BI.</p>
+        <div class="test-kpi">
+          <div><div class="v">P6 →</div><div class="l">sync nativo</div></div>
+          <div><div class="v">PBI</div><div class="l">8 templates prontos</div></div>
+        </div>
+        <div class="test-meta">
+          <div class="test-avatar">GP</div>
+          <div><div class="test-name">Gerente de Planejamento</div><div class="test-role">PMO · Multi-EPC · Operação industrial</div></div>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════ FAQ ═══════════════════ -->
+<section class="section" style="padding-top:0">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow">07 · FAQ</span>
+      <h2>Perguntas que sempre vêm.</h2>
+    </div>
+
+    <div class="faq">
+      <details class="faq-item" open>
+        <summary class="faq-q">Preciso instalar alguma coisa?</summary>
+        <div class="faq-a">Não. É 100% cloud. Funciona no navegador, no celular e no tablet. Conector Power BI é um <code>.pbit</code> que você abre no Power BI Desktop com o token nosso — atualização automática.</div>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-q">Funciona offline em obra sem sinal?</summary>
+        <div class="faq-a">O PWA mobile já vem habilitado pra cache offline básico (RDO, OS, inspeção). O sync acontece quando volta sinal. O navegador desktop precisa de conexão. Modo 100% offline-first está no roadmap.</div>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-q">Meus dados ficam onde?</summary>
+        <div class="faq-a">Em data center brasileiro (São Paulo), com criptografia AES-256 em repouso e TLS 1.3 em trânsito. Em conformidade com LGPD. Cliente Enterprise pode discutir instância dedicada e contratos específicos.</div>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-q">Posso usar sem ativar a IA?</summary>
+        <div class="faq-a">Sim. Os módulos <strong>Isométrico IA</strong> e <strong>Equipamento IA</strong> são opcionais — você pode trabalhar 100% no manual, com cadastro tradicional, importação por planilha ou API. A IA fica disponível quando quiser usar, e cada análise é contabilizada no plano (1 a 500/mês). Nada vai pra produção sem revisão humana.</div>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-q">Posso cancelar a qualquer momento?</summary>
+        <div class="faq-a">Mensal: cancela quando quiser, sem multa. Anual: 20% de desconto e cancelamento ao fim do ciclo. Em ambos os casos, você baixa todos os seus dados em <strong>JSON, Excel e PDF</strong> antes de sair.</div>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-q">A plataforma assina ART automaticamente?</summary>
+        <div class="faq-a"><strong>Não.</strong> A plataforma gera o memorial técnico em PDF com cálculos, fórmulas e dados. A <strong>ART</strong> é responsabilidade do engenheiro habilitado pelo CREA que assina o documento. O PDF tem espaço destacado para assinatura e dados do responsável.</div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════ FINAL CTA ═══════════════════ -->
+<section style="padding:0 32px">
+  <div class="container-wide">
+    <div class="cta-final">
+      <div class="cta-final-inner">
+        <span class="eyebrow white">Pronto pra acelerar a obra?</span>
+        <h2 style="margin-top:14px">Solte sua planilha.<br/>A <span class="gr">obra te espera.</span></h2>
+        <p class="lead">14 dias grátis no Solo IA, sem cartão, sem ligação de vendas. Quer ver com o seu projeto antes? Agenda uma demo de 30 minutos.</p>
+        <div class="cta-final-row">
+          <a href="hydrostec_v9.html#signup" class="btn btn-ia btn-lg">Começar 14 dias grátis <span class="arr">→</span></a>
+          <a href="mailto:contato@project-ia.com.br" class="btn btn-ghost-dark btn-lg">Agendar demo</a>
+        </div>
+        <div class="cta-final-meta">
+          <span>Sem cartão</span>
+          <span>Cancelamento em 1 clique</span>
+          <span>Dados em SP · LGPD</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════ FOOTER ═══════════════════ -->
+<footer class="footer" id="empresa">
+  <div class="container-wide">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="#" class="brand">
+          <svg class="brand-mark" viewBox="0 0 72 72" xmlns="http://www.w3.org/2000/svg">
+            <defs><linearGradient id="ftbg" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#22D3EE"/><stop offset="100%" stop-color="#A78BFA"/></linearGradient></defs>
+            <path d="M 36 8 L 60 22 L 36 36 L 12 22 Z" fill="#fff"/>
+            <path d="M 12 22 L 36 36 L 36 64 L 12 50 Z" fill="rgba(255,255,255,.55)"/>
+            <path d="M 60 22 L 36 36 L 36 64 L 60 50 Z" fill="rgba(255,255,255,.30)"/>
+            <circle cx="36" cy="36" r="5" fill="url(#ftbg)"/>
+          </svg>
+          <span class="wm wm-white">PROJECT<span class="dot">.</span><span class="ia">IA</span></span>
+        </a>
+        <p>Engenharia industrial 360° com IA brasileira. Do isométrico ao handover, da NR-13 à manutenção preditiva.</p>
+      </div>
+      <div class="footer-col"><h5>Produto</h5><ul><li><a href="#disciplinas">Disciplinas</a></li><li><a href="#produto">Isométrico IA</a></li><li><a href="#produto">Equipamento IA</a></li><li><a href="#integracoes">Integrações</a></li><li><a href="brand_kit.html">Brand Kit</a></li></ul></div>
+      <div class="footer-col"><h5>Empresa</h5><ul><li><a href="#empresa">Sobre</a></li><li><a href="mailto:contato@project-ia.com.br">Contato</a></li><li><a href="hydrostec_engenharia.html">Caixa de Ferramentas</a></li></ul></div>
+      <div class="footer-col"><h5>Recursos</h5><ul><li><a href="hydrostec_v9.html">App (login)</a></li><li><a href="#integracoes">API REST</a></li><li><a href="#integracoes">Power BI templates</a></li></ul></div>
+      <div class="footer-col"><h5>Legal</h5><ul><li><a href="#">Termos</a></li><li><a href="#">Privacidade</a></li><li><a href="#">LGPD</a></li><li><a href="#">Status</a></li></ul></div>
+    </div>
+    <div class="footer-bot">
+      <div>© 2026 PROJECT.IA · Engenharia Inteligente Multi-Disciplinar</div>
+      <div class="mono">Inter + JetBrains Mono · São Paulo, BR</div>
+    </div>
+  </div>
+</footer>
+
+<!-- Pricing monthly/annual toggle -->
+<script>
+(function(){
+  const buttons = document.querySelectorAll('.pricing-toggle button');
+  const nums = document.querySelectorAll('.price-num');
+  buttons.forEach(btn => btn.addEventListener('click', () => {
+    buttons.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const p = btn.dataset.period;
+    nums.forEach(n => { n.textContent = n.dataset[p] || n.textContent; });
+  }));
+})();
+// PWA Service Worker
+if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+  window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(()=>{}); });
+}
+</script>
+
+</body>
+</html>

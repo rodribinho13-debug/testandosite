@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>
+(function(){
+  if(location.protocol === 'https:' && !/localhost|127\.0\.0\.1/.test(location.hostname)){
+    var meta = document.createElement('meta');
+    meta.httpEquiv = 'Content-Security-Policy';
+    meta.content = "default-src 'self' https://*.supabase.co https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com https://fonts.googleapis.com https://fonts.gstatic.com data: blob:; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net; img-src 'self' data: blob: https:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://generativelanguage.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; frame-ancestors 'none'; object-src 'none'; base-uri 'self'";
+    document.head.appendChild(meta);
+  }
+})();
+</script>
+<meta http-equiv="X-Content-Type-Options" content="nosniff"/>
+<meta name="referrer" content="strict-origin-when-cross-origin"/>
+<meta name="robots" content="noindex,nofollow"/>
+<script src="assets/js/security.js?v=2"></script>
+<title>PROJECT.IA — HUB Pintura Industrial</title>
+<link rel="icon" href="favicon.ico" type="image/x-icon">
+<script>if(location.protocol==="file:"){}else{document.write('<link rel="manifest" href="manifest.json">');}</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest"></script>
+<script src="custom_views.js?v=2" defer></script>
+<script src="assets/js/saas-modules.js?v=2" defer></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --primary:#BE185D;--primary-h:#9D174D;--primary-l:#FCE7F3;
+  --accent:#EC4899;--accent-2:#F472B6;--accent-l:#FDF2F8;
+  --violet:#7C3AED;--violet-l:#F5F3FF;
+  --t0:#FFFFFF;--t1:#FAFBFD;--t2:#F1F5F9;--t3:#E2E8F0;--t4:#CBD5E1;
+  --t5:#94A3B8;--t6:#64748B;--t7:#334155;--t8:#1E293B;--t9:#0F172A;
+  --success:#10B981;--success-l:#ECFDF5;--success-h:#065F46;
+  --warning:#F59E0B;--warning-l:#FFFBEB;--warning-h:#92400E;
+  --danger:#EF4444;--danger-l:#FEF2F2;--danger-h:#991B1B;
+  --grad-ia:linear-gradient(135deg,#EC4899 0%,#7C3AED 100%);
+  --grad-deep-hero:radial-gradient(ellipse 1200px 600px at 75% -10%,rgba(236,72,153,.30),transparent 55%),radial-gradient(ellipse 900px 600px at 15% 110%,rgba(124,58,237,.28),transparent 55%),linear-gradient(180deg,#0A1628 0%,#13233F 100%);
+  --sh-sm:0 1px 2px rgba(10,22,40,.06);--sh-lg:0 24px 60px rgba(10,22,40,.14);
+  --r:10px;
+}
+html,body{height:100%}
+body{font-family:'Inter',-apple-system,'Segoe UI',sans-serif;color:var(--t8);font-size:13px;background:var(--t1);-webkit-font-smoothing:antialiased}
+.app{display:flex;flex-direction:column;height:100vh;overflow:hidden}
+.app-body{display:flex;flex:1;overflow:hidden}
+.hdr{display:flex;align-items:center;justify-content:space-between;background:var(--t0);padding:12px 22px;border-bottom:1px solid var(--t3);min-height:58px}
+.hdr-brand{display:flex;align-items:center;gap:12px}
+.hdr-name{font-size:14.5px;font-weight:700;color:var(--t9)}
+.hdr-sub{font-size:11px;color:var(--t6);margin-top:1px;font-weight:500}
+.hdr-back{background:var(--t2);border:1px solid var(--t3);color:var(--t7);padding:7px 14px;border-radius:8px;font-size:12.5px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px;font-weight:600}
+.hdr-back:hover{background:var(--t3)}
+.hdr-acts{display:flex;gap:8px;align-items:center}
+.sidebar{width:256px;background:var(--t1);border-right:1px solid var(--t3);overflow-y:auto;padding:14px 0;flex-shrink:0}
+.side-sec{padding:14px 18px 6px;font-size:10.5px;color:var(--t5);text-transform:uppercase;letter-spacing:.8px;font-weight:600}
+.side-sec:first-child{margin-top:0;padding-top:6px}
+.side-item{display:flex;align-items:center;gap:11px;padding:8px 18px;margin:0 8px;color:var(--t7);font-size:13px;cursor:pointer;border:none;background:none;width:calc(100% - 16px);text-align:left;border-radius:7px;font-family:inherit;font-weight:500}
+.side-item:hover{background:var(--t2);color:var(--t9)}
+.side-item.active{background:var(--primary-l);color:var(--primary-h);font-weight:600}
+.side-item .ico{width:18px;height:18px;flex-shrink:0;stroke-width:2}
+.content{flex:1;overflow-y:auto;background:var(--t0)}
+.bc-row{background:var(--t0);border-bottom:1px solid var(--t3);padding:12px 22px;display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--t7);font-weight:500}
+.sumbar{background:var(--t1);border-bottom:1px solid var(--t3);padding:14px 22px;display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+.sc{background:var(--t0);border:1px solid var(--t3);border-radius:var(--r);padding:13px 15px;box-shadow:var(--sh-sm)}
+.slbl{font-size:9.5px;text-transform:uppercase;letter-spacing:.7px;color:var(--t5);margin-bottom:6px;font-weight:700}
+.sval{font-size:22px;font-weight:700;color:var(--t9);font-family:'JetBrains Mono',monospace;line-height:1}
+.fbar{background:var(--t0);border-bottom:1px solid var(--t3);padding:12px 22px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.tbl-wrap{overflow-x:auto;background:var(--t0)}
+table{width:100%;border-collapse:collapse;font-size:12.5px;min-width:760px}
+thead tr{background:var(--t1)}
+th{padding:11px 14px;text-align:left;font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--t6);border-bottom:1px solid var(--t3);white-space:nowrap}
+td{padding:10px 14px;border-bottom:1px solid var(--t3);color:var(--t8)}
+tbody tr:hover{background:var(--t1)}
+.mono{font-family:'JetBrains Mono',monospace}
+.empty-st{text-align:center;padding:40px 20px;color:var(--t5);font-size:13px}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600;font-family:'JetBrains Mono',monospace;border:1px solid transparent}
+.b-ok{background:var(--success-l);color:var(--success-h);border-color:#6EE7B7}
+.b-no{background:var(--danger-l);color:var(--danger-h);border-color:#FCA5A5}
+.b-pe{background:var(--warning-l);color:var(--warning-h);border-color:#FCD34D}
+.b-in{background:var(--accent-l);color:var(--primary-h);border-color:var(--accent)}
+.btn,.bp,.bo,.bg{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:9px 16px;border-radius:var(--r);font-weight:600;font-size:12.5px;font-family:inherit;cursor:pointer;border:1px solid transparent;white-space:nowrap}
+.bp{background:var(--primary);color:#fff;border-color:var(--primary)}
+.bp:hover{background:var(--primary-h)}
+.bg{background:transparent;color:var(--t8);border-color:var(--t3)}
+.bg:hover{background:var(--t1)}
+.bo{background:var(--t2);color:var(--t8);border-color:var(--t3)}
+.bo:hover{background:var(--t3)}
+.btn .lucide,.bp .lucide,.bg .lucide,.bo .lucide{width:14px;height:14px;flex-shrink:0;stroke-width:2}
+.bp svg{color:#fff;stroke:#fff}
+.b-edit,.b-del{background:transparent;border:1px solid transparent;cursor:pointer;color:var(--t6);width:30px;height:30px;border-radius:7px;display:inline-flex;align-items:center;justify-content:center;padding:0}
+.b-edit:hover{background:var(--primary-l);color:var(--primary-h)}
+.b-del:hover{background:var(--danger-l);color:var(--danger)}
+.b-edit .lucide,.b-del .lucide{width:14px;height:14px}
+.overlay{position:fixed;inset:0;background:rgba(10,22,40,.55);backdrop-filter:blur(4px);z-index:1000;display:flex;align-items:center;justify-content:center;padding:24px}
+.mbox{background:var(--t0);border-radius:14px;padding:24px;max-width:720px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:var(--sh-lg);position:relative}
+.mclose{position:absolute;top:14px;right:14px;background:transparent;border:none;cursor:pointer;color:var(--t6);width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center}
+.mtitle{display:flex;align-items:center;gap:9px;font-size:16px;font-weight:700;color:var(--t9);margin-bottom:18px}
+.mtitle .lucide{width:18px;height:18px;stroke-width:2}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.fgrid .f-full{grid-column:1/-1}
+.fgrid label{display:block;font-size:11px;font-weight:600;color:var(--t6);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
+.fgrid input,.fgrid select,.fgrid textarea{width:100%;padding:8px 11px;border:1px solid var(--t3);border-radius:8px;font-size:12.5px;font-family:inherit;outline:none}
+.fgrid input:focus,.fgrid select:focus,.fgrid textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-l)}
+.mfooter{display:flex;gap:8px;justify-content:flex-end;margin-top:18px;padding-top:14px;border-top:1px solid var(--t3)}
+.toast-wrap{position:fixed;bottom:24px;right:24px;display:flex;flex-direction:column;gap:8px;z-index:5000}
+.toast{padding:11px 16px;border-radius:10px;background:var(--t0);border:1px solid var(--t3);box-shadow:var(--sh-lg);font-size:13px;color:var(--t9);min-width:260px}
+.toast.ok{border-left:3px solid var(--success)}
+.toast.err{border-left:3px solid var(--danger)}
+.toast.warn{border-left:3px solid var(--warning)}
+#authMsg{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:var(--grad-deep-hero);z-index:500;padding:40px}
+#authMsg.hidden{display:none}
+.proj-ctx{background:var(--primary-l);border-bottom:1px solid var(--primary);padding:8px 22px;font-size:12px;color:var(--primary-h);display:flex;align-items:center;gap:10px}
+.disc-chip{display:inline-flex;align-items:center;gap:5px;background:var(--accent-l);color:var(--primary-h);border:1px solid var(--accent);padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700}
+.alert-cond{background:linear-gradient(135deg,#FEF2F2 0%,#FFFBEB 100%);border-left:4px solid var(--warning);padding:12px 16px;border-radius:10px;margin-bottom:14px;font-size:12.5px;color:var(--warning-h)}
+</style>
+</head>
+<body>
+
+<div id="authMsg">
+  <div style="background:#fff;border-radius:14px;padding:32px 36px;max-width:380px;width:90%;box-shadow:var(--sh-lg);color:var(--t8)">
+    <div style="text-align:center;margin-bottom:22px">
+      <svg viewBox="0 0 72 72" xmlns="http://www.w3.org/2000/svg" width="48" height="48" style="margin-bottom:10px">
+        <defs><linearGradient id="hubAuthG" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#BE185D"/><stop offset="100%" stop-color="#F472B6"/></linearGradient></defs>
+        <path d="M 36 8 L 60 22 L 36 36 L 12 22 Z" fill="url(#hubAuthG)"/>
+        <path d="M 12 22 L 36 36 L 36 64 L 12 50 Z" fill="#BE185D" opacity=".75"/>
+        <path d="M 60 22 L 36 36 L 36 64 L 60 50 Z" fill="#F472B6" opacity=".55"/>
+        <circle cx="36" cy="36" r="5" fill="#fff"/>
+      </svg>
+      <h2 style="font-size:20px;font-weight:800;color:var(--t9);margin:0 0 4px">HUB Pintura</h2>
+      <p style="font-size:12.5px;color:var(--t6);margin:0">Entre com sua conta PROJECT.IA</p>
+    </div>
+    <div id="hub-login-err" style="display:none;background:var(--danger-l);color:var(--danger-h);border:1px solid var(--danger);border-radius:8px;padding:9px 12px;font-size:12px;margin-bottom:12px"></div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <label style="font-size:11px;font-weight:600;color:var(--t7);text-transform:uppercase;letter-spacing:.5px">Email
+        <input id="hub-em" type="email" style="width:100%;margin-top:5px;padding:10px 12px;border:1px solid var(--t3);border-radius:8px;font-size:13px;background:#fff;outline:none">
+      </label>
+      <label style="font-size:11px;font-weight:600;color:var(--t7);text-transform:uppercase;letter-spacing:.5px">Senha
+        <input id="hub-pw" type="password" style="width:100%;margin-top:5px;padding:10px 12px;border:1px solid var(--t3);border-radius:8px;font-size:13px;background:#fff;outline:none">
+      </label>
+      <button id="hub-login-btn" onclick="hubLogin()" style="margin-top:6px;width:100%;padding:11px;border-radius:10px;background:#BE185D;color:#fff;border:none;font-size:13px;font-weight:600;cursor:pointer">Entrar</button>
+      <a href="hydrostec_v9.html" style="font-size:11.5px;color:var(--t6);text-decoration:none;text-align:center;margin-top:6px">&larr; Voltar ao sistema</a>
+    </div>
+  </div>
+</div>
+
+<div class="app" id="app" style="display:none">
+  <div class="hdr">
+    <div class="hdr-brand">
+      <svg viewBox="0 0 72 72" xmlns="http://www.w3.org/2000/svg" width="34" height="34">
+        <defs><linearGradient id="hb1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#BE185D"/><stop offset="100%" stop-color="#F472B6"/></linearGradient></defs>
+        <path d="M 36 8 L 60 22 L 36 36 L 12 22 Z" fill="url(#hb1)"/>
+        <path d="M 12 22 L 36 36 L 36 64 L 12 50 Z" fill="#BE185D" opacity=".75"/>
+        <path d="M 60 22 L 36 36 L 36 64 L 60 50 Z" fill="#F472B6" opacity=".55"/>
+        <circle cx="36" cy="36" r="5" fill="#fff"/>
+      </svg>
+      <div>
+        <div class="hdr-name">PROJECT<span style="color:var(--accent)">.</span><span style="background:var(--grad-ia);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;font-weight:800">IA</span> &middot; HUB Pintura <span class="disc-chip"><i data-lucide="paintbrush" style="width:11px;height:11px"></i>PINTURA</span></div>
+        <div class="hdr-sub">DFT &middot; Aderência &middot; Esquemas Petrobras N-9/N-13 &middot; Janela Climática</div>
+      </div>
+    </div>
+    <div class="hdr-acts">
+      <span id="userBadge" style="font-size:12px;color:var(--t6);font-weight:500"></span>
+      <a class="hdr-back" href="hydrostec_v9.html"><i data-lucide="arrow-left" style="width:14px;height:14px"></i>Voltar</a>
+    </div>
+  </div>
+  <div id="projCtx" class="proj-ctx" style="display:none"></div>
+  <div class="app-body">
+    <aside class="sidebar">
+      <div class="side-sec">Visao</div>
+      <button class="side-item active" data-view="overview"><i data-lucide="layout-dashboard" class="ico"></i><span>Painel Pintura</span></button>
+      <div class="side-sec">Controle de Qualidade</div>
+      <button class="side-item" data-view="inspections"><i data-lucide="ruler" class="ico"></i><span>Inspeções DFT</span></button>
+      <div class="side-sec">Ferramentas</div>
+      <button class="side-item" data-view="dewpoint"><i data-lucide="droplets" class="ico"></i><span>Calculadora Ponto de Orvalho</span></button>
+    </aside>
+    <div class="content" id="content"><div class="empty-st" style="padding:60px 22px">Carregando...</div></div>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toast-wrap"></div>
+
+<script>
+const SUPABASE_URL='https://toapdhfouuedaexgqlsv.supabase.co';
+const SUPABASE_KEY='sb_publishable_qVVBatpB_ppDLR6QcG8QgQ_hVYW0h8Q';
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,storageKey:'hyd-auth',detectSessionInUrl:false}});
+let _user=null,_org=null,_curProject=null;
+const _cache={inspections:null};
+
+function san(s){if(s==null)return '';return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+function num(v,d=2){const n=parseFloat(v);if(isNaN(n))return '-';return n.toLocaleString('pt-BR',{minimumFractionDigits:d,maximumFractionDigits:d});}
+function fmtDate(d){if(!d)return '-';try{return new Date(d).toLocaleDateString('pt-BR');}catch{return d;}}
+function toast(msg,kind='ok'){const w=document.getElementById('toast-wrap');if(!w)return;const el=document.createElement('div');el.className='toast '+kind;el.textContent=msg;w.appendChild(el);setTimeout(()=>el.remove(),3200);}
+function _renderIcons(){try{lucide.createIcons();}catch(e){}}
+
+async function hubLogin(){
+  const em=document.getElementById('hub-em').value.trim(),pw=document.getElementById('hub-pw').value;
+  const errEl=document.getElementById('hub-login-err');errEl.style.display='none';
+  if(!em||!pw){errEl.textContent='Preencha email e senha';errEl.style.display='block';return;}
+  const btn=document.getElementById('hub-login-btn');btn.disabled=true;btn.textContent='Entrando...';
+  try{const {data,error}=await sb.auth.signInWithPassword({email:em,password:pw});if(error)throw error;_user=data.user;document.getElementById('authMsg').classList.add('hidden');document.getElementById('app').style.display='flex';await loadOrgProj();}
+  catch(e){errEl.textContent='Erro: '+(e.message||e);errEl.style.display='block';}
+  finally{btn.disabled=false;btn.textContent='Entrar';}
+}
+
+async function loadOrgProj(){
+  const {data:mem}=await sb.from('org_members').select('org_id,organizations(id,name)').eq('user_id',_user.id).limit(1).maybeSingle();
+  if(!mem){toast('Sem organizacao','err');return;}
+  _org=mem.organizations||{id:mem.org_id};
+  const pid=new URLSearchParams(location.search).get('project');
+  if(pid){
+    const {data:p}=await sb.from('projects').select('id,name,code').eq('id',pid).maybeSingle();
+    if(p){_curProject=p;document.getElementById('projCtx').style.display='flex';document.getElementById('projCtx').innerHTML='<i data-lucide="folder" style="width:14px;height:14px"></i> Projeto: <strong>'+san(p.name)+'</strong> <span style="color:var(--t6);font-weight:500">('+san(p.code||'-')+')</span>';}
+  }
+  document.getElementById('userBadge').textContent=_user.email;
+  _renderIcons();
+  document.querySelectorAll('.side-item').forEach(b=>{b.onclick=()=>go(b.dataset.view);});
+  window._org=_org; window._user=_user; window._curProject=_curProject; window.sb=sb;
+  window.SUPABASE_URL=SUPABASE_URL; window.SUPABASE_KEY=SUPABASE_KEY;
+  if(window.CustomViews){
+    const sb_el=document.querySelector('.sidebar');
+    if(sb_el)await CustomViews.renderSidebarItems(sb_el,'pintura');
+    document.addEventListener('cv-changed',async(e)=>{if(e.detail.scope==='pintura'&&sb_el)await CustomViews.renderSidebarItems(sb_el,'pintura');});
+  }
+  go('overview');
+}
+function go(v){document.querySelectorAll('.side-item').forEach(b=>b.classList.toggle('active',b.dataset.view===v));if(VIEWS[v])VIEWS[v]();setTimeout(_renderIcons,50);}
+
+async function loadInsp(){if(!_curProject)return [];const {data}=await sb.from('painting_inspections').select('*').eq('project_id',_curProject.id).is('deleted_at',null).order('inspection_date',{ascending:false});return data||[];}
+
+async function renderOverview(){
+  if(!_curProject){document.getElementById('content').innerHTML='<div class="empty-st" style="padding:60px 22px"><i data-lucide="alert-circle" style="width:36px;height:36px;color:var(--warning);margin-bottom:12px"></i><div style="font-size:15px;color:var(--t8);font-weight:600">Selecione um projeto</div><div style="font-size:12px;color:var(--t6);margin-top:6px">Volte ao sistema e abra um projeto com a disciplina Pintura ativa.</div><div style="margin-top:18px"><a href="hydrostec_v9.html" class="btn bp" style="text-decoration:none"><i data-lucide="arrow-left"></i>Ir ao sistema</a></div></div>';_renderIcons();return;}
+  const rows=await loadInsp();
+  const ok=rows.filter(r=>r.result==='aprovado').length;
+  const pct=rows.length?Math.round(ok*100/rows.length):0;
+  const dftMedia=rows.length?rows.reduce((s,r)=>s+(parseFloat(r.measured_dft_um)||0),0)/rows.length:0;
+  document.getElementById('content').innerHTML=
+    '<div class="bc-row"><i data-lucide="layout-dashboard" style="width:14px;height:14px"></i> Painel Pintura</div>'
+    +'<div class="sumbar">'
+    +'<div class="sc"><div class="slbl">Inspecoes</div><div class="sval">'+rows.length+'</div></div>'
+    +'<div class="sc"><div class="slbl">Aprovadas</div><div class="sval" style="color:var(--success-h)">'+ok+'</div></div>'
+    +'<div class="sc"><div class="slbl">% Aprovacao</div><div class="sval" style="color:'+(pct>=95?'var(--success-h)':pct>=80?'var(--warning-h)':'var(--danger-h)')+'">'+pct+'%</div></div>'
+    +'<div class="sc"><div class="slbl">DFT media (um)</div><div class="sval">'+num(dftMedia,0)+'</div></div>'
+    +'</div>'
+    +'<div style="padding:22px">'
+    +'<div style="background:var(--accent-l);border-left:3px solid var(--primary);padding:12px 16px;border-radius:8px;font-size:13px;color:var(--primary-h);margin-bottom:18px"><strong>HUB Pintura ativo.</strong> Inspecoes NACE/SSPC, esquemas Petrobras N-9 e N-13, controle de janela climatica e DFT.</div>'
+    +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px">'
+    +cardLink('ruler','Inspecoes DFT','Registro de medicoes DFT, aderencia, janela climatica','inspections')
+    +cardLink('droplets','Ponto de Orvalho','Calculadora rapida T_orvalho a partir de UR e temp ambiente','dewpoint')
+    +'</div></div>';
+  _renderIcons();
+}
+function cardLink(icon,title,desc,view){return '<div onclick="go(\''+view+'\')" style="background:var(--t0);border:1px solid var(--t3);border-radius:12px;padding:18px;cursor:pointer" onmouseover="this.style.borderColor=\'var(--primary)\'" onmouseout="this.style.borderColor=\'var(--t3)\'"><i data-lucide="'+icon+'" style="width:22px;height:22px;color:var(--primary);margin-bottom:10px"></i><div style="font-size:14px;font-weight:700;color:var(--t9);margin-bottom:4px">'+title+'</div><div style="font-size:12px;color:var(--t6);line-height:1.5">'+desc+'</div></div>';}
+
+async function renderInspections(){
+  if(!_curProject)return renderOverview();
+  const rows=await loadInsp();
+  const ok=rows.filter(r=>r.result==='aprovado').length;
+  document.getElementById('content').innerHTML=
+    '<div class="bc-row"><i data-lucide="ruler" style="width:14px;height:14px"></i> Inspecoes de Pintura (Petrobras N-9 / NACE / SSPC)</div>'
+    +'<div class="sumbar">'
+    +'<div class="sc"><div class="slbl">Total</div><div class="sval">'+rows.length+'</div></div>'
+    +'<div class="sc"><div class="slbl">Aprovadas</div><div class="sval" style="color:var(--success-h)">'+ok+'</div></div>'
+    +'<div class="sc"><div class="slbl">Reprovadas</div><div class="sval" style="color:var(--danger-h)">'+rows.filter(r=>r.result==='reprovado').length+'</div></div>'
+    +'</div>'
+    +'<div class="fbar">'
+    +'<button class="btn bp" onclick="editInsp()"><i data-lucide="plus"></i>Nova inspecao</button>'
+    +'<button class="btn bia" onclick="aiUpload()"><i data-lucide="sparkles"></i>IA: importar relatorio</button>'
+    +'<button class="btn bg" onclick="exportXlsx(\'inspecoes_pintura\',_cache.inspLast)"><i data-lucide="download"></i>Exportar</button>'
+    +'</div>'
+    +'<div class="tbl-wrap"><table><thead><tr>'
+    +'<th>Data</th><th>Inspetor</th><th>Esquema</th><th>Preparo</th><th>DFT med (um)</th><th>DFT req (um)</th><th>Aderencia MPa</th><th>UR %</th><th>Janela</th><th>Resultado</th><th></th>'
+    +'</tr></thead><tbody>'
+    +(rows.length?rows.map(r=>{
+        // Janela climatica: T_superficie >= T_orvalho + 3°C (regra geral SSPC)
+        const dewpointOk = r.dew_point_c==null||r.surface_temp_c==null ? null : (parseFloat(r.surface_temp_c) >= parseFloat(r.dew_point_c)+3);
+        const urOk = r.relative_humidity_pct==null ? null : (parseFloat(r.relative_humidity_pct) <= 85);
+        const janelaOk = dewpointOk===null||urOk===null ? null : (dewpointOk && urOk);
+        return '<tr>'
+        +'<td>'+fmtDate(r.inspection_date)+'</td>'
+        +'<td>'+san(r.inspector_name||'-')+'</td>'
+        +'<td class="mono">'+san(r.paint_scheme||'-')+'</td>'
+        +'<td class="mono">'+san(r.surface_preparation||'-')+'</td>'
+        +'<td class="mono">'+num(r.measured_dft_um,0)+'</td>'
+        +'<td class="mono">'+num(r.required_dft_um,0)+'</td>'
+        +'<td class="mono">'+num(r.adhesion_pull_off_mpa,1)+'</td>'
+        +'<td class="mono">'+num(r.relative_humidity_pct,0)+'</td>'
+        +'<td>'+(janelaOk===null?'-':'<span class="badge '+(janelaOk?'b-ok':'b-no')+'">'+(janelaOk?'OK':'FORA')+'</span>')+'</td>'
+        +'<td><span class="badge '+(r.result==='aprovado'?'b-ok':r.result==='reprovado'?'b-no':'b-pe')+'">'+san((r.result||'pendente').toUpperCase())+'</span></td>'
+        +'<td style="text-align:right;white-space:nowrap"><button class="b-edit" onclick="editInsp(\''+r.id+'\')"><i data-lucide="pencil"></i></button><button class="b-del" onclick="delRec(\''+r.id+'\')"><i data-lucide="trash-2"></i></button></td>'
+        +'</tr>';
+      }).join(''):'<tr><td colspan="11" class="empty-st">Sem inspecoes. Clique em <strong>Nova inspecao</strong>.</td></tr>')
+    +'</tbody></table></div>';
+  _cache.inspLast=rows;
+  _renderIcons();
+}
+
+function editInsp(id){
+  const r=id&&_cache.inspLast?_cache.inspLast.find(x=>x.id===id):null;
+  openModal('Inspecao de Pintura','ruler',[
+    {k:'inspection_date',l:'Data Inspecao',type:'date',req:true},
+    {k:'inspector_name',l:'Inspetor (matricula/CREA)',req:true},
+    {k:'paint_scheme',l:'Esquema',type:'select',opts:['','N-2680','N-1198','N-2912','N-2911','primer_epoxi','poliuretano','epoxi_alquitrao','customizado']},
+    {k:'surface_preparation',l:'Preparo',type:'select',opts:['','Sa1','Sa2','Sa2.5','Sa3','St2','St3']},
+    {k:'measured_dft_um',l:'DFT Medido (um)',type:'number',step:'1'},
+    {k:'required_dft_um',l:'DFT Requerido (um)',type:'number'},
+    {k:'adhesion_pull_off_mpa',l:'Aderencia Pull-Off MPa',type:'number',step:'0.1'},
+    {k:'salinity_test_passed',l:'Salinidade OK',type:'select',opts:['','true','false']},
+    {k:'ambient_temp_c',l:'Temp Ambiente C',type:'number',step:'0.1'},
+    {k:'surface_temp_c',l:'Temp Superficie C',type:'number',step:'0.1'},
+    {k:'dew_point_c',l:'Ponto Orvalho C',type:'number',step:'0.1'},
+    {k:'relative_humidity_pct',l:'UR %',type:'number',step:'0.1'},
+    {k:'paint_brand',l:'Marca tinta'},
+    {k:'paint_lot',l:'Lote'},
+    {k:'result',l:'Resultado',type:'select',opts:['pendente','aprovado','reprovado','reinspecao']},
+    {k:'notes',l:'Observacoes',full:true,type:'textarea'}
+  ],r,async(v)=>{
+    v.org_id=_org.id;v.project_id=_curProject.id;
+    if(v.salinity_test_passed==='true')v.salinity_test_passed=true;
+    else if(v.salinity_test_passed==='false')v.salinity_test_passed=false;
+    else v.salinity_test_passed=null;
+    const op=r?sb.from('painting_inspections').update(v).eq('id',r.id):sb.from('painting_inspections').insert(v);
+    const {error}=await op;
+    if(error){toast('Erro: '+error.message,'err');return false;}
+    toast(r?'Atualizado':'Criado','ok');renderInspections();return true;
+  });
+}
+
+async function delRec(id){if(!confirm('Excluir?'))return;const {error}=await sb.from('painting_inspections').update({deleted_at:new Date().toISOString()}).eq('id',id);if(error){toast('Erro: '+error.message,'err');return;}toast('Excluido','ok');renderInspections();}
+
+function renderDewpoint(){
+  document.getElementById('content').innerHTML=
+    '<div class="bc-row"><i data-lucide="droplets" style="width:14px;height:14px"></i> Calculadora de Ponto de Orvalho (Magnus)</div>'
+    +'<div style="padding:24px;max-width:640px;margin:0 auto">'
+    +'<div class="alert-cond"><strong>⚠ Regra geral SSPC PA-1:</strong> Temperatura da superficie deve ser pelo menos <strong>3°C acima</strong> do ponto de orvalho durante toda a aplicacao e cura da tinta. UR maxima recomendada: 85%.</div>'
+    +'<div style="background:var(--t1);border:1px solid var(--t3);border-radius:12px;padding:20px;margin-top:14px">'
+    +'<div class="fgrid">'
+    +'<div><label>Temp. Ambiente (°C)</label><input id="dpT" type="number" step="0.1" value="25" oninput="calcDP()"></div>'
+    +'<div><label>Umidade Relativa (%)</label><input id="dpUR" type="number" step="0.1" value="70" oninput="calcDP()"></div>'
+    +'<div><label>Temp. Superficie (°C)</label><input id="dpSup" type="number" step="0.1" value="28" oninput="calcDP()"></div>'
+    +'</div>'
+    +'<div id="dpRes" style="margin-top:18px"></div>'
+    +'</div></div>';
+  calcDP();
+  _renderIcons();
+}
+
+function calcDP(){
+  const T=parseFloat(document.getElementById('dpT').value);
+  const UR=parseFloat(document.getElementById('dpUR').value);
+  const Tsup=parseFloat(document.getElementById('dpSup').value);
+  if(isNaN(T)||isNaN(UR)){document.getElementById('dpRes').innerHTML='';return;}
+  // Magnus formula
+  const a=17.625, b=243.04;
+  const gamma = Math.log(UR/100) + (a*T)/(b+T);
+  const Tdew = (b*gamma)/(a-gamma);
+  const margem = Tsup - Tdew;
+  const ok = !isNaN(Tsup) && margem >= 3;
+  const urOk = UR <= 85;
+  document.getElementById('dpRes').innerHTML =
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">'
+    +'<div style="background:#fff;border:1px solid var(--t3);border-radius:10px;padding:14px"><div style="font-size:11px;color:var(--t6);text-transform:uppercase;font-weight:600">Ponto Orvalho</div><div style="font-size:28px;font-weight:800;color:var(--primary);font-family:JetBrains Mono,monospace">'+Tdew.toFixed(1)+' °C</div></div>'
+    +'<div style="background:#fff;border:1px solid var(--t3);border-radius:10px;padding:14px"><div style="font-size:11px;color:var(--t6);text-transform:uppercase;font-weight:600">Margem (Tsup - Tdew)</div><div style="font-size:28px;font-weight:800;color:'+(ok?'var(--success-h)':'var(--danger-h)')+';font-family:JetBrains Mono,monospace">'+(isNaN(margem)?'-':margem.toFixed(1)+' °C')+'</div></div>'
+    +'</div>'
+    +'<div style="margin-top:12px;padding:11px 14px;border-radius:8px;font-size:12.5px;font-weight:600;'+(ok&&urOk?'background:var(--success-l);color:var(--success-h);border:1px solid var(--success)':'background:var(--danger-l);color:var(--danger-h);border:1px solid var(--danger)')+'">'+(ok&&urOk?'✓ Janela climatica OK - pode pintar':'✗ FORA da janela - '+(ok?'':'margem &lt; 3°C ')+(urOk?'':'UR &gt; 85%'))+'</div>';
+}
+
+function openModal(title,icon,fields,current,onSave){
+  const overlay=document.createElement('div');overlay.className='overlay';overlay.onclick=(e)=>{if(e.target===overlay)overlay.remove();};
+  const html='<div class="mbox"><button class="mclose" onclick="this.closest(\'.overlay\').remove()"><i data-lucide="x"></i></button>'
+    +'<div class="mtitle"><i data-lucide="'+icon+'"></i>'+title+'</div>'
+    +'<div class="fgrid">'+fields.map(f=>{
+        const v=current?(current[f.k]==null?'':current[f.k]):'';
+        let inp;
+        if(f.type==='select'){const opts=(f.opts||[]).map(o=>'<option value="'+san(o)+'" '+(String(v)===String(o)?'selected':'')+'>'+san(o||'-')+'</option>').join('');inp='<select data-k="'+f.k+'">'+opts+'</select>';}
+        else if(f.type==='textarea'){inp='<textarea data-k="'+f.k+'" rows="3">'+san(v)+'</textarea>';}
+        else {inp='<input data-k="'+f.k+'" type="'+(f.type||'text')+'" '+(f.step?'step="'+f.step+'"':'')+' value="'+san(v)+'">';}
+        return '<div class="'+(f.full?'f-full':'')+'"><label>'+f.l+(f.req?' *':'')+'</label>'+inp+'</div>';
+      }).join('')
+    +'</div><div class="mfooter"><button class="btn bg" onclick="this.closest(\'.overlay\').remove()">Cancelar</button><button class="btn bp" id="modalSave"><i data-lucide="save"></i>Salvar</button></div></div>';
+  overlay.innerHTML=html;document.body.appendChild(overlay);_renderIcons();
+  overlay.querySelector('#modalSave').onclick=async()=>{const vals={};fields.forEach(f=>{const el=overlay.querySelector('[data-k="'+f.k+'"]');let val=el.value;if(f.type==='number'){val=val===''?null:parseFloat(val);}if(val==='')val=null;vals[f.k]=val;});const ok=await onSave(vals);if(ok)overlay.remove();};
+}
+
+function exportXlsx(name,data){if(!data||!data.length){toast('Sem dados','warn');return;}const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(data),name.slice(0,30));XLSX.writeFile(wb,name+'_'+new Date().toISOString().slice(0,10)+'.xlsx');toast('Exportado','ok');}
+
+function aiUpload(){
+  if(!_curProject){toast('Selecione projeto','warn');return;}
+  const overlay=document.createElement('div');overlay.className='overlay';overlay.id='ia-up-ov';overlay.onclick=(e)=>{if(e.target===overlay)overlay.remove();};
+  overlay.innerHTML='<div class="mbox" style="max-width:560px"><button class="mclose" onclick="document.getElementById(\'ia-up-ov\').remove()"><i data-lucide="x"></i></button>'
+    +'<div class="mtitle"><i data-lucide="sparkles" style="color:var(--violet)"></i>Importar relatorio de inspecao com IA</div>'
+    +'<div style="background:var(--accent-l);border-left:3px solid var(--primary);padding:10px 13px;border-radius:8px;font-size:12px;color:var(--primary-h);margin-bottom:14px">Envie o PDF ou foto do relatorio de inspecao. A IA extrai DFT, aderencia, condicoes ambientais, esquema usado.</div>'
+    +'<div style="border:2px dashed var(--primary);border-radius:12px;padding:30px;text-align:center;cursor:pointer;background:var(--accent-l)" onclick="document.getElementById(\'ia-f\').click()">'
+    +'<i data-lucide="upload-cloud" style="width:36px;height:36px;color:var(--primary);margin-bottom:6px"></i><div style="font-size:13px;font-weight:600;color:var(--t9)">Clique ou arraste</div><div style="font-size:11px;color:var(--t6);margin-top:3px">PDF, PNG, CSV, XLSX</div></div>'
+    +'<input type="file" id="ia-f" accept=".pdf,.png,.jpg,.jpeg,.webp,.csv,.xlsx" style="display:none" onchange="aiProcess(this)">'
+    +'<div id="ia-st" style="margin-top:14px"></div>'
+    +'<div class="mfooter"><button class="btn bg" onclick="document.getElementById(\'ia-up-ov\').remove()">Fechar</button></div></div>';
+  document.body.appendChild(overlay);_renderIcons();
+}
+
+async function aiProcess(input){
+  const file=input.files&&input.files[0];if(!file)return;
+  const st=document.getElementById('ia-st');
+  st.innerHTML='<div style="background:var(--primary-l);border:1px solid var(--primary);border-radius:8px;padding:11px 14px;font-size:12px;color:var(--primary-h)">Analisando com IA...</div>';
+  try{
+    let mime=file.type,b64;
+    if(file.name.toLowerCase().endsWith('.xlsx')){const buf=await file.arrayBuffer();const wb=XLSX.read(buf,{type:'array'});const csv=XLSX.utils.sheet_to_csv(wb.Sheets[wb.SheetNames[0]]);b64=btoa(unescape(encodeURIComponent(csv)));mime='text/csv';}
+    else {b64=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result.split(',')[1]);r.onerror=rej;r.readAsDataURL(file);});}
+    const {data:{session}}=await sb.auth.getSession();
+    const resp=await fetch(SUPABASE_URL+'/functions/v1/analyze-discipline-doc',{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+(session?.access_token||SUPABASE_KEY)},body:JSON.stringify({file:b64,mime,project_id:_curProject.id,discipline_code:'pintura',document_type:'inspecao_dft_relatorio'})});
+    const data=await resp.json();
+    if(!resp.ok||data.error){st.innerHTML='<div style="background:var(--danger-l);color:var(--danger-h);border:1px solid var(--danger);border-radius:8px;padding:11px 14px;font-size:12px">Erro: '+(data.error||resp.status)+'</div>';return;}
+    let records=[];for(const k of ['records','items','data','inspecoes']){if(Array.isArray(data[k])){records=data[k];break;}}
+    if(!records.length){for(const k in data){if(Array.isArray(data[k])&&data[k].length){records=data[k];break;}}}
+    let added=0,skipped=[];
+    for(const rec of records){
+      const r={...rec,org_id:_org.id,project_id:_curProject.id};
+      if(!r.inspection_date||!r.inspector_name){skipped.push((r.inspector_name||'?')+': sem data ou inspetor');continue;}
+      delete r.id;delete r.created_at;
+      const {error}=await sb.from('painting_inspections').insert(r);
+      if(error){skipped.push(r.inspector_name+': '+error.message);continue;}
+      added++;
+    }
+    st.innerHTML='<div style="background:var(--success-l);color:var(--success-h);border:1px solid var(--success);border-radius:8px;padding:11px 14px;font-size:12px"><strong>Concluido:</strong> '+added+' cadastrados / '+skipped.length+' descartados.</div>'
+      +(skipped.length?'<div style="margin-top:8px;background:var(--warning-l);border:1px solid var(--warning);border-radius:8px;padding:10px 13px;font-size:11.5px;color:var(--warning-h);max-height:120px;overflow:auto"><strong>Descartados:</strong><ul style="margin:4px 0 0 16px;padding:0">'+skipped.map(s=>'<li>'+san(s)+'</li>').join('')+'</ul></div>':'');
+    if(added){setTimeout(()=>{document.getElementById('ia-up-ov')?.remove();renderInspections();},1800);}
+  } catch(e){st.innerHTML='<div style="background:var(--danger-l);color:var(--danger-h);border:1px solid var(--danger);border-radius:8px;padding:11px 14px;font-size:12px">Erro: '+(e.message||e)+'</div>';}
+}
+
+const VIEWS={overview:renderOverview,inspections:renderInspections,dewpoint:renderDewpoint};
+
+window.addEventListener('DOMContentLoaded',async()=>{
+  _renderIcons();
+  const {data:{session}}=await sb.auth.getSession();
+  if(session?.user){_user=session.user;document.getElementById('authMsg').classList.add('hidden');document.getElementById('app').style.display='flex';await loadOrgProj();}
+  ['hub-em','hub-pw'].forEach(id=>{const el=document.getElementById(id);if(el)el.addEventListener('keypress',e=>{if(e.key==='Enter')hubLogin();});});
+});
+</script>
+<script src="assets/js/ia-chat.js?v=1" defer></script>
+<script src="assets/js/planner-unified-banner.js?v=1" defer></script>
+</body>
+</html>

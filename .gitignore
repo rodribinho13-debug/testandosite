@@ -1,0 +1,87 @@
+# PROJECT.IA — .gitignore (segurança + housekeeping)
+# ============================================================
+
+# ====== CREDENCIAIS — NUNCA commitar ======
+MINHAS_CREDENCIAIS.txt
+credentials*
+*.credentials
+*.secret
+*.env
+.env*
+!.env.example
+*.key
+*.pem
+service_account*.json
+
+# ====== Backups locais (qualquer formato) ======
+_backup_*/
+*_backup_*/
+_backups_auto/
+_backups_auto_*/
+*.bak
+*.bkp
+*.backup
+# Snapshots ad-hoc do v9.html (ex: hydrostec_v9.html.before_sidebar_fix_20260527_203702)
+hydrostec_v9.html.*
+hydrostec_planejador*.html.*
+
+# ====== Arquivos arquivados (manter local, NÃO subir pro GitHub) ======
+_archive_legacy/
+
+# ====== Dependências ======
+node_modules/
+.pnpm-store/
+.npm/
+.yarn/
+package-lock.json.bak
+
+# ====== Build / dist / Vercel ======
+dist/
+build/
+out/
+.next/
+.vercel/
+.netlify/
+
+# ====== Logs ======
+*.log
+npm-debug.log*
+yarn-error.log
+pnpm-debug.log*
+lerna-debug.log*
+
+# ====== IDE / OS ======
+.vscode/
+.idea/
+*.iml
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# ====== Supabase ======
+supabase/.temp/
+supabase/.branches/
+supabase/seed_local.sql
+
+# ====== Cypress (artefatos de execução, NÃO as specs) ======
+_tests/cypress/videos/
+_tests/cypress/screenshots/
+_tests/cypress/downloads/
+_tests/node_modules/
+cypress/videos/
+cypress/screenshots/
+cypress/downloads/
+
+# ====== Temporários ======
+*.tmp
+*.temp
+*.cache
+.cache/
+.parcel-cache/
+
+# ====== Python (caso skill use) ======
+__pycache__/
+*.pyc
+*.pyo

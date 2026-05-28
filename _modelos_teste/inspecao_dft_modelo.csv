@@ -1,0 +1,9 @@
+inspection_code,inspection_date,element_painted,scheme,sistema_camadas,dft_total_um,n_measurements,min_dft_um,max_dft_um,avg_dft_um,area_m2,qtd_demaos,ambient_temp_c,surface_temp_c,humidity_pct,dew_point_c,inspector,result,notes
+DFT-001,2026-05-15,Tubulação 6" linha L-101,PETROBRAS N-2628,Primer EP + Inter EP + Acab PU,280,15,265,310,287,12.5,3,28,30,72,21,Carlos Mendes,Aprovado,Acima do mínimo 250µm
+DFT-002,2026-05-16,Tubulação 4" linha L-102,PETROBRAS N-2628,Primer EP + Inter EP + Acab PU,295,12,280,320,298,8.2,3,29,31,68,22,Carlos Mendes,Aprovado,
+DFT-003,2026-05-17,Estrutura metálica EM-P-01,PETROBRAS N-1219,Primer rico em Zn + Inter EP + Acab PU,320,20,300,355,322,18.5,3,27,29,75,22,Carlos Mendes,Aprovado,
+DFT-004,2026-05-17,Estrutura metálica EM-P-02,PETROBRAS N-1219,Primer rico em Zn + Inter EP + Acab PU,310,20,295,340,315,18.5,3,27,29,75,22,Carlos Mendes,Aprovado,
+DFT-005,2026-05-18,Tanque TQ-01 (parte externa),RAL 9006 acabamento alumínio,Primer EP + Inter MIO + Acab Esmalte alumínio,330,25,310,370,335,82.0,3,30,32,65,22,Carlos Mendes,Aprovado,Pintura industrial - tanque
+DFT-006,2026-05-19,Suportes SUP-101 a SUP-110,PETROBRAS N-1219,Primer rico em Zn + Acab PU,180,30,150,210,182,15.0,2,28,30,70,22,Carlos Mendes,Reprovado,Demão única - retrabalho necessário
+DFT-007,2026-05-20,Tubulação 6" linha L-103 (retoque),PETROBRAS N-2628,Acab PU adicional,255,8,240,275,258,3.2,1,29,31,68,22,Carlos Mendes,Aprovado,Retoque pontual
+DFT-008,2026-05-21,Estrutura EM-V-01 + EM-V-02,PETROBRAS N-1219,Primer rico em Zn + Inter EP + Acab PU,315,18,290,345,318,12.0,3,27,29,72,22,Carlos Mendes,Aprovado,

@@ -1,0 +1,8 @@
+card_id,type,location,height_m,area_m2,assembly_date,inspection_date,valid_until,inspector,status,notes
+ANDM-001,Tubular,Frente NORTE - cota +6.0m,6.0,18.5,2026-05-10,2026-05-10,2026-06-10,Insp. Carlos,verde,Aprovado para uso geral
+ANDM-002,Tubular,Frente NORTE - cota +9.0m,9.0,22.0,2026-05-12,2026-05-12,2026-06-12,Insp. Carlos,verde,
+ANDM-003,Suspenso,Tanque TQ-01 - externa lateral,12.0,8.5,2026-05-15,2026-05-15,2026-06-15,Insp. Carlos,verde,Inspeção diária obrigatória
+ANDM-004,Tubular,Frente SUL - cota +4.5m,4.5,15.0,2026-05-08,2026-05-22,2026-05-29,Insp. Carlos,vermelho,"Tábuas com fissura - retirar de operação"
+ANDM-005,Móvel,Sala bombas,2.5,4.0,2026-05-18,2026-05-18,2026-06-18,Insp. Carlos,verde,Carrinho rotativo
+ANDM-006,Tubular,Frente LESTE - cota +12.0m,12.0,30.0,2026-05-20,2026-05-20,2026-06-20,Insp. Carlos,verde,Plataforma técnica
+ANDM-007,Suspenso,Torre T-02 externa,18.0,6.0,2026-05-22,2026-05-25,2026-05-30,Insp. Carlos,vermelho,Cordas desgastadas - troca programada para 28/05

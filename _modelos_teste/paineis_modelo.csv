@@ -1,0 +1,9 @@
+panel_tag,panel_type,location,voltage_v,current_a,protection_class,supplier,model,components_qty,status,installation_date,notes
+QGBT-01,Quadro Geral BT,Subestação principal,440,800,IP54,WEG,QGBT-FW400,12,em_montagem,,Quadro principal de força
+QGBT-02,Quadro Geral BT,Sala bombas,440,400,IP54,WEG,QGBT-FW200,8,em_montagem,,Quadro derivado
+MCC-01,CCM,Sala bombas,440,250,IP54,Schneider,Okken,16,projetado,,8 partidas diretas + 4 inversores
+MCC-02,CCM,Sala compressores,440,200,IP54,Schneider,Okken,12,projetado,,6 partidas diretas + 2 soft-starters
+QDC-01,Quadro Distribuição,Térreo - Iluminação,220,63,IP44,WEG,QDC-21,14,em_montagem,,Circuitos de iluminação térreo
+QDC-02,Quadro Distribuição,1º piso - Iluminação,220,63,IP44,WEG,QDC-21,12,projetado,,
+QC-CMD-01,Painel Comando,Sala controle,24,16,IP55,Rittal,AE-1054,24,projetado,,PLCs Siemens S7-1500 + IHM
+QC-PAINEL-MT-01,Painel Média Tensão,Subestação,13800,400,IP43,Schneider,SM6,3,projetado,,Painel MT 13.8kV com 3 cubículos

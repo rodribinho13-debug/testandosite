@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>PROJECT.IA · Brand Kit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  /* ═══ PALETA OFICIAL PROJECT.IA ═══ */
+  --ink:#0A1628;            /* Tinta profunda — texto, headers, marca */
+  --ink-2:#13233F;          /* Tinta secundária */
+  --primary:#1E40AF;        /* Azul primary — botões, links */
+  --primary-2:#2563EB;      /* Azul hover */
+  --accent:#06B6D4;         /* Ciano — IA, ações inteligentes */
+  --accent-2:#22D3EE;       /* Ciano claro */
+  --violet:#7C3AED;         /* Violeta — IA premium, novidade */
+  --violet-2:#A78BFA;       /* Violeta claro */
+  --slate-9:#0F172A;        /* Slate escuro */
+  --slate-7:#334155;        /* Texto principal */
+  --slate-5:#64748B;        /* Texto secundário */
+  --slate-3:#CBD5E1;        /* Linhas/divisores */
+  --slate-1:#F1F5F9;        /* Surface secondary */
+  --bg:#FAFBFD;             /* Fundo geral */
+  --white:#FFFFFF;
+  --success:#10B981;
+  --warning:#F59E0B;
+  --danger:#EF4444;
+  --grad-marca:linear-gradient(135deg,#1E40AF 0%,#06B6D4 100%);
+  --grad-ia:linear-gradient(135deg,#06B6D4 0%,#7C3AED 100%);
+  --grad-deep:linear-gradient(135deg,#0A1628 0%,#1E40AF 100%);
+}
+html,body{height:100%}
+body{font-family:'Inter',-apple-system,'Segoe UI',system-ui,sans-serif;color:var(--slate-7);background:var(--bg);line-height:1.55;-webkit-font-smoothing:antialiased}
+
+/* HERO */
+.hero{background:var(--grad-deep);color:#fff;padding:90px 40px 70px;text-align:center;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background:
+  radial-gradient(ellipse 800px 400px at 70% 10%,rgba(6,182,212,.30),transparent 60%),
+  radial-gradient(ellipse 600px 400px at 20% 90%,rgba(124,58,237,.25),transparent 60%);
+  pointer-events:none}
+.hero-inner{position:relative;max-width:1100px;margin:0 auto}
+.hero h1{font-size:52px;font-weight:800;letter-spacing:-1.5px;margin-bottom:14px;line-height:1.05}
+.hero .tag{font-size:18px;opacity:.88;font-weight:400;max-width:620px;margin:0 auto 36px}
+.hero-logo{display:inline-flex;align-items:center;gap:20px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);padding:26px 40px;border-radius:18px;backdrop-filter:blur(10px)}
+
+/* Container */
+.section{max-width:1100px;margin:0 auto;padding:60px 40px}
+.section-title{font-size:13px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:2.5px;margin-bottom:6px}
+.section h2{font-size:34px;font-weight:800;color:var(--ink);margin-bottom:10px;letter-spacing:-.8px;line-height:1.1}
+.section .lead{font-size:15px;color:var(--slate-5);margin-bottom:32px;max-width:640px;line-height:1.7}
+
+.grid{display:grid;gap:18px}
+.g2{grid-template-columns:repeat(2,1fr)}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g4{grid-template-columns:repeat(4,1fr)}
+.card{background:var(--white);border:1px solid var(--slate-3);border-radius:14px;padding:24px}
+
+/* Logo display */
+.logo-card{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:200px;background:var(--white);border:1px solid var(--slate-3);border-radius:14px;padding:30px;text-align:center}
+.logo-card.dark{background:var(--ink)}
+.logo-card.accent{background:var(--accent)}
+.logo-card.grad{background:var(--grad-deep)}
+.logo-card.grad-ia{background:var(--grad-ia)}
+.logo-card-label{margin-top:18px;font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:var(--slate-5);font-weight:700}
+.logo-card.dark .logo-card-label,
+.logo-card.accent .logo-card-label,
+.logo-card.grad .logo-card-label,
+.logo-card.grad-ia .logo-card-label{color:rgba(255,255,255,.75)}
+
+/* Swatches */
+.swatch{border-radius:12px;overflow:hidden;border:1px solid var(--slate-3);background:var(--white)}
+.swatch-color{height:120px;display:flex;align-items:flex-end;padding:14px;color:#fff;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600}
+.swatch-info{padding:14px 16px}
+.swatch-info .name{font-size:13px;font-weight:700;color:var(--ink);margin-bottom:3px}
+.swatch-info .role{font-size:11px;color:var(--slate-5);line-height:1.5}
+
+/* Typography */
+.type-row{display:flex;align-items:baseline;gap:16px;padding:18px 0;border-bottom:1px solid var(--slate-3)}
+.type-row:last-child{border:none}
+.type-row .specs{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--slate-5);min-width:160px;font-weight:500}
+
+/* Components */
+.btn{display:inline-flex;align-items:center;gap:8px;padding:11px 20px;border-radius:8px;font-weight:600;font-size:13px;font-family:inherit;cursor:pointer;border:none;text-decoration:none;transition:all .15s}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-primary:hover{background:var(--primary-2);transform:translateY(-1px)}
+.btn-accent{background:var(--accent);color:#fff}
+.btn-accent:hover{background:#0891B2}
+.btn-ia{background:var(--grad-ia);color:#fff;box-shadow:0 6px 16px rgba(124,58,237,.25)}
+.btn-ia:hover{box-shadow:0 8px 20px rgba(124,58,237,.35);transform:translateY(-1px)}
+.btn-ghost{background:transparent;color:var(--primary);border:1px solid var(--slate-3)}
+.btn-ghost:hover{background:var(--slate-1)}
+
+/* Badge */
+.badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;font-family:'JetBrains Mono',monospace}
+.badge-success{background:#D1FAE5;color:#065F46}
+.badge-warning{background:#FEF3C7;color:#92400E}
+.badge-danger{background:#FEE2E2;color:#991B1B}
+.badge-info{background:#DBEAFE;color:#1E3A8A}
+.badge-ia{background:linear-gradient(135deg,#E0F2FE,#EDE9FE);color:#5B21B6;border:1px solid #DDD6FE}
+.badge-neutral{background:var(--slate-1);color:var(--slate-5)}
+
+/* Mockup */
+.mockup{background:#fff;border:1px solid var(--slate-3);border-radius:16px;overflow:hidden;box-shadow:0 24px 60px rgba(10,22,40,.10)}
+.mock-bar{background:var(--slate-1);padding:10px 14px;border-bottom:1px solid var(--slate-3);display:flex;gap:6px}
+.mock-bar span{width:11px;height:11px;border-radius:50%}
+.mock-bar span:nth-child(1){background:#FF5F57}
+.mock-bar span:nth-child(2){background:#FFBD2E}
+.mock-bar span:nth-child(3){background:#28C840}
+.mock-content{display:flex;min-height:380px}
+.mock-side{width:220px;background:var(--slate-1);border-right:1px solid var(--slate-3);padding:18px 0}
+.mock-side-head{padding:0 18px 14px;border-bottom:1px solid var(--slate-3);margin-bottom:10px;display:flex;align-items:center;gap:10px}
+.mock-side-item{display:flex;align-items:center;gap:9px;padding:7px 18px;font-size:12px;color:var(--slate-7);cursor:pointer;border-left:3px solid transparent;font-weight:500}
+.mock-side-item.active{background:#EFF6FF;border-left-color:var(--accent);color:var(--primary);font-weight:600}
+.mock-main{flex:1;padding:26px}
+.mock-h{font-size:20px;font-weight:700;color:var(--ink);margin-bottom:6px;letter-spacing:-.3px}
+.mock-sub{font-size:12px;color:var(--slate-5);margin-bottom:20px}
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px}
+.kpi{background:var(--bg);border:1px solid var(--slate-3);border-radius:10px;padding:12px}
+.kpi .lbl{font-size:9px;text-transform:uppercase;color:var(--slate-5);font-weight:700;letter-spacing:.8px}
+.kpi .val{font-size:20px;font-weight:700;color:var(--ink);font-family:'JetBrains Mono',monospace;margin-top:3px;letter-spacing:-.3px}
+
+/* DNA */
+.dna{background:var(--grad-deep);color:#fff;padding:56px 44px;border-radius:20px;display:grid;grid-template-columns:1fr 1fr;gap:44px;align-items:center;margin-bottom:40px;position:relative;overflow:hidden}
+.dna::before{content:'';position:absolute;top:-50px;right:-50px;width:300px;height:300px;background:radial-gradient(circle,rgba(6,182,212,.25),transparent 70%);pointer-events:none}
+.dna h3{font-size:32px;font-weight:800;letter-spacing:-.6px;margin-bottom:14px;line-height:1.15;position:relative}
+.dna p{opacity:.88;font-size:15px;line-height:1.7;position:relative}
+.dna-pillars{display:flex;flex-direction:column;gap:16px;position:relative}
+.pillar{display:flex;gap:14px;align-items:flex-start}
+.pillar-ico{font-size:22px;width:46px;height:46px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);border-radius:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.pillar h4{font-size:15px;font-weight:700;margin-bottom:4px}
+.pillar p{font-size:13px;opacity:.78;margin:0;line-height:1.55}
+
+/* Pin */
+.pin{display:inline-block;padding:6px 14px;border-radius:20px;background:rgba(6,182,212,.12);color:var(--accent);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.8px;margin-bottom:18px}
+
+/* Do/Dont */
+.guide-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.guide-do,.guide-dont{padding:24px;border-radius:14px}
+.guide-do{background:#D1FAE5;border:1px solid #6EE7B7}
+.guide-dont{background:#FEE2E2;border:1px solid #FCA5A5}
+.guide-do h4,.guide-dont h4{font-size:13px;font-weight:800;margin-bottom:12px;display:flex;align-items:center;gap:6px;text-transform:uppercase;letter-spacing:1px}
+.guide-do h4{color:#065F46}
+.guide-dont h4{color:#991B1B}
+.guide-do ul,.guide-dont ul{list-style:none;font-size:12.5px;line-height:1.8}
+.guide-do li::before{content:'✓ ';color:#10B981;font-weight:700}
+.guide-dont li::before{content:'✗ ';color:#EF4444;font-weight:700}
+
+footer{background:var(--ink);color:rgba(255,255,255,.65);padding:40px;text-align:center;font-size:12px;margin-top:60px}
+footer strong{color:#fff}
+
+/* Wordmark especial */
+.wm{font-weight:800;letter-spacing:-1px;color:#fff;display:inline-flex;align-items:baseline}
+.wm .dot{color:var(--accent-2);font-weight:800}
+.wm .ia{background:var(--grad-ia);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;font-weight:900}
+.wm.dark{color:var(--ink)}
+.wm.dark .dot{color:var(--accent)}
+.wm.dark .ia{background:var(--grad-ia);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════ HERO ═══════════════════ -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-logo">
+      <!-- LOGO OFICIAL -->
+      <svg width="72" height="72" viewBox="0 0 72 72" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="logo-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#06B6D4"/>
+            <stop offset="100%" stop-color="#7C3AED"/>
+          </linearGradient>
+          <linearGradient id="cube-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#22D3EE"/>
+            <stop offset="100%" stop-color="#06B6D4"/>
+          </linearGradient>
+        </defs>
+        <!-- Cubo isométrico (3 faces = 3 disciplinas) -->
+        <!-- Face superior -->
+        <path d="M 36 8 L 60 22 L 36 36 L 12 22 Z" fill="#fff" stroke="#fff" stroke-width="1.5" stroke-linejoin="round"/>
+        <!-- Face esquerda -->
+        <path d="M 12 22 L 36 36 L 36 64 L 12 50 Z" fill="rgba(255,255,255,.55)" stroke="#fff" stroke-width="1.5" stroke-linejoin="round"/>
+        <!-- Face direita -->
+        <path d="M 60 22 L 36 36 L 36 64 L 60 50 Z" fill="rgba(255,255,255,.30)" stroke="#fff" stroke-width="1.5" stroke-linejoin="round"/>
+        <!-- Nó central de IA -->
+        <circle cx="36" cy="36" r="5" fill="url(#logo-grad)"/>
+        <circle cx="36" cy="36" r="9" fill="none" stroke="url(#logo-grad)" stroke-width="1.5" opacity=".7"/>
+      </svg>
+      <div style="text-align:left">
+        <div class="wm" style="font-size:42px;line-height:1">PROJECT<span class="dot">.</span><span class="ia">IA</span></div>
+        <div style="font-size:11px;text-transform:uppercase;letter-spacing:3.5px;opacity:.7;margin-top:7px;font-weight:600">Engineering Intelligence Platform</div>
+      </div>
+    </div>
+    <h1 style="margin-top:44px">Brand Kit Oficial</h1>
+    <p class="tag">Identidade visual da plataforma de engenharia multi-disciplinar com IA — civil, elétrica, mecânica, pintura, segurança e qualidade num lugar só.</p>
+  </div>
+</div>
+
+<!-- ═══════════════════ DNA ═══════════════════ -->
+<div class="section">
+  <div class="dna">
+    <div>
+      <span class="pin" style="background:rgba(255,255,255,.14);color:#fff">DNA DA MARCA</span>
+      <h3>O projeto inteiro,<br/>num lugar só.</h3>
+      <p>PROJECT.IA é a plataforma onde engenheiros de todas as disciplinas — civil, elétrica, mecânica, instrumentação, pintura, segurança — projetam, planejam e executam com inteligência artificial especializada. Onde um isométrico vira plano de obra, onde um PDF vira lista de materiais, onde toda planilha vira ação.</p>
+    </div>
+    <div class="dna-pillars">
+      <div class="pillar">
+        <div class="pillar-ico">🎯</div>
+        <div><h4>Multi-disciplinar</h4><p>16 disciplinas integradas. Civil, elétrica, mecânica, pintura, andaime, segurança — todos no mesmo projeto.</p></div>
+      </div>
+      <div class="pillar">
+        <div class="pillar-ico">🤖</div>
+        <div><h4>IA Especializada</h4><p>Cada disciplina com seu prompt próprio. Não é ChatGPT genérico — entende NR-13, ABNT, AWS, ASME.</p></div>
+      </div>
+      <div class="pillar">
+        <div class="pillar-ico">⚡</div>
+        <div><h4>Do papel ao dado</h4><p>PDF, planilha, foto — vira registro estruturado em segundos. Sem retrabalho de digitação.</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ LOGO ═══════════════════ -->
+<div class="section">
+  <div class="section-title">01 · Logotipo</div>
+  <h2>Sistema de Logo</h2>
+  <p class="lead">O símbolo é um cubo isométrico aberto em 3 faces (representando as 3 grandes áreas da engenharia: civil, elétrica e mecânica) com um nó pulsante de IA ao centro. O wordmark "PROJECT.IA" separa visualmente "PROJECT" (raiz portuguesa de projetar) do ".IA" em gradient violeta-ciano.</p>
+
+  <div class="grid g4">
+    <div class="logo-card">
+      <svg width="140" viewBox="0 0 72 72" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="l1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#06B6D4"/><stop offset="100%" stop-color="#7C3AED"/></linearGradient>
+        </defs>
+        <path d="M 36 8 L 60 22 L 36 36 L 12 22 Z" fill="#0A1628" stroke="#0A1628" stroke-width="1.5" stroke-linejoin="round"/>
+        <path d="M 12 22 L 36 36 L 36 64 L 12 50 Z" fill="#1E40AF" stroke="#0A1628" stroke-width="1.5" stroke-linejoin="round"/>
+        <path d="M 60 22 L 36 36 L 36 64 L 60 50 Z" fill="#2563EB" stroke="#0A1628" stroke-width="1.5" stroke-linejoin="round"/>
+        <circle cx="36" cy="36" r="5" fill="url(#l1)"/>
+        <circle cx="36" cy="36" r="9" fill="none" stroke="url(#l1)" stroke-width="1.5" opacity=".7"/>
+      </svg>
+      <div class="logo-card-label">Símbolo · 3 faces + IA</div>
+    </div>
+    <div class="logo-card">
+      <div style="display:flex;align-items:center;gap:12px">
+        <svg width="44" viewBox="0 0 72 72" xmlns="http://www.w3.org/2000/svg">
+          <defs><linearGradient id="l2" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#06B6D4"/><stop offset="100%" stop-color="#7C3AED"/></linearGradient></defs>
+          <path d="M 36 8 L 60 22 L 36 36 L 12 22 Z" fill="#0A1628"/>
+          <path d="M 12 22 L 36 36 L 36 64 L 12 50 Z" fill="#1E40AF"/>
+          <path d="M 60 22 L 36 36 L 36 64 L 60 50 Z" fill="#2563EB"/>
+          <circle cx="36" cy="36" r="5" fill="url(#l2)"/>
+          <circle cx="36" cy="36" r="9" fill="none" stroke="url(#l2)" stroke-width="1.5" opacity=".7"/>
+        </svg>
+        <div class="wm dark" style="font-size:24px">PROJECT<span class="dot">.</span><span class="ia">IA</span></div>
+      </div>
+      <div class="logo-card-label">Lockup horizontal</div>
+    </div>
+    <div class="logo-card dark">
+      <div style="display:flex;align-items:center;gap:12px">
+        <svg width="44" viewBox="0 0 72 72" xmlns="http://www.w3.org/2000/svg">
+          <defs><linearGradient id="l3" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#22D3EE"/><stop offset="100%" stop-color="#A78BFA"/></linearGradient></defs>
+          <path d="M 36 8 L 60 22 L 36 36 L 12 22 Z" fill="#fff"/>
+          <path d="M 12 22 L 36 36 L 36 64 L 12 50 Z" fill="rgba(255,255,255,.55)"/>
+          <path d="M 60 22 L 36 36 L 36 64 L 60 50 Z" fill="rgba(255,255,255,.30)"/>
+          <circle cx="36" cy="36" r="5" fill="url(#l3)"/>
+          <circle cx="36" cy="36" r="9" fill="none" stroke="url(#l3)" stroke-width="1.5" opacity=".7"/>
+        </svg>
+        <div class="wm" style="font-size:24px">PROJECT<span class="dot">.</span><span class="ia">IA</span></div>
+      </div>
+      <div class="logo-card-label">Inversão dark</div>
+    </div>
+    <div class="logo-card grad-ia">
+      <div style="background:rgba(255,255,255,.95);width:80px;height:80px;border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:900;color:#0A1628;font-family:'Inter',sans-serif;letter-spacing:-1.5px">P.<span style="background:linear-gradient(135deg,#06B6D4,#7C3AED);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent">IA</span></div>
+      <div class="logo-card-label">Monograma · favicon</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ PALETA ═══════════════════ -->
+<div class="section">
+  <div class="section-title">02 · Paleta</div>
+  <h2>Cores</h2>
+  <p class="lead">Tinta profunda (ink) = autoridade técnica. Azul primary = ação. Ciano = inteligência/IA. Violeta = recursos premium e marca. Status alinhados com semáforos de obra (verde/amarelo/vermelho).</p>
+
+  <h3 style="font-size:13px;text-transform:uppercase;color:var(--slate-5);letter-spacing:1.5px;margin:8px 0 14px;font-weight:700">Marca</h3>
+  <div class="grid g4">
+    <div class="swatch"><div class="swatch-color" style="background:#0A1628">#0A1628</div><div class="swatch-info"><div class="name">Ink</div><div class="role">Headers, marca, footer</div></div></div>
+    <div class="swatch"><div class="swatch-color" style="background:#1E40AF">#1E40AF</div><div class="swatch-info"><div class="name">Primary</div><div class="role">Botões principais, links</div></div></div>
+    <div class="swatch"><div class="swatch-color" style="background:#06B6D4">#06B6D4</div><div class="swatch-info"><div class="name">Accent (IA)</div><div class="role">Ações inteligentes, IA</div></div></div>
+    <div class="swatch"><div class="swatch-color" style="background:#7C3AED">#7C3AED</div><div class="swatch-info"><div class="name">Violet (PRO)</div><div class="role">Features premium, novidades</div></div></div>
+  </div>
+
+  <h3 style="font-size:13px;text-transform:uppercase;color:var(--slate-5);letter-spacing:1.5px;margin:24px 0 14px;font-weight:700">Neutras (escala Slate)</h3>
+  <div class="grid g4">
+    <div class="swatch"><div class="swatch-color" style="background:#0F172A">#0F172A</div><div class="swatch-info"><div class="name">Slate-900</div><div class="role">Texto reforçado</div></div></div>
+    <div class="swatch"><div class="swatch-color" style="background:#334155">#334155</div><div class="swatch-info"><div class="name">Slate-700</div><div class="role">Texto principal</div></div></div>
+    <div class="swatch"><div class="swatch-color" style="background:#64748B">#64748B</div><div class="swatch-info"><div class="name">Slate-500</div><div class="role">Labels, secundário</div></div></div>
+    <div class="swatch"><div class="swatch-color" style="background:#CBD5E1;color:#0F172A">#CBD5E1</div><div class="swatch-info"><div class="name">Slate-300</div><div class="role">Divisores 0.5px</div></div></div>
+  </div>
+
+  <h3 style="font-size:13px;text-transform:uppercase;color:var(--slate-5);letter-spacing:1.5px;margin:24px 0 14px;font-weight:700">Status semânticas</h3>
+  <div class="grid g3">
+    <div class="swatch"><div class="swatch-color" style="background:#10B981">#10B981</div><div class="swatch-info"><div class="name">Success</div><div class="role">Aprovado, OK, liberado</div></div></div>
+    <div class="swatch"><div class="swatch-color" style="background:#F59E0B">#F59E0B</div><div class="swatch-info"><div class="name">Warning</div><div class="role">Pendente, atenção</div></div></div>
+    <div class="swatch"><div class="swatch-color" style="background:#EF4444">#EF4444</div><div class="swatch-info"><div class="name">Danger</div><div class="role">Reprovado, reparo, crítico</div></div></div>
+  </div>
+</div>
+
+<!-- ═══════════════════ TIPOGRAFIA ═══════════════════ -->
+<div class="section">
+  <div class="section-title">03 · Tipografia</div>
+  <h2>Fontes</h2>
+  <p class="lead">Inter para tudo de interface (legibilidade superior em dashboards densos). JetBrains Mono para dados técnicos: TAGs, dimensões, datas, números, R$. Hierarquia rigorosa de 5 tamanhos.</p>
+
+  <div class="card">
+    <div class="type-row"><div class="specs">DISPLAY · 52/56 · 800</div><div style="font-size:42px;font-weight:800;color:var(--ink);letter-spacing:-1.2px">O projeto inteiro.</div></div>
+    <div class="type-row"><div class="specs">H1 · 34/40 · 800</div><div style="font-size:32px;font-weight:800;color:var(--ink);letter-spacing:-.6px">Mapa de Juntas Pro</div></div>
+    <div class="type-row"><div class="specs">H2 · 22/30 · 700</div><div style="font-size:22px;font-weight:700;color:var(--ink);letter-spacing:-.3px">Controle de Suportes</div></div>
+    <div class="type-row"><div class="specs">H3 · 16/24 · 600</div><div style="font-size:16px;font-weight:600;color:var(--slate-7)">Análise multi-disciplinar com IA</div></div>
+    <div class="type-row"><div class="specs">Body · 14/22 · 400</div><div style="font-size:14px;color:var(--slate-7)">Junta 045/B soldada em 12/05/2026, sinete A1. Aprovada em VS, aguarda RT/UT.</div></div>
+    <div class="type-row"><div class="specs">Mono · 13/20 · 500</div><div style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--slate-7);font-weight:500">PSF-001-A · Ø6" · SCH40 · 6,5 Hh/m · R$ 24.748,69</div></div>
+    <div class="type-row"><div class="specs">Caption · 11/16 · 600</div><div style="font-size:11px;color:var(--slate-5);text-transform:uppercase;letter-spacing:.8px;font-weight:600">Estado da solda</div></div>
+  </div>
+</div>
+
+<!-- ═══════════════════ COMPONENTES ═══════════════════ -->
+<div class="section">
+  <div class="section-title">04 · Componentes</div>
+  <h2>UI Kit</h2>
+  <p class="lead">Botões, badges, KPIs e formulários alinhados. Estes blocos são a base de toda nova feature.</p>
+
+  <h3 style="font-size:13px;text-transform:uppercase;color:var(--slate-5);letter-spacing:1.5px;margin:8px 0 14px;font-weight:700">Botões</h3>
+  <div class="card" style="display:flex;flex-wrap:wrap;gap:12px;align-items:center">
+    <button class="btn btn-primary">+ Nova Junta</button>
+    <button class="btn btn-accent">⚡ Calcular HH</button>
+    <button class="btn btn-ia">🤖 Analisar com IA</button>
+    <button class="btn btn-ghost">Cancelar</button>
+    <button class="btn btn-primary" style="background:var(--success)">✓ Aprovar</button>
+    <button class="btn btn-primary" style="background:var(--danger)">🗑️ Excluir</button>
+  </div>
+
+  <h3 style="font-size:13px;text-transform:uppercase;color:var(--slate-5);letter-spacing:1.5px;margin:24px 0 14px;font-weight:700">Badges de status</h3>
+  <div class="card" style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">
+    <span class="badge badge-success">✓ Soldada</span>
+    <span class="badge badge-success">RT OK</span>
+    <span class="badge badge-warning">Pendente TH</span>
+    <span class="badge badge-warning">Em fabricação</span>
+    <span class="badge badge-danger">Reparo</span>
+    <span class="badge badge-info">PSF-001</span>
+    <span class="badge badge-info">SCH40</span>
+    <span class="badge badge-ia">🤖 IA</span>
+    <span class="badge badge-neutral">Rascunho</span>
+  </div>
+
+  <h3 style="font-size:13px;text-transform:uppercase;color:var(--slate-5);letter-spacing:1.5px;margin:24px 0 14px;font-weight:700">KPIs (números técnicos)</h3>
+  <div class="kpi-row">
+    <div class="kpi"><div class="lbl">Juntas ativas</div><div class="val">1.475</div></div>
+    <div class="kpi"><div class="lbl">Soldadas</div><div class="val" style="color:var(--success)">1.230</div></div>
+    <div class="kpi"><div class="lbl">RT OK</div><div class="val" style="color:var(--primary)">812</div></div>
+    <div class="kpi"><div class="lbl">Em reparo</div><div class="val" style="color:var(--danger)">9</div></div>
+  </div>
+</div>
+
+<!-- ═══════════════════ APP MOCKUP ═══════════════════ -->
+<div class="section">
+  <div class="section-title">05 · Aplicação</div>
+  <h2>No app</h2>
+  <p class="lead">Aparência final consistente — sidebar leve com indicador ciano, header limpo, conteúdo em cards. Vale para v9 (sistema), planejador, ferramentas e index.</p>
+
+  <div class="mockup">
+    <div class="mock-bar"><span></span><span></span><span></span></div>
+    <div class="mock-content">
+      <div class="mock-side">
+        <div class="mock-side-head">
+          <svg width="28" viewBox="0 0 72 72" xmlns="http://www.w3.org/2000/svg">
+            <defs><linearGradient id="lm1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#06B6D4"/><stop offset="100%" stop-color="#7C3AED"/></linearGradient></defs>
+            <path d="M 36 8 L 60 22 L 36 36 L 12 22 Z" fill="#0A1628"/>
+            <path d="M 12 22 L 36 36 L 36 64 L 12 50 Z" fill="#1E40AF"/>
+            <path d="M 60 22 L 36 36 L 36 64 L 60 50 Z" fill="#2563EB"/>
+            <circle cx="36" cy="36" r="5" fill="url(#lm1)"/>
+          </svg>
+          <div class="wm dark" style="font-size:16px">PROJECT<span class="dot">.</span><span class="ia">IA</span></div>
+        </div>
+        <div style="padding:0 18px;font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--slate-5);font-weight:700;margin:8px 0 4px">Planejamento</div>
+        <div class="mock-side-item active">📁 Projetos</div>
+        <div class="mock-side-item">📄 Folhas</div>
+        <div class="mock-side-item">🗺️ Mapa de Juntas</div>
+        <div class="mock-side-item">📋 HUB Planejador <span style="margin-left:auto;background:var(--success);color:#fff;font-size:9px;padding:1px 6px;border-radius:10px;font-weight:700">PRO</span></div>
+        <div style="padding:0 18px;font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--slate-5);font-weight:700;margin:12px 0 4px">Qualidade</div>
+        <div class="mock-side-item">⚠️ Pendências</div>
+        <div class="mock-side-item">🔧 Soldadores</div>
+      </div>
+      <div class="mock-main">
+        <div class="mock-h">Dashboard executivo</div>
+        <div class="mock-sub">Projeto Refinaria Norte · Atualizado há 2 min</div>
+        <div class="kpi-row">
+          <div class="kpi"><div class="lbl">Avanço físico</div><div class="val">67,3<span style="font-size:14px;color:var(--slate-5)">%</span></div></div>
+          <div class="kpi"><div class="lbl">HH realizado</div><div class="val" style="color:var(--success)">12.450</div></div>
+          <div class="kpi"><div class="lbl">Pendências</div><div class="val" style="color:var(--warning)">23</div></div>
+          <div class="kpi"><div class="lbl">Custo R$</div><div class="val">847k</div></div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-primary">+ Nova folha</button><button class="btn btn-ia">🤖 Analisar PDF</button><button class="btn btn-ghost">📥 Exportar</button></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ DO/DON'T ═══════════════════ -->
+<div class="section">
+  <div class="section-title">06 · Diretrizes</div>
+  <h2>Faça / Não Faça</h2>
+
+  <div class="guide-grid">
+    <div class="guide-do">
+      <h4>✓ Faça</h4>
+      <ul>
+        <li>Ink (#0A1628) para headers e momentos de marca</li>
+        <li>Primary (#1E40AF) para CTA principal</li>
+        <li>Accent ciano (#06B6D4) para IA e ações inteligentes</li>
+        <li>Violeta (#7C3AED) só em features PRO e gradients</li>
+        <li>JetBrains Mono em TAG, datas, dimensões e R$</li>
+        <li>Cards com borda 1px slate-300 + radius 14px</li>
+        <li>Gradient Ink→Primary em hero e login</li>
+        <li>Botão IA com gradient ciano→violeta + sombra</li>
+      </ul>
+    </div>
+    <div class="guide-dont">
+      <h4>✗ Não Faça</h4>
+      <ul>
+        <li>Não use violeta em massa — só em destaques</li>
+        <li>Não combine ciano com warning (laranja) — vibram</li>
+        <li>Evite sombras pesadas; prefira borda fina</li>
+        <li>Não use itálico (Inter italic é fraca) — use bold</li>
+        <li>Nunca distorça o logo — só escale proporcional</li>
+        <li>Não use mais de 1 gradient por tela</li>
+        <li>Não use cor de status em dados não-status</li>
+        <li>Nunca quebre "PROJECT.IA" em linhas separadas</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ VOZ ═══════════════════ -->
+<div class="section">
+  <div class="section-title">07 · Voz e tom</div>
+  <h2>Como PROJECT.IA fala</h2>
+  <p class="lead">Técnico mas humano. Direto, sem jargão desnecessário. Como um engenheiro sênior explicando para um colega de campo. Português brasileiro, mas pronto para escalar.</p>
+
+  <div class="grid g2">
+    <div class="card">
+      <div style="font-size:11px;text-transform:uppercase;letter-spacing:1.8px;color:var(--accent);font-weight:700;margin-bottom:8px">Hero principal</div>
+      <div style="font-size:26px;font-weight:800;color:var(--ink);line-height:1.2;letter-spacing:-.5px">Solte sua planilha.<br/>A obra te espera.</div>
+      <div style="font-size:12px;color:var(--slate-5);margin-top:12px">Para landing — fala de agilidade sem perder profundidade técnica.</div>
+    </div>
+    <div class="card">
+      <div style="font-size:11px;text-transform:uppercase;letter-spacing:1.8px;color:var(--accent);font-weight:700;margin-bottom:8px">CTA principal</div>
+      <div style="font-size:22px;font-weight:700;color:var(--ink);line-height:1.3">Engenharia inteligente,<br/>do esboço à entrega.</div>
+      <div style="font-size:12px;color:var(--slate-5);margin-top:12px">Subtítulo de hero — multi-disciplinar, ciclo completo.</div>
+    </div>
+    <div class="card">
+      <div style="font-size:11px;text-transform:uppercase;letter-spacing:1.8px;color:var(--accent);font-weight:700;margin-bottom:8px">Estado vazio</div>
+      <div style="font-size:14px;color:var(--slate-7);line-height:1.6">Nenhuma junta cadastrada ainda. Importe seu mapa Excel, mande um isométrico pra IA ler, ou cadastre na mão clicando em <strong>+ Nova junta</strong>.</div>
+      <div style="font-size:12px;color:var(--slate-5);margin-top:10px">Sempre 3 caminhos: importar, IA, manual.</div>
+    </div>
+    <div class="card">
+      <div style="font-size:11px;text-transform:uppercase;letter-spacing:1.8px;color:var(--accent);font-weight:700;margin-bottom:8px">Microcopy IA</div>
+      <div style="font-size:14px;color:var(--slate-7);line-height:1.6">A IA leu seu PDF e encontrou <strong>23 cabos</strong>, <strong>12 suportes</strong> e <strong>4 estruturas metálicas</strong>. Tudo já tá no Planejador. Confere?</div>
+      <div style="font-size:12px;color:var(--slate-5);margin-top:10px">Roteamento automático — sempre transparente sobre o que fez.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ FOOTER ═══════════════════ -->
+<footer>
+  <div style="max-width:1100px;margin:0 auto">
+    <div style="display:inline-flex;align-items:center;gap:12px;margin-bottom:14px">
+      <svg width="28" viewBox="0 0 72 72" xmlns="http://www.w3.org/2000/svg">
+        <defs><linearGradient id="lf1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#22D3EE"/><stop offset="100%" stop-color="#A78BFA"/></linearGradient></defs>
+        <path d="M 36 8 L 60 22 L 36 36 L 12 22 Z" fill="#fff"/>
+        <path d="M 12 22 L 36 36 L 36 64 L 12 50 Z" fill="rgba(255,255,255,.55)"/>
+        <path d="M 60 22 L 36 36 L 36 64 L 60 50 Z" fill="rgba(255,255,255,.30)"/>
+        <circle cx="36" cy="36" r="5" fill="url(#lf1)"/>
+      </svg>
+      <div class="wm" style="font-size:20px">PROJECT<span class="dot">.</span><span class="ia">IA</span></div>
+    </div>
+    <div><strong>PROJECT.IA</strong> · Engenharia Inteligente Multi-Disciplinar</div>
+    Brand Kit v2.0 · Maio 2026 · Inter + JetBrains Mono · WCAG AA
+  </div>
+</footer>
+
+</body>
+</html>

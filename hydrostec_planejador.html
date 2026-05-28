@@ -1,0 +1,1702 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>
+(function(){
+  if(location.protocol === 'https:' && !/localhost|127\.0\.0\.1/.test(location.hostname)){
+    var meta = document.createElement('meta');
+    meta.httpEquiv = 'Content-Security-Policy';
+    meta.content = "default-src 'self' https://*.supabase.co https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com https://fonts.googleapis.com https://fonts.gstatic.com data: blob:; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net; img-src 'self' data: blob: https:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://generativelanguage.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; frame-ancestors 'none'; object-src 'none'; base-uri 'self'";
+    document.head.appendChild(meta);
+  }
+})();
+</script>
+<meta http-equiv="X-Content-Type-Options" content="nosniff"/>
+<meta name="referrer" content="strict-origin-when-cross-origin"/>
+<meta name="robots" content="noindex,nofollow"/>
+<script src="assets/js/security.js?v=2"></script>
+<title>PROJECT.IA — HUB do Planejador</title>
+<link rel="icon" href="favicon.ico" type="image/x-icon">
+<script>if(location.protocol==="file:"){/* manifest CORS bloqueia em file:// */}else{document.write('<link rel="manifest" href="manifest.json">');}</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest"></script>
+<script src="custom_views.js?v=2" defer></script>
+<script src="assets/js/saas-modules.js?v=2" defer></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#0A1628;--ink-2:#13233F;--ink-3:#1B2D4E;
+  --primary:#1E40AF;--primary-h:#2563EB;--primary-l:#EFF6FF;
+  --accent:#06B6D4;--accent-2:#22D3EE;--accent-l:#ECFEFF;
+  --violet:#7C3AED;--violet-l:#F5F3FF;
+  --t0:#FFFFFF;--t1:#FAFBFD;--t2:#F1F5F9;--t3:#E2E8F0;--t4:#CBD5E1;
+  --t5:#94A3B8;--t6:#64748B;--t7:#334155;--t8:#1E293B;--t9:#0F172A;
+  --success:#10B981;--success-l:#ECFDF5;--success-h:#065F46;
+  --warning:#F59E0B;--warning-l:#FFFBEB;--warning-h:#92400E;
+  --danger:#EF4444;--danger-l:#FEF2F2;--danger-h:#991B1B;
+  --bg:var(--t0);--bg2:var(--t1);
+  --grad-marca:linear-gradient(135deg,#1E40AF 0%,#06B6D4 100%);
+  --grad-ia:linear-gradient(135deg,#06B6D4 0%,#7C3AED 100%);
+  --grad-deep-hero:radial-gradient(ellipse 1200px 600px at 75% -10%,rgba(6,182,212,.30),transparent 55%),radial-gradient(ellipse 900px 600px at 15% 110%,rgba(124,58,237,.28),transparent 55%),linear-gradient(180deg,#0A1628 0%,#13233F 100%);
+  --sh-sm:0 1px 2px rgba(10,22,40,.06);--sh:0 8px 24px rgba(10,22,40,.08);--sh-lg:0 24px 60px rgba(10,22,40,.14);
+  --r-sm:6px;--r:10px;--r-md:14px;--r-lg:18px;
+}
+html,body{height:100%}
+body{font-family:'Inter',-apple-system,'Segoe UI',sans-serif;color:var(--t8);font-size:13px;background:var(--t1);-webkit-font-smoothing:antialiased;letter-spacing:-.005em}
+.app{display:flex;flex-direction:column;height:100vh;overflow:hidden}
+.app-body{display:flex;flex:1;overflow:hidden}
+.hdr{display:flex;align-items:center;justify-content:space-between;background:var(--t0);padding:12px 22px;border-bottom:1px solid var(--t3);min-height:58px}
+.hdr-brand{display:flex;align-items:center;gap:12px}
+.hdr-name{font-size:14.5px;font-weight:700;color:var(--t9);letter-spacing:-.3px}
+.hdr-sub{font-size:11px;color:var(--t6);margin-top:1px;font-weight:500}
+.hdr-back{background:var(--t2);border:1px solid var(--t3);color:var(--t7);padding:7px 14px;border-radius:8px;font-size:12.5px;cursor:pointer;font-family:inherit;text-decoration:none;display:inline-flex;align-items:center;gap:6px;font-weight:600;transition:all .12s}
+.hdr-back:hover{background:var(--t3);color:var(--t9)}
+.hdr-acts{display:flex;gap:8px;align-items:center}
+.sidebar{width:256px;background:var(--t1);border-right:1px solid var(--t3);overflow-y:auto;padding:14px 0;flex-shrink:0}
+.side-sec{padding:14px 18px 6px;font-size:10.5px;color:var(--t5);text-transform:uppercase;letter-spacing:.8px;font-weight:600;margin-top:4px}
+.side-sec:first-child{margin-top:0;padding-top:6px}
+.side-item{display:flex;align-items:center;gap:11px;padding:8px 18px;margin:0 8px;color:var(--t7);font-size:13px;cursor:pointer;border:none;background:none;width:calc(100% - 16px);text-align:left;border-radius:7px;font-family:inherit;font-weight:500;transition:all .12s}
+.side-item:hover{background:var(--t2);color:var(--t9)}
+.side-item.active{background:var(--primary-l);color:var(--primary-h);font-weight:600}
+.side-item .ico{width:18px;height:18px;flex-shrink:0;stroke-width:2}
+.content{flex:1;overflow-y:auto;background:var(--t0)}
+.bc-row{background:var(--t0);border-bottom:1px solid var(--t3);padding:12px 22px;display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--t7);font-weight:500}
+.sumbar{background:var(--t1);border-bottom:1px solid var(--t3);padding:14px 22px;display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+.sc{background:var(--t0);border:1px solid var(--t3);border-radius:var(--r);padding:13px 15px;box-shadow:var(--sh-sm)}
+.slbl{font-size:9.5px;text-transform:uppercase;letter-spacing:.7px;color:var(--t5);margin-bottom:6px;font-weight:700}
+.sval{font-size:22px;font-weight:700;color:var(--t9);font-family:'JetBrains Mono',monospace;line-height:1;letter-spacing:-.025em}
+.fbar{background:var(--t0);border-bottom:1px solid var(--t3);padding:12px 22px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.tbl-wrap{overflow-x:auto;background:var(--t0)}
+table{width:100%;border-collapse:collapse;font-size:12.5px;min-width:760px}
+thead tr{background:var(--t1)}
+th{padding:11px 14px;text-align:left;font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--t6);border-bottom:1px solid var(--t3);white-space:nowrap}
+td{padding:10px 14px;border-bottom:1px solid var(--t3);color:var(--t8)}
+tbody tr:hover{background:var(--t1)}
+.mono{font-family:'JetBrains Mono',monospace}
+.empty-st{text-align:center;padding:40px 20px;color:var(--t5);font-size:13px}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600;font-family:'JetBrains Mono',monospace;border:1px solid transparent}
+.b-sim{background:var(--success-l);color:var(--success-h);border-color:#6EE7B7}
+.b-nao{background:var(--danger-l);color:var(--danger-h);border-color:#FCA5A5}
+.b-pen{background:var(--warning-l);color:var(--warning-h);border-color:#FCD34D}
+.b-info{background:var(--primary-l);color:var(--primary-h);border-color:#BFDBFE}
+.btn,.bp,.bc,.bo,.bg{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:9px 16px;border-radius:var(--r);font-weight:600;font-size:12.5px;font-family:inherit;cursor:pointer;border:1px solid transparent;transition:transform .15s,box-shadow .15s,background .15s;white-space:nowrap;line-height:1.3}
+.bp{background:var(--primary);color:#fff;border-color:var(--primary);box-shadow:0 4px 12px rgba(30,64,175,.25)}
+.bp:hover{background:var(--primary-h);transform:translateY(-1px);box-shadow:0 8px 20px rgba(30,64,175,.35)}
+.bc{background:var(--accent);color:#0A1628;border-color:var(--accent);font-weight:700}
+.bc:hover{background:var(--accent-2);transform:translateY(-1px)}
+.bg{background:transparent;color:var(--t8);border-color:var(--t3)}
+.bg:hover{background:var(--t1);border-color:var(--t4)}
+.bo{background:var(--t2);color:var(--t8);border-color:var(--t3)}
+.bo:hover{background:var(--t3);color:var(--t9)}
+.btn .lucide,.bp .lucide,.bc .lucide,.bg .lucide,.bo .lucide{width:14px;height:14px;flex-shrink:0;stroke-width:2;color:inherit;stroke:currentColor}
+.bp svg{color:#fff;stroke:#fff}
+.bc svg{color:#0A1628;stroke:#0A1628}
+.b-edit,.b-del{background:transparent;border:1px solid transparent;cursor:pointer;color:var(--t6);width:30px;height:30px;border-radius:7px;display:inline-flex;align-items:center;justify-content:center;transition:all .12s;padding:0;margin-left:2px}
+.b-edit:hover{background:var(--primary-l);color:var(--primary-h)}
+.b-del:hover{background:var(--danger-l);color:var(--danger)}
+.b-edit .lucide,.b-del .lucide{width:14px;height:14px}
+.overlay{position:fixed;inset:0;background:rgba(10,22,40,.55);backdrop-filter:blur(4px);z-index:1000;display:flex;align-items:center;justify-content:center;padding:24px}
+.overlay.open{display:flex}
+.mbox{background:var(--t0);border-radius:14px;padding:24px;max-width:680px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:var(--sh-lg);position:relative}
+.mclose{position:absolute;top:14px;right:14px;background:transparent;border:none;cursor:pointer;color:var(--t6);width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center}
+.mclose:hover{background:var(--t2);color:var(--t9)}
+.mclose .lucide{width:14px;height:14px}
+.mtitle{display:flex;align-items:center;gap:9px;font-size:16px;font-weight:700;color:var(--t9);margin-bottom:18px;letter-spacing:-.2px}
+.mtitle .lucide{width:18px;height:18px;flex-shrink:0;stroke-width:2}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.fgrid .f-full{grid-column:1/-1}
+.fgrid label{display:block;font-size:11px;font-weight:600;color:var(--t6);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
+.fgrid input,.fgrid select,.fgrid textarea{width:100%;padding:8px 11px;border:1px solid var(--t3);border-radius:8px;font-size:12.5px;background:var(--t0);color:var(--t9);font-family:inherit;outline:none}
+.fgrid input:focus,.fgrid select:focus,.fgrid textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-l)}
+.mfooter{display:flex;gap:8px;justify-content:flex-end;margin-top:18px;padding-top:14px;border-top:1px solid var(--t3)}
+.toast-wrap{position:fixed;bottom:24px;right:24px;display:flex;flex-direction:column;gap:8px;z-index:5000}
+.toast{padding:11px 16px;border-radius:10px;background:var(--t0);border:1px solid var(--t3);box-shadow:var(--sh-lg);font-size:13px;color:var(--t9);font-weight:500;min-width:260px;animation:slidein .2s}
+.toast.ok{border-left:3px solid var(--success)}
+.toast.err{border-left:3px solid var(--danger)}
+.toast.warn{border-left:3px solid var(--warning)}
+@keyframes slidein{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+#authMsg{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:var(--grad-deep-hero);z-index:500;padding:40px}
+#authMsg.hidden{display:none}
+.proj-ctx{background:var(--primary-l);border-bottom:1px solid var(--primary);padding:8px 22px;font-size:12px;color:var(--primary-h);display:flex;align-items:center;gap:10px}
+.proj-ctx strong{font-weight:700}
+</style>
+</head>
+<body>
+
+<div id="authMsg">
+  <div style="background:#fff;border-radius:14px;padding:32px 36px;max-width:380px;width:90%;box-shadow:var(--sh-lg);color:var(--t8)">
+    <div style="text-align:center;margin-bottom:22px">
+      <svg viewBox="0 0 72 72" xmlns="http://www.w3.org/2000/svg" width="48" height="48" style="margin-bottom:10px">
+        <defs><linearGradient id="hubAuthG" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#1E40AF"/><stop offset="100%" stop-color="#06B6D4"/></linearGradient></defs>
+        <path d="M 36 8 L 60 22 L 36 36 L 12 22 Z" fill="url(#hubAuthG)"/>
+        <path d="M 12 22 L 36 36 L 36 64 L 12 50 Z" fill="#1E40AF" opacity=".75"/>
+        <path d="M 60 22 L 36 36 L 36 64 L 60 50 Z" fill="#06B6D4" opacity=".55"/>
+        <circle cx="36" cy="36" r="5" fill="#fff"/>
+      </svg>
+      <h2 style="font-size:20px;font-weight:800;color:var(--t9);letter-spacing:-.02em;margin:0 0 4px">HUB do Planejador</h2>
+      <p style="font-size:12.5px;color:var(--t6);margin:0">Entre com sua conta PROJECT.IA</p>
+    </div>
+    <div id="hub-login-err" style="display:none;background:var(--danger-l);color:var(--danger-h);border:1px solid var(--danger);border-radius:8px;padding:9px 12px;font-size:12px;margin-bottom:12px"></div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <label style="font-size:11px;font-weight:600;color:var(--t7);text-transform:uppercase;letter-spacing:.5px">Email
+        <input id="hub-em" type="email" placeholder="seu@email.com" style="width:100%;margin-top:5px;padding:10px 12px;border:1px solid var(--t3);border-radius:8px;font-size:13px;font-family:inherit;background:#fff;outline:none">
+      </label>
+      <label style="font-size:11px;font-weight:600;color:var(--t7);text-transform:uppercase;letter-spacing:.5px">Senha
+        <input id="hub-pw" type="password" placeholder="********" style="width:100%;margin-top:5px;padding:10px 12px;border:1px solid var(--t3);border-radius:8px;font-size:13px;font-family:inherit;background:#fff;outline:none">
+      </label>
+      <button id="hub-login-btn" onclick="hubLogin()" style="margin-top:6px;width:100%;padding:11px;border-radius:10px;background:#1E40AF;color:#fff;border:none;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">Entrar</button>
+      <a href="hydrostec_v9.html" style="font-size:11.5px;color:var(--t6);text-decoration:none;font-weight:500;text-align:center;margin-top:6px">&larr; Voltar ao sistema principal</a>
+    </div>
+  </div>
+</div>
+
+<div class="app" id="app" style="display:none">
+  <div class="hdr">
+    <div class="hdr-brand">
+      <svg viewBox="0 0 72 72" xmlns="http://www.w3.org/2000/svg" width="34" height="34">
+        <defs><linearGradient id="hb1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#1E40AF"/><stop offset="100%" stop-color="#06B6D4"/></linearGradient></defs>
+        <path d="M 36 8 L 60 22 L 36 36 L 12 22 Z" fill="url(#hb1)"/>
+        <path d="M 12 22 L 36 36 L 36 64 L 12 50 Z" fill="#1E40AF" opacity=".75"/>
+        <path d="M 60 22 L 36 36 L 36 64 L 60 50 Z" fill="#06B6D4" opacity=".55"/>
+        <circle cx="36" cy="36" r="5" fill="#fff"/>
+      </svg>
+      <div>
+        <div class="hdr-name">PROJECT<span style="color:var(--accent)">.</span><span style="background:var(--grad-ia);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;font-weight:800">IA</span> &middot; HUB do Planejador</div>
+        <div class="hdr-sub">Folhas &middot; Mapa de Juntas &middot; Suportes &middot; Cabos &middot; Calculadora HH &middot; HYCONTROL</div>
+      </div>
+    </div>
+    <div class="hdr-acts">
+      <span id="userBadge" style="font-size:12px;color:var(--t6);font-weight:500"></span>
+      <a class="hdr-back" href="hydrostec_v9.html"><i data-lucide="arrow-left" style="width:14px;height:14px"></i>Voltar ao sistema</a>
+    </div>
+  </div>
+  <div id="projCtx" class="proj-ctx" style="display:none"></div>
+  <div class="app-body">
+    <aside class="sidebar">
+      <div class="side-sec">Visao</div>
+      <button class="side-item" data-view="overview"><i data-lucide="layout-dashboard" class="ico"></i><span>Painel do Projeto</span></button>
+      <div class="side-sec">Documentos</div>
+      <button class="side-item" data-view="sheets"><i data-lucide="file-text" class="ico"></i><span>Folhas / Isos</span></button>
+      <button class="side-item active" data-view="joints"><i data-lucide="combine" class="ico"></i><span>Mapa de Juntas</span></button>
+      <div class="side-sec">Estruturas &amp; Suportes</div>
+      <button class="side-item" data-view="supports"><i data-lucide="anchor" class="ico"></i><span>Suportes</span></button>
+      <button class="side-item" data-view="em"><i data-lucide="component" class="ico"></i><span>Estruturas Metalicas</span></button>
+      <div class="side-sec">Eletrica</div>
+      <button class="side-item" data-view="cables"><i data-lucide="cable" class="ico"></i><span>Cabos</span></button>
+      <button class="side-item" data-view="eletroduct"><i data-lucide="route" class="ico"></i><span>Eletrodutos</span></button>
+      <button class="side-item" data-view="panels"><i data-lucide="server" class="ico"></i><span>Sala de Controle</span></button>
+      <div class="side-sec">Materiais</div>
+      <button class="side-item" data-view="materials"><i data-lucide="package" class="ico"></i><span>Materiais do Projeto</span></button>
+      <div class="side-sec">Catalogos de Referencia</div>
+      <button class="side-item" data-view="profiles"><i data-lucide="layers" class="ico"></i><span>Perfis Estruturais</span></button>
+      <button class="side-item" data-view="refs"><i data-lucide="book-marked" class="ico"></i><span>Normas e Referencias</span></button>
+      <button class="side-item" data-view="cablecat"><i data-lucide="cable" class="ico"></i><span>Catalogo de Cabos</span></button>
+      <button class="side-item" data-view="civilins"><i data-lucide="hard-hat" class="ico"></i><span>Insumos Civis SINAPI</span></button>
+      <div class="side-sec">Planejamento</div>
+      <button class="side-item" data-view="calc"><i data-lucide="calculator" class="ico"></i><span>Calculadora HH</span></button>
+      <button class="side-item" data-view="hycontrol"><i data-lucide="trending-up" class="ico"></i><span>HYCONTROL Semanal</span></button>
+      <button class="side-item" data-view="coef"><i data-lucide="gauge" class="ico"></i><span>Coeficientes Hh</span></button>
+    </aside>
+    <div class="content" id="content">
+      <div class="empty-st" style="padding:60px 22px">Carregando...</div>
+    </div>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toast-wrap"></div>
+
+<script>
+// =================================================================
+// PROJECT.IA - HUB do Planejador (rebuild limpo)
+// =================================================================
+const SUPABASE_URL = 'https://toapdhfouuedaexgqlsv.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_qVVBatpB_ppDLR6QcG8QgQ_hVYW0h8Q';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let _user = null, _org = null, _curProject = null;
+let _sheets = [], _joints = [], _supports = [], _em = [], _cables = [], _eletros = [], _panels = [];
+let _projMaterials = [], _hhPipe = [], _hhValve = [], _weeks = [];
+let _profiles = [], _refs = [], _cableSpecs = [], _civilInsumos = [];
+let _fieldCustomizations = {}; // {view: {field: {label, visible, order}}}
+
+// Schema padrao dos campos por view (label e tipo)
+const FIELD_SCHEMA = {
+  sheets: [
+    {name:'iso_number', label:'Iso', type:'text', required:true, full:true},
+    {name:'revision', label:'Rev', type:'text'},
+    {name:'line', label:'Linha', type:'text'},
+    {name:'area', label:'Area', type:'text'},
+    {name:'iso_category', label:'Categoria', type:'text'},
+    {name:'inspection_class', label:'Classe inspecao', type:'text'},
+    {name:'nr13', label:'NR-13', type:'checkbox'}
+  ],
+  supports: [
+    {name:'tag', label:'Tag', type:'text', required:true},
+    {name:'type', label:'Tipo', type:'text'},
+    {name:'line', label:'Linha', type:'text'},
+    {name:'material', label:'Material', type:'text'},
+    {name:'peso_total_kg', label:'Peso total (kg)', type:'number', step:'0.1'}
+  ],
+  em: [
+    {name:'tag', label:'Tag', type:'text', required:true},
+    {name:'profile', label:'Perfil', type:'text'},
+    {name:'material', label:'Material', type:'text'},
+    {name:'quantity', label:'Quantidade', type:'number'},
+    {name:'peso_kg', label:'Peso unit. (kg)', type:'number', step:'0.1'}
+  ],
+  cables: [
+    {name:'tag', label:'Tag', type:'text', required:true},
+    {name:'cable_type', label:'Tipo', type:'text'},
+    {name:'gauge', label:'Bitola', type:'text'},
+    {name:'length_m', label:'Comprimento (m)', type:'number', step:'0.1'},
+    {name:'from_location', label:'De', type:'text'},
+    {name:'to_location', label:'Para', type:'text'}
+  ],
+  eletroduct: [
+    {name:'tag', label:'Tag', type:'text', required:true},
+    {name:'conduit_type', label:'Tipo', type:'text'},
+    {name:'size', label:'Bitola (mm)', type:'text'},
+    {name:'length_m', label:'Comprimento (m)', type:'number', step:'0.1'}
+  ],
+  panels: [
+    {name:'tag', label:'Tag', type:'text', required:true},
+    {name:'description', label:'Descricao', type:'textarea', full:true},
+    {name:'status', label:'Status', type:'text'}
+  ]
+};
+
+// Helpers de customizacao
+function getFieldLabel(view, fieldName, defaultLabel){
+  const cust = _fieldCustomizations[view] && _fieldCustomizations[view][fieldName];
+  if(cust && cust.label) return cust.label;
+  return defaultLabel;
+}
+function isFieldVisible(view, fieldName){
+  const cust = _fieldCustomizations[view] && _fieldCustomizations[view][fieldName];
+  if(cust && cust.visible === false) return false;
+  return true;
+}
+function getOrderedFields(view){
+  const schema = FIELD_SCHEMA[view] || [];
+  const custs = _fieldCustomizations[view] || {};
+  return schema.map(f=>({
+    ...f,
+    label: getFieldLabel(view, f.name, f.label),
+    visible: isFieldVisible(view, f.name),
+    order: (custs[f.name] && custs[f.name].order!=null) ? custs[f.name].order : 999
+  })).sort((a,b)=>a.order-b.order);
+}
+async function loadFieldCustomizations(){
+  if(!_org) return;
+  try {
+    const {data} = await sb.from('org_field_customizations').select('*').eq('org_id',_org.id);
+    _fieldCustomizations = {};
+    (data||[]).forEach(r=>{
+      if(!_fieldCustomizations[r.view_name]) _fieldCustomizations[r.view_name] = {};
+      _fieldCustomizations[r.view_name][r.field_name] = {
+        label: r.custom_label,
+        visible: r.is_visible,
+        order: r.display_order
+      };
+    });
+  } catch(e){ console.warn('loadFieldCustomizations:', e); }
+}
+
+// Modal de personalizacao de colunas/campos
+function openFieldsCustomization(view){
+  const schema = FIELD_SCHEMA[view];
+  if(!schema){ toast('View nao suporta customizacao ainda','warn'); return; }
+  const fields = getOrderedFields(view);
+  const viewNames = {sheets:'Folhas / Isos', supports:'Suportes', em:'Estruturas Metalicas', cables:'Cabos', eletroduct:'Eletrodutos', panels:'Sala de Controle'};
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay open';
+  overlay.id = 'fields-cust-overlay';
+  overlay.onclick = (e)=>{ if(e.target===overlay) overlay.remove(); };
+  overlay.innerHTML = '<div class="mbox" style="max-width:680px"><button class="mclose" onclick="document.getElementById(\'fields-cust-overlay\').remove()"><i data-lucide="x"></i></button>'
+    + '<div class="mtitle"><i data-lucide="settings" style="color:var(--primary)"></i>Personalizar colunas - '+(viewNames[view]||view)+'</div>'
+    + '<div style="background:var(--primary-l);border-left:3px solid var(--primary);padding:10px 14px;border-radius:6px;font-size:12px;color:var(--primary-h);margin-bottom:14px">Renomeie campos conforme a terminologia da sua empresa, esconda colunas que voce nao usa e arraste para reordenar. As mudancas valem para toda a sua organizacao.</div>'
+    + '<div id="fields-list" style="display:flex;flex-direction:column;gap:8px;max-height:50vh;overflow-y:auto">'
+    + fields.map((f,i)=>'<div class="field-row" data-field="'+f.name+'" style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--t1);border:1px solid var(--t3);border-radius:8px">'
+        + '<i data-lucide="grip-vertical" style="width:16px;height:16px;color:var(--t5);cursor:grab"></i>'
+        + '<label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--t7);font-weight:600;cursor:pointer;user-select:none"><input type="checkbox" '+(f.visible?'checked':'')+' data-name="'+f.name+'" data-prop="visible" style="width:auto;height:16px"> Visivel</label>'
+        + '<div style="display:flex;flex-direction:column;gap:2px;flex:1;min-width:0">'
+        + '<span style="font-size:10px;color:var(--t5);text-transform:uppercase;letter-spacing:.5px;font-weight:600">Campo: '+f.name+' ('+f.type+')</span>'
+        + '<input type="text" value="'+san(f.label)+'" data-name="'+f.name+'" data-prop="label" placeholder="Nome a exibir" style="padding:6px 10px;border:1px solid var(--t3);border-radius:6px;font-size:12.5px;font-family:inherit;width:100%">'
+        + '</div>'
+        + '</div>').join('')
+    + '</div>'
+    + '<div class="mfooter"><button class="btn bg" onclick="document.getElementById(\'fields-cust-overlay\').remove()">Cancelar</button><button class="btn bo" onclick="resetFieldsCustomization(\''+view+'\')"><i data-lucide="rotate-ccw"></i>Restaurar padrao</button><button class="btn bp" onclick="saveFieldsCustomization(\''+view+'\')"><i data-lucide="check"></i>Salvar</button></div>'
+    + '</div>';
+  document.body.appendChild(overlay);
+  _renderIcons();
+
+  // Drag and drop simples
+  let draggedEl = null;
+  overlay.querySelectorAll('.field-row').forEach(row=>{
+    row.draggable = true;
+    row.addEventListener('dragstart', e=>{ draggedEl = row; row.style.opacity='.4'; });
+    row.addEventListener('dragend', e=>{ row.style.opacity='1'; draggedEl = null; });
+    row.addEventListener('dragover', e=>{ e.preventDefault(); });
+    row.addEventListener('drop', e=>{
+      e.preventDefault();
+      if(draggedEl && draggedEl !== row){
+        const list = document.getElementById('fields-list');
+        const rows = [...list.children];
+        const draggedIdx = rows.indexOf(draggedEl);
+        const targetIdx = rows.indexOf(row);
+        if(draggedIdx < targetIdx) list.insertBefore(draggedEl, row.nextSibling);
+        else list.insertBefore(draggedEl, row);
+      }
+    });
+  });
+}
+
+async function saveFieldsCustomization(view){
+  const overlay = document.getElementById('fields-cust-overlay');
+  if(!overlay) return;
+  const rows = overlay.querySelectorAll('.field-row');
+  const updates = [];
+  rows.forEach((row, idx)=>{
+    const fieldName = row.dataset.field;
+    const labelInput = row.querySelector('input[data-prop="label"]');
+    const visibleInput = row.querySelector('input[data-prop="visible"]');
+    updates.push({
+      org_id: _org.id,
+      view_name: view,
+      field_name: fieldName,
+      custom_label: labelInput.value.trim() || null,
+      is_visible: visibleInput.checked,
+      display_order: idx,
+      updated_at: new Date().toISOString()
+    });
+  });
+  try {
+    // Upsert todos
+    const {error} = await sb.from('org_field_customizations').upsert(updates, {onConflict:'org_id,view_name,field_name'});
+    if(error) throw error;
+    toast('Colunas personalizadas','ok');
+    overlay.remove();
+    await loadFieldCustomizations();
+    if(VIEWS[view]) VIEWS[view]();
+  } catch(e){ toast('Erro: '+(e.message||e),'err'); }
+}
+
+async function resetFieldsCustomization(view){
+  if(!confirm('Restaurar todos os campos desta view ao padrao? Suas customizacoes serao apagadas.')) return;
+  const {error} = await sb.from('org_field_customizations').delete().eq('org_id',_org.id).eq('view_name',view);
+  if(error){ toast('Erro: '+error.message,'err'); return; }
+  toast('Restaurado ao padrao','ok');
+  document.getElementById('fields-cust-overlay')?.remove();
+  await loadFieldCustomizations();
+  if(VIEWS[view]) VIEWS[view]();
+}
+
+let _profilesFilter = {family:'', source:'', q:''};
+let _refsFilter = {discipline:'', publisher:'', q:''};
+let _cableCatFilter = {type:'', q:''};
+let _civilInsFilter = {category:'', q:''};
+let _calcSource = 'TCPO-14';
+
+// ---------- Helpers ----------
+function san(s){ if(s==null) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+function _renderIcons(){ try { if(window.lucide) lucide.createIcons(); } catch(e){} }
+function toast(msg, type){
+  const wrap = document.getElementById('toast-wrap');
+  if(!wrap) return alert(msg);
+  const t = document.createElement('div');
+  t.className = 'toast ' + (type||'ok');
+  t.textContent = msg;
+  wrap.appendChild(t);
+  setTimeout(()=>{ t.style.opacity='0'; t.style.transform='translateX(100%)'; setTimeout(()=>t.remove(),200); }, 3500);
+}
+
+// Aplica filtro de projeto numa query (helper)
+function _applyProjectFilter(q){
+  return _curProject ? q.eq('project_id', _curProject.id) : q;
+}
+
+// Modal form generico
+function openForm(opts){
+  closeForm();
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay open';
+  overlay.id = 'form-overlay';
+  overlay.onclick = (e)=>{ if(e.target===overlay) closeForm(); };
+  const fhtml = opts.fields.map(f=>{
+    const v = (opts.values && opts.values[f.name]!=null) ? opts.values[f.name] : '';
+    const cls = f.full ? 'f-full' : '';
+    const req = f.required ? ' required' : '';
+    if(f.type === 'select'){
+      const optsHtml = (f.opts||[]).map(o=>'<option value="'+(o.value||o)+'"'+((o.value||o)==v?' selected':'')+'>'+(o.label||o)+'</option>').join('');
+      return '<div class="'+cls+'"><label>'+f.label+(f.required?' *':'')+'</label><select name="'+f.name+'"'+req+'>'+optsHtml+'</select></div>';
+    }
+    if(f.type === 'textarea'){
+      return '<div class="'+cls+'"><label>'+f.label+(f.required?' *':'')+'</label><textarea name="'+f.name+'" rows="3"'+req+'>'+san(v)+'</textarea></div>';
+    }
+    if(f.type === 'checkbox'){
+      return '<div class="'+cls+'"><label>'+f.label+'</label><input type="checkbox" name="'+f.name+'"'+(v?' checked':'')+' style="width:auto;height:18px"></div>';
+    }
+    const t = f.type || 'text';
+    const step = f.step ? ' step="'+f.step+'"' : '';
+    return '<div class="'+cls+'"><label>'+f.label+(f.required?' *':'')+'</label><input type="'+t+'" name="'+f.name+'"'+step+' value="'+san(v)+'"'+req+'></div>';
+  }).join('');
+  overlay.innerHTML = '<div class="mbox"><button class="mclose" onclick="closeForm()" title="Fechar"><i data-lucide="x"></i></button>'
+    + '<div class="mtitle"><i data-lucide="'+(opts.values?'pencil':'plus')+'" style="color:var(--primary)"></i>'+opts.title+'</div>'
+    + '<form id="form-mod" class="fgrid">'+fhtml+'</form>'
+    + '<div class="mfooter"><button class="btn bg" onclick="closeForm()">Cancelar</button><button class="btn bp" id="btn-save-form"><i data-lucide="'+(opts.values?'check':'plus')+'"></i>'+(opts.values?'Salvar':'Criar')+'</button></div>'
+    + '</div>';
+  document.body.appendChild(overlay);
+  _renderIcons();
+  document.getElementById('btn-save-form').onclick = async ()=>{
+    const form = document.getElementById('form-mod');
+    const data = {};
+    for(const f of opts.fields){
+      const el = form.elements[f.name];
+      if(!el) continue;
+      let val;
+      if(f.type==='checkbox') val = el.checked;
+      else val = el.value;
+      if((f.type==='number'||f.type==='date') && val==='') val = null;
+      else if(f.type==='number') val = parseFloat(val);
+      data[f.name] = val;
+    }
+    try { await opts.onSave(data); closeForm(); }
+    catch(e){ toast('Erro: '+(e.message||e),'err'); }
+  };
+}
+function closeForm(){ const o=document.getElementById('form-overlay'); if(o) o.remove(); }
+
+async function confirmDel(table, id, name){
+  if(!confirm('Excluir "'+(name||'item')+'"? Esta acao pode ser revertida.')) return false;
+  const {error} = await sb.from(table).update({deleted_at: new Date().toISOString()}).eq('id',id);
+  if(error){
+    const {error:e2} = await sb.from(table).delete().eq('id',id);
+    if(e2){ toast('Erro: '+e2.message,'err'); return false; }
+  }
+  toast('Excluido','ok');
+  return true;
+}
+
+// ---------- LOGIN ----------
+async function hubLogin(){
+  const em = document.getElementById('hub-em').value.trim();
+  const pw = document.getElementById('hub-pw').value;
+  const errEl = document.getElementById('hub-login-err');
+  const btn = document.getElementById('hub-login-btn');
+  if(errEl) errEl.style.display='none';
+  if(!em || !pw){ if(errEl){errEl.textContent='Preencha email e senha.';errEl.style.display='block';} return; }
+  if(btn){ btn.disabled=true; btn.textContent='Entrando...'; }
+  try {
+    const {error} = await sb.auth.signInWithPassword({email:em, password:pw});
+    if(error){
+      if(errEl){errEl.textContent='Email ou senha invalidos.';errEl.style.display='block';}
+      if(btn){btn.disabled=false; btn.textContent='Entrar';}
+      return;
+    }
+    if(btn) btn.textContent='Carregando...';
+    await init();
+  } catch(e){
+    if(errEl){errEl.textContent='Erro: '+(e.message||e);errEl.style.display='block';}
+    if(btn){btn.disabled=false; btn.textContent='Entrar';}
+  }
+}
+document.addEventListener('keydown', e=>{
+  if(e.key==='Enter' && (e.target.id==='hub-em' || e.target.id==='hub-pw')){
+    e.preventDefault(); hubLogin();
+  }
+});
+
+// ---------- INIT ----------
+function _parseProjectFromURL(){
+  const params = new URLSearchParams(window.location.search);
+  const pid = params.get('project');
+  const pname = params.get('name');
+  if(pid){
+    _curProject = {id: pid, name: pname || ''};
+    try { localStorage.setItem('projectia-cur-project', pid); localStorage.setItem('projectia-cur-project-name', pname||''); } catch(e){}
+  } else {
+    try {
+      const stored = localStorage.getItem('projectia-cur-project');
+      const storedName = localStorage.getItem('projectia-cur-project-name');
+      if(stored) _curProject = {id: stored, name: storedName||''};
+    } catch(e){}
+  }
+}
+function renderProjectContextBar(){
+  const el = document.getElementById('projCtx');
+  if(!el) return;
+  if(_curProject){
+    el.style.display = 'flex';
+    el.innerHTML = '<i data-lucide="folder-open" style="width:14px;height:14px"></i>Projeto ativo: <strong>'+san(_curProject.name||_curProject.id.slice(0,8))+'</strong><button onclick="changeProject()" style="margin-left:auto;background:transparent;border:1px solid var(--primary);color:var(--primary-h);padding:3px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-family:inherit;font-weight:600">Trocar projeto</button>';
+    _renderIcons();
+  } else {
+    el.style.display = 'none';
+  }
+}
+// Limpa TODOS os caches de dados — garante que ao trocar de projeto nao tem mistura
+function resetProjectCaches(){
+  _sheets = []; _joints = []; _supports = []; _em = [];
+  _cables = []; _eletros = []; _panels = []; _projMaterials = [];
+  _weeks = [];
+  // Catalogos (_profiles, _refs, _cableSpecs, _civilInsumos, _hhPipe, _hhValve) NAO sao resetados pois sao compartilhados na org
+}
+
+async function changeProject(){
+  const {data} = await sb.from('projects').select('id,name,code,description').eq('org_id',_org.id).is('deleted_at',null).order('name').limit(200);
+  if(!data || !data.length){ toast('Sem projetos cadastrados — crie um no sistema principal primeiro','warn'); return; }
+
+  // Modal visual de selecao (substitui o prompt)
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay open';
+  overlay.id = 'proj-sel-overlay';
+  overlay.onclick = (e)=>{ if(e.target===overlay) overlay.remove(); };
+  overlay.innerHTML = '<div class="mbox" style="max-width:560px"><button class="mclose" onclick="document.getElementById(\'proj-sel-overlay\').remove()"><i data-lucide="x"></i></button>'
+    + '<div class="mtitle"><i data-lucide="folder-open" style="color:var(--primary)"></i>Selecionar projeto</div>'
+    + '<div style="background:var(--primary-l);border-left:3px solid var(--primary);padding:10px 12px;border-radius:6px;font-size:12px;color:var(--primary-h);margin-bottom:14px">Cada projeto tem seu próprio HUB Planejador isolado. Os dados de um projeto NÃO se misturam com outro.</div>'
+    + '<input type="text" id="proj-sel-q" placeholder="Filtrar por código ou nome..." style="width:100%;padding:9px 12px;border:1px solid var(--t3);border-radius:8px;font-size:12.5px;margin-bottom:12px;outline:none" oninput="filterProjectList()">'
+    + '<div id="proj-sel-list" style="max-height:50vh;overflow-y:auto;display:flex;flex-direction:column;gap:6px">'
+    + data.map(p=>'<button class="proj-opt" data-id="'+p.id+'" data-name="'+san(p.name)+'" data-code="'+san(p.code||'')+'" data-search="'+san(((p.code||'')+' '+p.name).toLowerCase())+'" onclick="selectProject(this)" style="text-align:left;background:var(--t1);border:1px solid var(--t3);border-radius:8px;padding:10px 14px;cursor:pointer;font-family:inherit;transition:all .12s" onmouseover="this.style.background=\'var(--primary-l)\';this.style.borderColor=\'var(--primary)\'" onmouseout="this.style.background=\'var(--t1)\';this.style.borderColor=\'var(--t3)\'">'
+      + '<div style="font-family:JetBrains Mono,monospace;font-weight:700;color:var(--primary-h);font-size:11.5px">'+san(p.code||'(sem código)')+'</div>'
+      + '<div style="font-size:13px;font-weight:600;color:var(--t9);margin-top:2px">'+san(p.name)+'</div>'
+      + (p.description?'<div style="font-size:11px;color:var(--t6);margin-top:3px">'+san(p.description.slice(0,140))+'</div>':'')
+      + '</button>').join('')
+    + '</div>'
+    + '<div class="mfooter"><button class="btn bg" onclick="document.getElementById(\'proj-sel-overlay\').remove()">Cancelar</button></div>'
+    + '</div>';
+  document.body.appendChild(overlay);
+  _renderIcons();
+  setTimeout(()=>document.getElementById('proj-sel-q')?.focus(), 100);
+}
+
+function filterProjectList(){
+  const q = (document.getElementById('proj-sel-q')?.value||'').toLowerCase().trim();
+  document.querySelectorAll('.proj-opt').forEach(b=>{
+    const match = !q || b.dataset.search.includes(q);
+    b.style.display = match ? 'block' : 'none';
+  });
+}
+
+async function selectProject(btn){
+  const id = btn.dataset.id;
+  const name = btn.dataset.name;
+  if(!id) return;
+  // Reset completo dos caches antes de trocar
+  resetProjectCaches();
+  _curProject = {id, name};
+  try { localStorage.setItem('projectia-cur-project', id); localStorage.setItem('projectia-cur-project-name', name); } catch(e){}
+  document.getElementById('proj-sel-overlay')?.remove();
+  toast('Projeto ativado: ' + name, 'ok');
+  renderProjectContextBar();
+  // Volta pra overview do novo projeto
+  go('overview');
+}
+
+async function init(){
+  // Tokens via URL (auth automatica entre v9 e HUB)
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const at = params.get('_at'), rt = params.get('_rt');
+    if(at && rt){
+      await sb.auth.setSession({access_token: at, refresh_token: rt});
+      params.delete('_at'); params.delete('_rt');
+      const ns = params.toString() ? '?'+params.toString() : '';
+      history.replaceState(null, '', location.pathname + ns + location.hash);
+    }
+  } catch(e){}
+
+  const {data:{user}} = await sb.auth.getUser();
+  if(!user) return;
+  _user = user;
+  const {data:mem} = await sb.from('org_members').select('role, organizations(id, name, plan)').limit(1);
+  if(!mem || !mem.length){ toast('Sem organizacao','err'); return; }
+  _org = {id: mem[0].organizations.id, name: mem[0].organizations.name, role: mem[0].role};
+
+  document.getElementById('authMsg').classList.add('hidden');
+  document.getElementById('app').style.display = 'flex';
+  document.getElementById('userBadge').textContent = user.email + ' &middot; ' + _org.name;
+
+  _parseProjectFromURL();
+  if(_curProject){
+    const {data:p} = await sb.from('projects').select('id,name').eq('id', _curProject.id).maybeSingle();
+    if(p) _curProject.name = p.name;
+    else _curProject = null;
+  }
+  renderProjectContextBar();
+
+  // Sidebar listeners
+  document.querySelectorAll('.side-item').forEach(b=>b.addEventListener('click',()=>{
+    if(!_curProject){ toast('Selecione um projeto primeiro','warn'); changeProject(); return; }
+    document.querySelectorAll('.side-item').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    go(b.dataset.view);
+  }));
+
+  // Carrega coeficientes em background
+  loadCoefficients();
+  loadFieldCustomizations();
+
+  // Expor contexto e abas personalizadas (custom_views) - scope tubulacao
+  window._org=_org; window._user=_user; window._curProject=_curProject; window.sb=sb;
+  window.SUPABASE_URL=SUPABASE_URL; window.SUPABASE_KEY=SUPABASE_KEY;
+  if(window.CustomViews){
+    const sb_el = document.querySelector('.sidebar');
+    if(sb_el){
+      await CustomViews.renderSidebarItems(sb_el, 'tubulacao');
+      document.addEventListener('cv-changed', async (e)=>{ if(e.detail.scope==='tubulacao') await CustomViews.renderSidebarItems(sb_el,'tubulacao'); });
+    }
+  }
+
+  // View inicial pelo hash da URL
+  const validViews = ['overview','sheets','joints','supports','em','cables','eletroduct','panels','materials','calc','hycontrol','coef','profiles','refs','cablecat','civilins'];
+  const hash = (window.location.hash||'').replace('#','').trim();
+  const initialView = (hash && validViews.includes(hash)) ? hash : 'overview';
+  if(_curProject){
+    document.querySelectorAll('.side-item').forEach(x=>x.classList.remove('active'));
+    document.querySelector('.side-item[data-view="'+initialView+'"]')?.classList.add('active');
+    go(initialView);
+  } else {
+    document.getElementById('content').innerHTML = '<div style="padding:60px 22px;text-align:center;max-width:520px;margin:0 auto"><div style="width:80px;height:80px;border-radius:20px;background:var(--warning-l);display:inline-flex;align-items:center;justify-content:center;margin-bottom:18px"><i data-lucide="folder-search" style="width:36px;height:36px;color:var(--warning)"></i></div><div style="font-size:24px;font-weight:800;color:var(--t9);margin-bottom:8px">Selecione um projeto</div><div style="font-size:14px;color:var(--t6);margin-bottom:24px">O HUB Planejador opera no contexto de um projeto.</div><button class="btn bp" onclick="changeProject()"><i data-lucide="folder-plus"></i>Escolher projeto</button></div>';
+    _renderIcons();
+  }
+}
+
+async function loadCoefficients(){
+  try {
+    const [pipe,valve,prof,refs,cabs,civ] = await Promise.all([
+      sb.from('hh_coefficients_pipe').select('*').order('material').limit(2000),
+      sb.from('hh_coefficients_valve').select('*').order('code').limit(500),
+      sb.from('structural_profiles_catalog').select('*').order('family').order('weight_kg_m').limit(1000),
+      sb.from('industry_references').select('*').order('discipline').order('code').limit(500),
+      sb.from('cable_specs_catalog').select('*').order('cable_type').order('cross_section_mm2').limit(500),
+      sb.from('civil_insumos_catalog').select('*').order('category').order('code').limit(500)
+    ]);
+    _hhPipe = pipe.data || [];
+    _hhValve = valve.data || [];
+    _profiles = prof.data || [];
+    _refs = refs.data || [];
+    _cableSpecs = cabs.data || [];
+    _civilInsumos = civ.data || [];
+  } catch(e){ console.warn('loadCoefficients:', e); }
+}
+
+// =================================================================
+// VIEWS DO HUB
+// =================================================================
+
+async function renderOverview(){
+  const projLabel = _curProject ? _curProject.name : 'Sem projeto';
+  document.getElementById('content').innerHTML = '<div style="padding:24px 22px"><div style="margin-bottom:20px"><div style="font-size:11px;color:var(--t6);text-transform:uppercase;letter-spacing:.8px;font-weight:600;margin-bottom:4px">Painel</div><div style="font-size:26px;font-weight:800;color:var(--t9);letter-spacing:-.6px">'+san(projLabel)+'</div></div><div id="ov-kpis" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px"></div></div>';
+  const pf = (q)=>_applyProjectFilter(q);
+  const [sh,jt,sup,em,ca,el,mt] = await Promise.all([
+    pf(sb.from('isometric_sheets').select('id',{count:'exact',head:true}).eq('org_id',_org.id).is('deleted_at',null)),
+    pf(sb.from('joints').select('id',{count:'exact',head:true}).eq('org_id',_org.id).eq('junta_ativa',true)),
+    pf(sb.from('supports').select('id',{count:'exact',head:true}).eq('org_id',_org.id).is('deleted_at',null)),
+    pf(sb.from('structural_em_records').select('id',{count:'exact',head:true}).eq('org_id',_org.id).is('deleted_at',null)),
+    pf(sb.from('electrical_cables').select('id',{count:'exact',head:true}).eq('org_id',_org.id).is('deleted_at',null)),
+    pf(sb.from('eletroduct_runs').select('id',{count:'exact',head:true}).eq('org_id',_org.id).is('deleted_at',null)),
+    pf(sb.from('project_materials').select('id',{count:'exact',head:true}).eq('org_id',_org.id))
+  ]);
+  const cards = [
+    {k:'Folhas / Isos', v:sh.count||0, ic:'file-text', view:'sheets', col:'#1E40AF'},
+    {k:'Juntas', v:jt.count||0, ic:'combine', view:'joints', col:'#06B6D4'},
+    {k:'Suportes', v:sup.count||0, ic:'anchor', view:'supports', col:'#7C3AED'},
+    {k:'Estruturas EM', v:em.count||0, ic:'component', view:'em', col:'#1E40AF'},
+    {k:'Cabos', v:ca.count||0, ic:'cable', view:'cables', col:'#06B6D4'},
+    {k:'Eletrodutos', v:el.count||0, ic:'route', view:'eletroduct', col:'#7C3AED'},
+    {k:'Materiais', v:mt.count||0, ic:'package', view:'materials', col:'#10B981'}
+  ];
+  const kpiEl = document.getElementById('ov-kpis');
+  kpiEl.innerHTML = cards.map(c=>'<button onclick="go(\''+c.view+'\')" style="background:var(--t0);border:1px solid var(--t3);border-radius:12px;padding:14px 16px;text-align:left;cursor:pointer;font-family:inherit;box-shadow:var(--sh-sm);transition:transform .15s,box-shadow .15s" onmouseover="this.style.transform=\'translateY(-2px)\';this.style.boxShadow=\'var(--sh)\'" onmouseout="this.style.transform=\'translateY(0)\';this.style.boxShadow=\'var(--sh-sm)\'"><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><i data-lucide="'+c.ic+'" style="width:16px;height:16px;color:'+c.col+'"></i><span style="font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--t6);font-weight:600">'+c.k+'</span></div><div style="font-size:24px;font-weight:800;color:var(--t9);font-family:\'JetBrains Mono\',monospace">'+c.v.toLocaleString('pt-BR')+'</div></button>').join('');
+  _renderIcons();
+}
+
+// === FOLHAS ===
+async function renderSheets(){
+  if(!_curProject){ document.getElementById('content').innerHTML='<div class="empty-st">Selecione um projeto.</div>'; return; }
+  const {data} = await sb.from('isometric_sheets').select('*').eq('project_id',_curProject.id).is('deleted_at',null).order('iso_number').limit(2000);
+  _sheets = data||[];
+  const tot = _sheets.length;
+  document.getElementById('content').innerHTML = '<div class="bc-row"><strong><i data-lucide="file-text" style="width:14px;height:14px;display:inline-block;vertical-align:-2px"></i> Folhas / Isometricos</strong><span style="margin-left:auto;font-size:11px;color:var(--t6)">'+tot+' folhas</span></div>'
+    + '<div class="fbar"><button class="btn bp" onclick="editSheet(null)"><i data-lucide="plus"></i>'+getFieldLabel("sheets","__new_button","Nova folha")+'</button><button class="btn bia" onclick="openIsoAIRouter()" title="Ler isométrico com IA e rotear para todas as views" style="background:var(--grad-ia);color:#fff;border-color:transparent"><i data-lucide="sparkles"></i>IA Isométrico</button><button class="btn bo" onclick="openFieldsCustomization(\'sheets\')" title="Personalizar colunas"><i data-lucide="settings"></i>Personalizar</button><button class="btn bg" onclick="exportSheetsXLSX()" style="margin-left:auto"><i data-lucide="file-spreadsheet"></i>Exportar Excel</button></div>'
+    + (function(){
+      const visFields = getOrderedFields('sheets').filter(f=>f.visible);
+      const ths = visFields.map(f=>'<th>'+san(f.label)+'</th>').join('') + '<th>Acoes</th>';
+      const rows = tot ? _sheets.map(s=>{
+        const tds = visFields.map(f=>{
+          const v = s[f.name];
+          if(f.type==='checkbox') return '<td>'+(v?'<span class="badge b-info">'+san(f.label)+'</span>':'-')+'</td>';
+          if(f.name==='iso_number') return '<td class="mono"><strong>'+san(v||'-')+'</strong></td>';
+          if(f.type==='number') return '<td class="mono">'+(v!=null?v:'-')+'</td>';
+          return '<td>'+san(v||'-')+'</td>';
+        }).join('');
+        return '<tr>'+tds+'<td style="white-space:nowrap"><button class="b-edit" data-id="'+san(s.id)+'" onclick="editSheet(this.dataset.id)" title="Editar"><i data-lucide="pencil"></i></button><button class="b-del" data-id="'+san(s.id)+'" data-name="'+san(s.iso_number||'')+'" onclick="delSheet(this.dataset.id, this.dataset.name)" title="Excluir"><i data-lucide="trash-2"></i></button></td></tr>';
+      }).join('') : '<tr><td colspan="'+(visFields.length+1)+'"><div class="empty-st">Sem folhas. Clique em + Nova folha.</div></td></tr>';
+      return '<div class="tbl-wrap"><table><thead><tr>'+ths+'</tr></thead><tbody>'+rows+'</tbody></table></div>';
+    })();
+  _renderIcons();
+}
+function editSheet(id){
+  const s = id ? _sheets.find(x=>x.id===id) : {};
+  if(id && !s){ toast('Folha nao encontrada','err'); return; }
+  // Usa schema com labels customizados pela organizacao
+  const fields = getOrderedFields('sheets').filter(f=>f.visible).map(f=>({
+    name: f.name, label: f.label, type: f.type,
+    full: f.full, required: f.required && !id, step: f.step
+  }));
+  openForm({title: id?'Editar '+(s.iso_number||''):'+ Novo registro',
+    fields: fields, values: s,
+    onSave: async (data)=>{
+      data.org_id=_org.id; data.project_id=_curProject.id;
+      const op = id ? sb.from('isometric_sheets').update(data).eq('id',id) : sb.from('isometric_sheets').insert(data);
+      const {error} = await op; if(error) throw error;
+      toast(id?'Atualizada':'Criada','ok'); renderSheets();
+    }});
+}
+async function delSheet(id,name){ if(await confirmDel('isometric_sheets',id,'folha '+name)) renderSheets(); }
+function exportSheetsXLSX(){
+  if(!_sheets.length){ toast('Sem dados','warn'); return; }
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(_sheets),'Folhas');
+  XLSX.writeFile(wb,'folhas_'+new Date().toISOString().slice(0,10)+'.xlsx');
+  toast('Exportado','ok');
+}
+
+// === JUNTAS (read-only) ===
+async function renderJoints(){
+  if(!_curProject){ document.getElementById('content').innerHTML='<div class="empty-st">Selecione um projeto.</div>'; return; }
+  const {data} = await sb.from('joints').select('*').eq('project_id',_curProject.id).eq('junta_ativa',true).order('joint_number').limit(2000);
+  _joints = data||[];
+  const tot = _joints.length;
+  const soldadas = _joints.filter(j=>j.data_solda).length;
+  const rt_ok = _joints.filter(j=>j.rx_us_rel).length;
+  const th_ok = _joints.filter(j=>j.th_date).length;
+  document.getElementById('content').innerHTML = '<div class="bc-row"><strong><i data-lucide="combine" style="width:14px;height:14px;display:inline-block;vertical-align:-2px"></i> Mapa de Juntas</strong><span style="margin-left:auto;font-size:11px;color:var(--t6)">'+tot+' juntas &middot; edite em Qualidade no v9</span></div>'
+    + '<div class="sumbar"><div class="sc"><div class="slbl">Total</div><div class="sval">'+tot+'</div></div><div class="sc"><div class="slbl">Soldadas</div><div class="sval" style="color:var(--primary-h)">'+soldadas+'</div></div><div class="sc"><div class="slbl">RT/UT OK</div><div class="sval" style="color:var(--accent)">'+rt_ok+'</div></div><div class="sc"><div class="slbl">TH OK</div><div class="sval" style="color:var(--success)">'+th_ok+'</div></div></div>'
+    + '<div class="fbar"><button class="btn bg" onclick="exportJointsXLSX()" style="margin-left:auto"><i data-lucide="file-spreadsheet"></i>Exportar Excel</button></div>'
+    + '<div class="tbl-wrap"><table><thead><tr><th>Junta</th><th>Iso</th><th>Spool</th><th>Diam</th><th>Sched</th><th>Material</th><th>Solda</th><th>RT/UT</th><th>TH</th></tr></thead><tbody>'
+    + (tot ? _joints.slice(0,500).map(j=>'<tr><td class="mono"><strong>'+san(j.joint_number||j.junta||'-')+'</strong></td><td class="mono">'+san((j.iso_number||'').slice(-12))+'</td><td>'+san(j.spool_id_ref||'-')+'</td><td class="mono">'+(j.diameter_in||'-')+'\"</td><td class="mono">'+san(j.schedule||'-')+'</td><td>'+san((j.material||'').slice(0,15))+'</td><td class="mono">'+(j.data_solda?'<span class="badge b-sim">'+new Date(j.data_solda).toLocaleDateString('pt-BR')+'</span>':'-')+'</td><td>'+(j.rx_us_rel?'<span class="badge b-info">OK</span>':'-')+'</td><td>'+(j.th_date?'<span class="badge b-sim">OK</span>':'-')+'</td></tr>').join('') : '<tr><td colspan="9"><div class="empty-st">Sem juntas. Cadastre em Qualidade no v9.</div></td></tr>')
+    + '</tbody></table></div>';
+  _renderIcons();
+}
+function exportJointsXLSX(){
+  if(!_joints.length){ toast('Sem dados','warn'); return; }
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(_joints),'Juntas');
+  XLSX.writeFile(wb,'juntas_'+new Date().toISOString().slice(0,10)+'.xlsx');
+  toast('Exportado','ok');
+}
+
+// === SUPORTES ===
+async function renderSupports(){
+  if(!_curProject){ document.getElementById('content').innerHTML='<div class="empty-st">Selecione um projeto.</div>'; return; }
+  const {data} = await sb.from('supports').select('*').eq('project_id',_curProject.id).is('deleted_at',null).order('tag').limit(2000);
+  _supports = data||[];
+  const tot = _supports.length;
+  document.getElementById('content').innerHTML = '<div class="bc-row"><strong><i data-lucide="anchor" style="width:14px;height:14px;display:inline-block;vertical-align:-2px"></i> Suportes</strong><span style="margin-left:auto;font-size:11px;color:var(--t6)">'+tot+' suportes</span></div>'
+    + '<div class="fbar"><button class="btn bp" onclick="editSupport(null)"><i data-lucide="plus"></i>Novo suporte</button><button class="btn bo" onclick="openFieldsCustomization(\'supports\')" title="Personalizar colunas"><i data-lucide="settings"></i>Personalizar</button><button class="btn bg" onclick="exportSupports()" style="margin-left:auto"><i data-lucide="file-spreadsheet"></i>Exportar Excel</button></div>'
+    + (function(){
+      const visFields = getOrderedFields('supports').filter(f=>f.visible);
+      const ths = visFields.map(f=>'<th>'+san(f.label)+'</th>').join('') + '<th>Acoes</th>';
+      const rows = tot ? _supports.map(s=>{
+        const tds = visFields.map(f=>{
+          const v = s[f.name];
+          if(f.name==='tag') return '<td class="mono"><strong>'+san(v||'-')+'</strong></td>';
+          if(f.type==='number') return '<td class="mono">'+(v!=null?v:'-')+'</td>';
+          return '<td>'+san(v||'-')+'</td>';
+        }).join('');
+        return '<tr>'+tds+'<td style="white-space:nowrap"><button class="b-edit" data-id="'+san(s.id)+'" onclick="editSupport(this.dataset.id)" title="Editar"><i data-lucide="pencil"></i></button><button class="b-del" data-id="'+san(s.id)+'" data-name="'+san(s.tag||'')+'" onclick="delSupport(this.dataset.id, this.dataset.name)" title="Excluir"><i data-lucide="trash-2"></i></button></td></tr>';
+      }).join('') : '<tr><td colspan="'+(visFields.length+1)+'"><div class="empty-st">Sem suportes cadastrados.</div></td></tr>';
+      return '<div class="tbl-wrap"><table><thead><tr>'+ths+'</tr></thead><tbody>'+rows+'</tbody></table></div>';
+    })();
+  _renderIcons();
+}
+function editSupport(id){
+  const s = id ? _supports.find(x=>x.id===id) : {};
+  if(id && !s){ toast('Suporte nao encontrado','err'); return; }
+  const fields = getOrderedFields('supports').filter(f=>f.visible).map(f=>({name:f.name,label:f.label,type:f.type,full:f.full,required:f.required&&!id,step:f.step}));
+  openForm({title: id?'Editar '+(s.tag||''):'+ Novo registro',
+    fields: fields,
+    values:s,
+    onSave: async (data)=>{
+      data.org_id=_org.id; data.project_id=_curProject.id;
+      const op = id ? sb.from('supports').update(data).eq('id',id) : sb.from('supports').insert(data);
+      const {error} = await op; if(error) throw error;
+      toast(id?'Atualizado':'Criado','ok'); renderSupports();
+    }});
+}
+async function delSupport(id,name){ if(await confirmDel('supports',id,'suporte '+name)) renderSupports(); }
+function exportSupports(){
+  if(!_supports.length){ toast('Sem dados','warn'); return; }
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(_supports),'Suportes');
+  XLSX.writeFile(wb,'suportes_'+new Date().toISOString().slice(0,10)+'.xlsx');
+  toast('Exportado','ok');
+}
+
+// === ESTRUTURAS METALICAS ===
+async function renderEM(){
+  if(!_curProject){ document.getElementById('content').innerHTML='<div class="empty-st">Selecione um projeto.</div>'; return; }
+  const {data} = await sb.from('structural_em_records').select('*').eq('project_id',_curProject.id).is('deleted_at',null).order('tag').limit(2000);
+  _em = data||[];
+  const tot = _em.length;
+  document.getElementById('content').innerHTML = '<div class="bc-row"><strong><i data-lucide="component" style="width:14px;height:14px;display:inline-block;vertical-align:-2px"></i> Estruturas Metalicas</strong><span style="margin-left:auto;font-size:11px;color:var(--t6)">'+tot+' itens</span></div>'
+    + '<div class="fbar"><button class="btn bp" onclick="editEM(null)"><i data-lucide="plus"></i>Nova estrutura</button><button class="btn bo" onclick="openFieldsCustomization(\'em\')" title="Personalizar colunas"><i data-lucide="settings"></i>Personalizar</button></div>'
+    + (function(){
+      const visFields = getOrderedFields('em').filter(f=>f.visible);
+      const ths = visFields.map(f=>'<th>'+san(f.label)+'</th>').join('') + '<th>Acoes</th>';
+      const rows = tot ? _em.map(e=>{
+        const tds = visFields.map(f=>{
+          const v = e[f.name];
+          if(f.name==='tag') return '<td class="mono"><strong>'+san(v||'-')+'</strong></td>';
+          if(f.type==='number') return '<td class="mono">'+(v!=null?v:'-')+'</td>';
+          return '<td>'+san(v||'-')+'</td>';
+        }).join('');
+        return '<tr>'+tds+'<td style="white-space:nowrap"><button class="b-edit" data-id="'+san(e.id)+'" onclick="editEM(this.dataset.id)" title="Editar"><i data-lucide="pencil"></i></button><button class="b-del" data-id="'+san(e.id)+'" data-name="'+san(e.tag||'')+'" onclick="delEM(this.dataset.id, this.dataset.name)" title="Excluir"><i data-lucide="trash-2"></i></button></td></tr>';
+      }).join('') : '<tr><td colspan="'+(visFields.length+1)+'"><div class="empty-st">Sem estruturas cadastradas.</div></td></tr>';
+      return '<div class="tbl-wrap"><table><thead><tr>'+ths+'</tr></thead><tbody>'+rows+'</tbody></table></div>';
+    })();
+  _renderIcons();
+}
+function editEM(id){
+  const e = id ? _em.find(x=>x.id===id) : {};
+  if(id && !e){ toast('Estrutura nao encontrada','err'); return; }
+  const fields = getOrderedFields('em').filter(f=>f.visible).map(f=>({name:f.name,label:f.label,type:f.type,full:f.full,required:f.required&&!id,step:f.step}));
+  openForm({title: id?'Editar '+(e.tag||''):'+ Novo registro',
+    fields: fields,
+    values:e,
+    onSave: async (data)=>{
+      data.org_id=_org.id; data.project_id=_curProject.id;
+      const op = id ? sb.from('structural_em_records').update(data).eq('id',id) : sb.from('structural_em_records').insert(data);
+      const {error} = await op; if(error) throw error;
+      toast(id?'Atualizada':'Criada','ok'); renderEM();
+    }});
+}
+async function delEM(id,name){ if(await confirmDel('structural_em_records',id,'estrutura '+name)) renderEM(); }
+
+// === CABOS ===
+async function renderCables(){
+  if(!_curProject){ document.getElementById('content').innerHTML='<div class="empty-st">Selecione um projeto.</div>'; return; }
+  const {data} = await sb.from('electrical_cables').select('*').eq('project_id',_curProject.id).is('deleted_at',null).order('tag').limit(2000);
+  _cables = data||[];
+  const tot = _cables.length;
+  document.getElementById('content').innerHTML = '<div class="bc-row"><strong><i data-lucide="cable" style="width:14px;height:14px;display:inline-block;vertical-align:-2px"></i> Cabos</strong><span style="margin-left:auto;font-size:11px;color:var(--t6)">'+tot+' cabos</span></div>'
+    + '<div class="fbar"><button class="btn bp" onclick="editCable(null)"><i data-lucide="plus"></i>Novo cabo</button><button class="btn bo" onclick="openFieldsCustomization(\'cables\')" title="Personalizar colunas"><i data-lucide="settings"></i>Personalizar</button></div>'
+    + (function(){
+      const visFields = getOrderedFields('cables').filter(f=>f.visible);
+      const ths = visFields.map(f=>'<th>'+san(f.label)+'</th>').join('') + '<th>Acoes</th>';
+      const rows = tot ? _cables.map(c=>{
+        const tds = visFields.map(f=>{
+          const v = c[f.name];
+          if(f.name==='tag') return '<td class="mono"><strong>'+san(v||'-')+'</strong></td>';
+          if(f.type==='number') return '<td class="mono">'+(v!=null?v:'-')+'</td>';
+          return '<td>'+san(v||'-')+'</td>';
+        }).join('');
+        return '<tr>'+tds+'<td style="white-space:nowrap"><button class="b-edit" data-id="'+san(c.id)+'" onclick="editCable(this.dataset.id)" title="Editar"><i data-lucide="pencil"></i></button><button class="b-del" data-id="'+san(c.id)+'" data-name="'+san(c.tag||'')+'" onclick="delCable(this.dataset.id, this.dataset.name)" title="Excluir"><i data-lucide="trash-2"></i></button></td></tr>';
+      }).join('') : '<tr><td colspan="'+(visFields.length+1)+'"><div class="empty-st">Sem cabos cadastrados.</div></td></tr>';
+      return '<div class="tbl-wrap"><table><thead><tr>'+ths+'</tr></thead><tbody>'+rows+'</tbody></table></div>';
+    })();
+  _renderIcons();
+}
+function editCable(id){
+  const c = id ? _cables.find(x=>x.id===id) : {};
+  if(id && !c){ toast('Cabo nao encontrado','err'); return; }
+  const fields = getOrderedFields('cables').filter(f=>f.visible).map(f=>({name:f.name,label:f.label,type:f.type,full:f.full,required:f.required&&!id,step:f.step}));
+  openForm({title: id?'Editar '+(c.tag||''):'+ Novo registro',
+    fields: fields,
+    values:c,
+    onSave: async (data)=>{
+      data.org_id=_org.id; data.project_id=_curProject.id;
+      const op = id ? sb.from('electrical_cables').update(data).eq('id',id) : sb.from('electrical_cables').insert(data);
+      const {error} = await op; if(error) throw error;
+      toast(id?'Atualizado':'Criado','ok'); renderCables();
+    }});
+}
+async function delCable(id,name){ if(await confirmDel('electrical_cables',id,'cabo '+name)) renderCables(); }
+
+// === ELETRODUTOS ===
+async function renderEletroduct(){
+  if(!_curProject){ document.getElementById('content').innerHTML='<div class="empty-st">Selecione um projeto.</div>'; return; }
+  const {data} = await sb.from('eletroduct_runs').select('*').eq('project_id',_curProject.id).is('deleted_at',null).order('tag').limit(2000);
+  _eletros = data||[];
+  const tot = _eletros.length;
+  document.getElementById('content').innerHTML = '<div class="bc-row"><strong><i data-lucide="route" style="width:14px;height:14px;display:inline-block;vertical-align:-2px"></i> Eletrodutos</strong><span style="margin-left:auto;font-size:11px;color:var(--t6)">'+tot+' trechos</span></div>'
+    + '<div class="fbar"><button class="btn bp" onclick="editEletro(null)"><i data-lucide="plus"></i>Novo trecho</button><button class="btn bo" onclick="openFieldsCustomization(\'eletroduct\')" title="Personalizar colunas"><i data-lucide="settings"></i>Personalizar</button></div>'
+    + (function(){
+      const visFields = getOrderedFields('eletroduct').filter(f=>f.visible);
+      const ths = visFields.map(f=>'<th>'+san(f.label)+'</th>').join('') + '<th>Acoes</th>';
+      const rows = tot ? _eletros.map(e=>{
+        const tds = visFields.map(f=>{
+          const v = e[f.name];
+          if(f.name==='tag') return '<td class="mono"><strong>'+san(v||'-')+'</strong></td>';
+          if(f.type==='number') return '<td class="mono">'+(v!=null?v:'-')+'</td>';
+          return '<td>'+san(v||'-')+'</td>';
+        }).join('');
+        return '<tr>'+tds+'<td style="white-space:nowrap"><button class="b-edit" data-id="'+san(e.id)+'" onclick="editEletro(this.dataset.id)" title="Editar"><i data-lucide="pencil"></i></button><button class="b-del" data-id="'+san(e.id)+'" data-name="'+san(e.tag||'')+'" onclick="delEletro(this.dataset.id, this.dataset.name)" title="Excluir"><i data-lucide="trash-2"></i></button></td></tr>';
+      }).join('') : '<tr><td colspan="'+(visFields.length+1)+'"><div class="empty-st">Sem trechos cadastrados.</div></td></tr>';
+      return '<div class="tbl-wrap"><table><thead><tr>'+ths+'</tr></thead><tbody>'+rows+'</tbody></table></div>';
+    })();
+  _renderIcons();
+}
+function editEletro(id){
+  const e = id ? _eletros.find(x=>x.id===id) : {};
+  if(id && !e){ toast('Trecho nao encontrado','err'); return; }
+  const fields = getOrderedFields('eletroduct').filter(f=>f.visible).map(f=>({name:f.name,label:f.label,type:f.type,full:f.full,required:f.required&&!id,step:f.step}));
+  openForm({title: id?'Editar '+(e.tag||''):'+ Novo registro',
+    fields: fields,
+    values:e,
+    onSave: async (data)=>{
+      data.org_id=_org.id; data.project_id=_curProject.id;
+      const op = id ? sb.from('eletroduct_runs').update(data).eq('id',id) : sb.from('eletroduct_runs').insert(data);
+      const {error} = await op; if(error) throw error;
+      toast(id?'Atualizado':'Criado','ok'); renderEletroduct();
+    }});
+}
+async function delEletro(id,name){ if(await confirmDel('eletroduct_runs',id,'eletroduto '+name)) renderEletroduct(); }
+
+// === PAINEIS ===
+async function renderPanels(){
+  if(!_curProject){ document.getElementById('content').innerHTML='<div class="empty-st">Selecione um projeto.</div>'; return; }
+  const {data} = await sb.from('panel_disconnect_records').select('*').eq('project_id',_curProject.id).is('deleted_at',null).order('tag').limit(2000);
+  _panels = data||[];
+  const tot = _panels.length;
+  document.getElementById('content').innerHTML = '<div class="bc-row"><strong><i data-lucide="server" style="width:14px;height:14px;display:inline-block;vertical-align:-2px"></i> Sala de Controle / Paineis</strong><span style="margin-left:auto;font-size:11px;color:var(--t6)">'+tot+' registros</span></div>'
+    + '<div class="fbar"><button class="btn bp" onclick="editPanel(null)"><i data-lucide="plus"></i>Novo registro</button><button class="btn bo" onclick="openFieldsCustomization(\'panels\')" title="Personalizar colunas"><i data-lucide="settings"></i>Personalizar</button></div>'
+    + (function(){
+      const visFields = getOrderedFields('panels').filter(f=>f.visible);
+      const ths = visFields.map(f=>'<th>'+san(f.label)+'</th>').join('') + '<th>Acoes</th>';
+      const rows = tot ? _panels.map(p=>{
+        const tds = visFields.map(f=>{
+          const v = p[f.name];
+          if(f.name==='tag') return '<td class="mono"><strong>'+san(v||'-')+'</strong></td>';
+          if(f.name==='status') return '<td><span class="badge b-info">'+san(v||'-')+'</span></td>';
+          return '<td>'+san(v||'-')+'</td>';
+        }).join('');
+        return '<tr>'+tds+'<td style="white-space:nowrap"><button class="b-edit" data-id="'+san(p.id)+'" onclick="editPanel(this.dataset.id)" title="Editar"><i data-lucide="pencil"></i></button><button class="b-del" data-id="'+san(p.id)+'" data-name="'+san(p.tag||'')+'" onclick="delPanel(this.dataset.id, this.dataset.name)" title="Excluir"><i data-lucide="trash-2"></i></button></td></tr>';
+      }).join('') : '<tr><td colspan="'+(visFields.length+1)+'"><div class="empty-st">Sem registros.</div></td></tr>';
+      return '<div class="tbl-wrap"><table><thead><tr>'+ths+'</tr></thead><tbody>'+rows+'</tbody></table></div>';
+    })();
+  _renderIcons();
+}
+function editPanel(id){
+  const p = id ? _panels.find(x=>x.id===id) : {};
+  if(id && !p){ toast('Nao encontrado','err'); return; }
+  const fields = getOrderedFields('panels').filter(f=>f.visible).map(f=>({name:f.name,label:f.label,type:f.type,full:f.full,required:f.required&&!id,step:f.step}));
+  openForm({title: id?'Editar '+(p.tag||''):'+ Novo registro',
+    fields: fields,
+    values:p,
+    onSave: async (data)=>{
+      data.org_id=_org.id; data.project_id=_curProject.id;
+      const op = id ? sb.from('panel_disconnect_records').update(data).eq('id',id) : sb.from('panel_disconnect_records').insert(data);
+      const {error} = await op; if(error) throw error;
+      toast(id?'Atualizado':'Criado','ok'); renderPanels();
+    }});
+}
+async function delPanel(id,name){ if(await confirmDel('panel_disconnect_records',id,'painel '+name)) renderPanels(); }
+
+// === MATERIAIS ===
+async function renderMaterials(){
+  if(!_curProject){ document.getElementById('content').innerHTML='<div class="empty-st">Selecione um projeto.</div>'; return; }
+  const {data} = await sb.from('project_materials').select('*, materials_catalog(code, description, category, unit)').eq('project_id',_curProject.id).order('created_at',{ascending:false}).limit(1000);
+  _projMaterials = data||[];
+  const tot = _projMaterials.length;
+  const planejado = _projMaterials.reduce((s,r)=>s+(parseFloat(r.qty_planned)||0),0);
+  const comprado = _projMaterials.reduce((s,r)=>s+(parseFloat(r.qty_purchased)||0),0);
+  const usado = _projMaterials.reduce((s,r)=>s+(parseFloat(r.qty_used)||0),0);
+  document.getElementById('content').innerHTML = '<div class="bc-row"><strong><i data-lucide="package" style="width:14px;height:14px;display:inline-block;vertical-align:-2px"></i> Materiais do projeto</strong><span style="margin-left:auto;font-size:11px;color:var(--t6)">'+tot+' itens</span></div>'
+    + '<div class="sumbar"><div class="sc"><div class="slbl">Itens</div><div class="sval">'+tot+'</div></div><div class="sc"><div class="slbl">Planejado</div><div class="sval" style="color:var(--primary-h)">'+planejado.toLocaleString('pt-BR',{maximumFractionDigits:1})+'</div></div><div class="sc"><div class="slbl">Comprado</div><div class="sval" style="color:var(--accent)">'+comprado.toLocaleString('pt-BR',{maximumFractionDigits:1})+'</div></div><div class="sc"><div class="slbl">Usado</div><div class="sval" style="color:var(--success)">'+usado.toLocaleString('pt-BR',{maximumFractionDigits:1})+'</div></div></div>'
+    + '<div class="fbar"><span style="font-size:12px;color:var(--t6)">Materiais cadastrados pelo sistema principal ou IA.</span><button class="btn bg" onclick="exportProjMaterialsXLSX()" style="margin-left:auto"><i data-lucide="file-spreadsheet"></i>Exportar Excel</button></div>'
+    + '<div class="tbl-wrap"><table><thead><tr><th>Codigo</th><th>Descricao</th><th>Categoria</th><th>Un</th><th>Plan.</th><th>Compr.</th><th>Usado</th><th>Saldo</th></tr></thead><tbody>'
+    + (tot ? _projMaterials.map(m=>{ const mc=m.materials_catalog||{}; const saldo=(parseFloat(m.qty_purchased)||0)-(parseFloat(m.qty_used)||0); return '<tr><td class="mono"><strong>'+san(mc.code||'-')+'</strong></td><td>'+san(mc.description||'-')+'</td><td>'+san(mc.category||'-')+'</td><td class="mono">'+san(mc.unit||'-')+'</td><td class="mono">'+(parseFloat(m.qty_planned)||0).toLocaleString('pt-BR',{maximumFractionDigits:2})+'</td><td class="mono">'+(parseFloat(m.qty_purchased)||0).toLocaleString('pt-BR',{maximumFractionDigits:2})+'</td><td class="mono">'+(parseFloat(m.qty_used)||0).toLocaleString('pt-BR',{maximumFractionDigits:2})+'</td><td class="mono" style="color:'+(saldo>=0?'var(--success)':'var(--danger)')+'"><strong>'+saldo.toLocaleString('pt-BR',{maximumFractionDigits:2})+'</strong></td></tr>'; }).join('') : '<tr><td colspan="8"><div class="empty-st">Sem materiais.</div></td></tr>')
+    + '</tbody></table></div>';
+  _renderIcons();
+}
+function exportProjMaterialsXLSX(){
+  if(!_projMaterials.length){ toast('Sem materiais','warn'); return; }
+  const rows = _projMaterials.map(m=>{ const mc=m.materials_catalog||{}; return {Codigo:mc.code,Descricao:mc.description,Categoria:mc.category,Unidade:mc.unit,Planejado:m.qty_planned,Comprado:m.qty_purchased,Usado:m.qty_used,Saldo:(parseFloat(m.qty_purchased)||0)-(parseFloat(m.qty_used)||0)}; });
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(rows),'Materiais');
+  XLSX.writeFile(wb,'materiais_'+new Date().toISOString().slice(0,10)+'.xlsx');
+  toast('Exportado','ok');
+}
+
+// === CALCULADORA HH ===
+function renderCalc(){
+  const sources = [...new Set(_hhPipe.map(c=>c.source||'sem_fonte'))].sort();
+  if(!sources.length){ document.getElementById('content').innerHTML='<div class="empty-st" style="padding:50px 22px">Sem coeficientes carregados. Cadastre em Coeficientes Hh.</div>'; return; }
+  if(!sources.includes(_calcSource)) _calcSource = sources[0];
+  const sourceLabels = {'TCPO-14':'TCPO-14','SINAPI-2025':'SINAPI 2025','Petrobras N-115':'Petrobras N-115','planejador_xlsx':'Planejador (XLSX)'};
+  const filtered = _hhPipe.filter(c=>c.source === _calcSource);
+  const materials = [...new Set(filtered.map(c=>c.material))].sort();
+  document.getElementById('content').innerHTML = '<div class="bc-row"><strong><i data-lucide="calculator" style="width:14px;height:14px;display:inline-block;vertical-align:-2px"></i> Calculadora HH</strong><span style="margin-left:auto;font-size:11px;color:var(--t6)">'+_hhPipe.length+' coef.</span></div>'
+    + '<div style="padding:18px 22px;max-width:980px">'
+    + '<div style="display:flex;gap:10px;align-items:center;margin-bottom:18px"><label style="font-size:11px;font-weight:600;color:var(--t7);text-transform:uppercase">Fonte</label><select id="calc-source" onchange="_calcSource=this.value;renderCalc()" style="padding:7px 11px;border:1px solid var(--t3);border-radius:8px;font-size:12.5px;font-family:inherit;min-width:240px">'+sources.map(s=>'<option value="'+s+'" '+(s===_calcSource?'selected':'')+'>'+(sourceLabels[s]||s)+' ('+_hhPipe.filter(c=>c.source===s).length+')</option>').join('')+'</select></div>'
+    + '<div style="background:var(--t0);border:1px solid var(--t3);border-radius:12px;padding:18px 20px;box-shadow:var(--sh-sm)">'
+    + '<div style="font-size:13px;font-weight:700;color:var(--t9);margin-bottom:14px">Calculo rapido</div>'
+    + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px">'
+    + '<div><label style="font-size:10.5px;font-weight:600;color:var(--t6)">Material</label><select id="calc-mat" onchange="_calcRefresh()" style="width:100%;margin-top:4px;padding:7px 10px;border:1px solid var(--t3);border-radius:7px;font-size:12px;font-family:inherit"><option value="">--</option>'+materials.map(m=>'<option value="'+san(m)+'">'+san(m)+'</option>').join('')+'</select></div>'
+    + '<div><label style="font-size:10.5px;font-weight:600;color:var(--t6)">Schedule</label><select id="calc-sch" onchange="_calcRefresh()" style="width:100%;margin-top:4px;padding:7px 10px;border:1px solid var(--t3);border-radius:7px;font-size:12px;font-family:inherit"><option value="">-</option></select></div>'
+    + '<div><label style="font-size:10.5px;font-weight:600;color:var(--t6)">Diametro</label><select id="calc-dia" onchange="_calcRefresh()" style="width:100%;margin-top:4px;padding:7px 10px;border:1px solid var(--t3);border-radius:7px;font-size:12px;font-family:inherit"><option value="">-</option></select></div>'
+    + '<div><label style="font-size:10.5px;font-weight:600;color:var(--t6)">Metros</label><input type="number" id="calc-m" min="0" step="0.1" value="100" oninput="_calcRefresh()" style="width:100%;margin-top:4px;padding:7px 10px;border:1px solid var(--t3);border-radius:7px;font-size:12px;font-family:inherit"></div>'
+    + '</div>'
+    + '<div id="calc-result" style="display:none;background:var(--primary-l);border:1px solid var(--primary);border-radius:10px;padding:14px 16px;color:var(--primary-h);font-size:13px"></div>'
+    + '</div></div>';
+  window._calcRefresh = function(){
+    const mat = document.getElementById('calc-mat').value;
+    const schEl = document.getElementById('calc-sch');
+    const diaEl = document.getElementById('calc-dia');
+    const m = parseFloat(document.getElementById('calc-m').value)||0;
+    const result = document.getElementById('calc-result');
+    if(mat){ const schs=[...new Set(filtered.filter(c=>c.material===mat).map(c=>c.schedule))].sort(); schEl.innerHTML='<option value="">-</option>'+schs.map(s=>'<option value="'+san(s)+'">'+san(s)+'</option>').join(''); }
+    const sch = schEl.value;
+    if(mat && sch){ const dias=[...new Set(filtered.filter(c=>c.material===mat&&c.schedule===sch).map(c=>c.diameter_class))].sort(); diaEl.innerHTML='<option value="">-</option>'+dias.map(d=>'<option value="'+san(d)+'">'+san(d)+'</option>').join(''); }
+    const dia = diaEl.value;
+    const coef = filtered.find(c=>c.material===mat&&c.schedule===sch&&c.diameter_class===dia);
+    if(coef && m>0){ const hh=coef.hh_per_m*m; result.style.display='block'; result.innerHTML='<strong style="font-size:15px">'+hh.toLocaleString('pt-BR',{maximumFractionDigits:2})+' HH</strong> total<br><span style="font-size:11px;opacity:.85">'+coef.hh_per_m+' HH/m x '+m+' m - Fonte: '+san(coef.source||'-')+'</span>'; } else { result.style.display='none'; }
+  };
+  _renderIcons();
+}
+
+// === HYCONTROL ===
+async function renderHycontrol(){
+  if(!_curProject){ document.getElementById('content').innerHTML='<div class="empty-st">Selecione um projeto.</div>'; return; }
+  const {data} = await sb.from('weekly_progress_summary').select('*').eq('project_id',_curProject.id).order('week_start_date',{ascending:false}).limit(60);
+  _weeks = data||[];
+  const tot = _weeks.length;
+  const totHHPlan = _weeks.reduce((s,w)=>s+(parseFloat(w.hh_planejado)||0),0);
+  const totHHReal = _weeks.reduce((s,w)=>s+(parseFloat(w.hh_realizado)||0),0);
+  document.getElementById('content').innerHTML = '<div class="bc-row"><strong><i data-lucide="trending-up" style="width:14px;height:14px;display:inline-block;vertical-align:-2px"></i> HYCONTROL Semanal</strong><span style="margin-left:auto;font-size:11px;color:var(--t6)">'+tot+' semanas</span></div>'
+    + '<div class="sumbar"><div class="sc"><div class="slbl">Semanas</div><div class="sval">'+tot+'</div></div><div class="sc"><div class="slbl">HH Plan total</div><div class="sval" style="color:var(--primary-h)">'+totHHPlan.toLocaleString('pt-BR',{maximumFractionDigits:0})+'</div></div><div class="sc"><div class="slbl">HH Real total</div><div class="sval" style="color:var(--success)">'+totHHReal.toLocaleString('pt-BR',{maximumFractionDigits:0})+'</div></div><div class="sc"><div class="slbl">Eficiencia</div><div class="sval">'+(totHHPlan?Math.round((totHHReal/totHHPlan)*100):0)+'%</div></div></div>'
+    + '<div class="fbar"><button class="btn bp" onclick="editWeek(null)"><i data-lucide="plus"></i>Nova semana</button><button class="btn bg" onclick="exportWeeksXLSX()" style="margin-left:auto"><i data-lucide="file-spreadsheet"></i>Exportar Excel</button></div>'
+    + (tot ? '<div style="background:var(--t0);border:1px solid var(--t3);border-radius:12px;padding:18px;margin:14px 22px;box-shadow:var(--sh-sm)"><div style="font-size:12px;font-weight:700;color:var(--t9);margin-bottom:12px">HH Planejado vs Realizado</div><div style="position:relative;height:220px"><canvas id="chart-week"></canvas></div></div>' : '')
+    + '<div class="tbl-wrap"><table><thead><tr><th>Semana</th><th>HH Plan</th><th>HH Real</th><th>Avanco Plan</th><th>Avanco Real</th><th>Acoes</th></tr></thead><tbody>'
+    + (tot ? _weeks.map(w=>'<tr><td class="mono"><strong>'+san(w.week_label||'-')+'</strong></td><td class="mono">'+(parseFloat(w.hh_planejado)||0).toLocaleString('pt-BR')+'</td><td class="mono"><strong>'+(parseFloat(w.hh_realizado)||0).toLocaleString('pt-BR')+'</strong></td><td class="mono">'+(parseFloat(w.avanco_planejado_pct)||0).toFixed(1)+'%</td><td class="mono"><strong>'+(parseFloat(w.avanco_realizado_pct)||0).toFixed(1)+'%</strong></td><td style="white-space:nowrap"><button class="b-edit" onclick=\'editWeek('+JSON.stringify(w.id)+')\' title="Editar"><i data-lucide="pencil"></i></button><button class="b-del" onclick=\'delWeek('+JSON.stringify(w.id)+','+JSON.stringify(w.week_label||'')+')\' title="Excluir"><i data-lucide="trash-2"></i></button></td></tr>').join('') : '<tr><td colspan="6"><div class="empty-st">Sem semanas. Clique em + Nova semana.</div></td></tr>')
+    + '</tbody></table></div>';
+  if(tot && typeof Chart !== 'undefined'){
+    const sorted = [..._weeks].reverse();
+    const ctxEl = document.getElementById('chart-week');
+    if(ctxEl){
+      if(Chart.getChart(ctxEl)) Chart.getChart(ctxEl).destroy();
+      const cctx = ctxEl.getContext('2d');
+      const gP = cctx.createLinearGradient(0,0,0,220); gP.addColorStop(0,'rgba(30,64,175,.22)'); gP.addColorStop(1,'rgba(30,64,175,0)');
+      const gR = cctx.createLinearGradient(0,0,0,220); gR.addColorStop(0,'rgba(16,185,129,.22)'); gR.addColorStop(1,'rgba(16,185,129,0)');
+      new Chart(ctxEl, {type:'line', data:{labels:sorted.map(w=>w.week_label), datasets:[{label:'HH Planejado', data:sorted.map(w=>w.hh_planejado||0), borderColor:'#1E40AF', backgroundColor:gP, tension:.35, fill:true, borderWidth:2.5}, {label:'HH Realizado', data:sorted.map(w=>w.hh_realizado||0), borderColor:'#10B981', backgroundColor:gR, tension:.35, fill:true, borderWidth:2.5}]}, options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'top',align:'end'}}, scales:{y:{beginAtZero:true}}}});
+    }
+  }
+  _renderIcons();
+}
+function editWeek(id){
+  const w = id ? _weeks.find(x=>x.id===id) : {};
+  if(id && !w){ toast('Semana nao encontrada','err'); return; }
+  openForm({title: id?'Editar '+(w.week_label||''):'+ Nova semana',
+    fields:[{name:'week_label',label:'Semana (ex: S-37)',required:!id},{name:'week_start_date',label:'Data inicio',type:'date'},{name:'hh_planejado',label:'HH Planejado',type:'number',step:'0.1'},{name:'hh_realizado',label:'HH Realizado',type:'number',step:'0.1'},{name:'custo_planejado_brl',label:'Custo Plan. (R$)',type:'number',step:'0.01'},{name:'custo_realizado_brl',label:'Custo Real. (R$)',type:'number',step:'0.01'},{name:'avanco_planejado_pct',label:'Avanco plan. (%)',type:'number',step:'0.1'},{name:'avanco_realizado_pct',label:'Avanco real. (%)',type:'number',step:'0.1'}],
+    values:w,
+    onSave: async (data)=>{
+      data.org_id=_org.id; data.project_id=_curProject.id;
+      const op = id ? sb.from('weekly_progress_summary').update(data).eq('id',id) : sb.from('weekly_progress_summary').insert(data);
+      const {error} = await op; if(error) throw error;
+      toast(id?'Atualizada':'Criada','ok'); renderHycontrol();
+    }});
+}
+async function delWeek(id,name){
+  if(!confirm('Excluir semana '+name+'?')) return;
+  const {error} = await sb.from('weekly_progress_summary').delete().eq('id',id);
+  if(error){ toast('Erro: '+error.message,'err'); return; }
+  toast('Excluida','ok'); renderHycontrol();
+}
+function exportWeeksXLSX(){
+  if(!_weeks.length){ toast('Sem dados','warn'); return; }
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(_weeks),'HYCONTROL');
+  XLSX.writeFile(wb,'hycontrol_'+new Date().toISOString().slice(0,10)+'.xlsx');
+  toast('Exportado','ok');
+}
+
+// === COEFICIENTES ===
+function renderCoef(){
+  const matsAg = {};
+  _hhPipe.forEach(c=>{ if(!matsAg[c.material]) matsAg[c.material]={}; if(!matsAg[c.material][c.schedule]) matsAg[c.material][c.schedule]=[]; matsAg[c.material][c.schedule].push(c); });
+  let html = '<div class="bc-row"><strong><i data-lucide="gauge" style="width:14px;height:14px;display:inline-block;vertical-align:-2px"></i> Coeficientes Hh</strong><span style="margin-left:auto;font-size:11px;color:var(--t6)">'+_hhPipe.length+' Hh/m + '+_hhValve.length+' Hh/und</span></div>';
+  html += '<div class="fbar"><button class="btn bp" onclick="editPipeCoef(null)"><i data-lucide="plus"></i>Novo coef. tubo</button><button class="btn bc" onclick="editValveCoef(null)"><i data-lucide="plus"></i>Novo coef. valvula</button><button class="btn bg" onclick="exportCoefsXLSX()" style="margin-left:auto"><i data-lucide="file-spreadsheet"></i>Exportar Excel</button></div>';
+  html += '<div style="padding:14px">';
+  if(!Object.keys(matsAg).length && !_hhValve.length){ html += '<div class="empty-st" style="padding:50px 22px">Sem coeficientes cadastrados.</div>'; }
+  Object.keys(matsAg).sort().forEach(mat=>{
+    html += '<h3 style="color:var(--primary-h);font-size:13px;margin:14px 0 8px;font-weight:700">'+san(mat)+'</h3>';
+    html += '<div class="tbl-wrap" style="margin-bottom:10px"><table><thead><tr><th>Schedule</th><th>Diametro</th><th>Hh/m</th><th>Fonte</th><th>Acoes</th></tr></thead><tbody>';
+    Object.keys(matsAg[mat]).sort().forEach(sch=>{
+      matsAg[mat][sch].forEach(c=>{
+        html += '<tr><td class="mono">'+san(sch)+'</td><td class="mono">'+san(c.diameter_class||'-')+'</td><td class="mono"><strong>'+(c.hh_per_m||0)+'</strong></td><td><span class="badge b-info">'+san(c.source||'-')+'</span></td><td style="white-space:nowrap"><button class="b-edit" onclick=\'editPipeCoef('+JSON.stringify(c.id)+')\' title="Editar"><i data-lucide="pencil"></i></button><button class="b-del" onclick=\'delCoef("hh_coefficients_pipe",'+JSON.stringify(c.id)+')\' title="Excluir"><i data-lucide="trash-2"></i></button></td></tr>';
+      });
+    });
+    html += '</tbody></table></div>';
+  });
+  if(_hhValve.length){
+    html += '<h3 style="color:var(--primary-h);font-size:13px;margin:18px 0 8px;font-weight:700">Valvulas / Flanges (Hh/und)</h3>';
+    html += '<div class="tbl-wrap"><table><thead><tr><th>Codigo</th><th>Descricao</th><th>Hh/und</th><th>Fonte</th><th>Acoes</th></tr></thead><tbody>';
+    _hhValve.forEach(v=>{
+      html += '<tr><td class="mono"><strong>'+san(v.code||'-')+'</strong></td><td>'+san(v.description||'-')+'</td><td class="mono"><strong>'+(v.hh_per_unit||0)+'</strong></td><td><span class="badge b-info">'+san(v.source||'-')+'</span></td><td style="white-space:nowrap"><button class="b-edit" onclick=\'editValveCoef('+JSON.stringify(v.id)+')\' title="Editar"><i data-lucide="pencil"></i></button><button class="b-del" onclick=\'delCoef("hh_coefficients_valve",'+JSON.stringify(v.id)+')\' title="Excluir"><i data-lucide="trash-2"></i></button></td></tr>';
+    });
+    html += '</tbody></table></div>';
+  }
+  html += '</div>';
+  document.getElementById('content').innerHTML = html;
+  _renderIcons();
+}
+function editPipeCoef(id){
+  const c = id ? _hhPipe.find(x=>x.id===id) : {};
+  if(id && !c){ toast('Coef nao encontrado','err'); return; }
+  openForm({title: id?'Editar coef. tubo':'+ Novo coef. tubo',
+    fields:[{name:'material',label:'Material',required:!id},{name:'schedule',label:'Schedule'},{name:'diameter_class',label:'Diametro/Classe'},{name:'hh_per_m',label:'Hh por metro',type:'number',step:'0.001',required:!id},{name:'source',label:'Fonte',full:true}],
+    values:c,
+    onSave: async (data)=>{
+      data.org_id=_org.id;
+      const op = id ? sb.from('hh_coefficients_pipe').update(data).eq('id',id) : sb.from('hh_coefficients_pipe').insert(data);
+      const {error} = await op; if(error) throw error;
+      toast(id?'Atualizado':'Criado','ok');
+      await loadCoefficients(); renderCoef();
+    }});
+}
+function editValveCoef(id){
+  const v = id ? _hhValve.find(x=>x.id===id) : {};
+  if(id && !v){ toast('Coef nao encontrado','err'); return; }
+  openForm({title: id?'Editar coef. valvula':'+ Novo coef. valvula',
+    fields:[{name:'code',label:'Codigo',required:!id},{name:'description',label:'Descricao',full:true},{name:'hh_per_unit',label:'Hh por und',type:'number',step:'0.001',required:!id},{name:'source',label:'Fonte',full:true}],
+    values:v,
+    onSave: async (data)=>{
+      data.org_id=_org.id;
+      const op = id ? sb.from('hh_coefficients_valve').update(data).eq('id',id) : sb.from('hh_coefficients_valve').insert(data);
+      const {error} = await op; if(error) throw error;
+      toast(id?'Atualizado':'Criado','ok');
+      await loadCoefficients(); renderCoef();
+    }});
+}
+async function delCoef(table,id){
+  if(!confirm('Excluir este coeficiente?')) return;
+  const {error} = await sb.from(table).delete().eq('id',id);
+  if(error){ toast('Erro: '+error.message,'err'); return; }
+  toast('Excluido','ok');
+  await loadCoefficients(); renderCoef();
+}
+function exportCoefsXLSX(){
+  if(!_hhPipe.length && !_hhValve.length){ toast('Sem coeficientes','warn'); return; }
+  const wb=XLSX.utils.book_new();
+  if(_hhPipe.length){
+    const pipeRows = _hhPipe.map(c=>({Material:c.material,Schedule:c.schedule,Diametro:c.diameter_class,'Hh por m':c.hh_per_m,Fonte:c.source}));
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(pipeRows),'Hh por metro');
+  }
+  if(_hhValve.length){
+    const valveRows = _hhValve.map(v=>({Codigo:v.code,Descricao:v.description,'Hh por und':v.hh_per_unit,Fonte:v.source}));
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(valveRows),'Hh por und');
+  }
+  XLSX.writeFile(wb,'coeficientes_'+new Date().toISOString().slice(0,10)+'.xlsx');
+  toast('Exportado','ok');
+}
+
+
+// === PERFIS ESTRUTURAIS (Gerdau / ArcelorMittal / Usiminas / CSN) ===
+function renderProfiles(){
+  const f = _profilesFilter;
+  let list = _profiles;
+  if(f.family) list = list.filter(p=>p.family===f.family);
+  if(f.source) list = list.filter(p=>p.source===f.source);
+  if(f.q){ const q=f.q.toLowerCase(); list = list.filter(p=>(p.designation||'').toLowerCase().includes(q) || (p.family||'').toLowerCase().includes(q)); }
+  const families = [...new Set(_profiles.map(p=>p.family))].sort();
+  const sources = [...new Set(_profiles.map(p=>p.source))].sort();
+  document.getElementById('content').innerHTML = '<div class="bc-row"><strong><i data-lucide="layers" style="width:14px;height:14px;display:inline-block;vertical-align:-2px"></i> Perfis Estruturais</strong><span style="margin-left:auto;font-size:11px;color:var(--t6)">'+list.length+' de '+_profiles.length+' perfis &middot; Gerdau / ArcelorMittal / Usiminas / CSN</span></div>'
+    + '<div class="fbar">'
+    + '<input id="prof-q" placeholder="Buscar W250x32, L 4&quot;, CA-50..." oninput="_profilesFilter.q=this.value;renderProfiles()" value="'+san(f.q)+'" style="min-width:240px;padding:7px 11px;border:1px solid var(--t3);border-radius:7px;font-size:12.5px;font-family:inherit;outline:none">'
+    + '<select onchange="_profilesFilter.family=this.value;renderProfiles()" style="padding:7px 11px;border:1px solid var(--t3);border-radius:7px;font-size:12.5px;font-family:inherit"><option value="">Todas famílias</option>'+families.map(fam=>'<option value="'+fam+'" '+(fam===f.family?'selected':'')+'>'+fam+'</option>').join('')+'</select>'
+    + '<select onchange="_profilesFilter.source=this.value;renderProfiles()" style="padding:7px 11px;border:1px solid var(--t3);border-radius:7px;font-size:12.5px;font-family:inherit"><option value="">Todas fontes</option>'+sources.map(s=>'<option value="'+s+'" '+(s===f.source?'selected':'')+'>'+s+'</option>').join('')+'</select>'
+    + '<button class="btn bg" onclick="_profilesFilter={family:\'\',source:\'\',q:\'\'};renderProfiles()"><i data-lucide="x"></i>Limpar</button>'
+    + '<button class="btn bp" onclick="exportProfilesXLSX()" style="margin-left:auto"><i data-lucide="file-spreadsheet"></i>Exportar</button>'
+    + '</div>'
+    + '<div class="tbl-wrap"><table><thead><tr><th>Família</th><th>Designação</th><th>Peso (kg/m)</th><th>Altura (mm)</th><th>Larg. (mm)</th><th>Área (cm²)</th><th>Ix (cm⁴)</th><th>Fonte</th><th>Norma</th><th>Ações</th></tr></thead><tbody>'
+    + (list.length ? list.slice(0,500).map(p=>'<tr><td><span class="badge b-info">'+san(p.family||'-')+'</span></td><td class="mono"><strong>'+san(p.designation||'-')+'</strong></td><td class="mono"><strong>'+(p.weight_kg_m||0)+'</strong></td><td class="mono">'+(p.height_mm||'-')+'</td><td class="mono">'+(p.width_mm||'-')+'</td><td class="mono">'+(p.area_cm2||'-')+'</td><td class="mono">'+(p.inertia_x_cm4||'-')+'</td><td>'+san(p.source||'-')+'</td><td style="font-size:11px;color:var(--t6)">'+san(p.standard||'-')+'</td><td style="white-space:nowrap"><button class="b-edit" data-id="'+san(p.id)+'" onclick="editProfile(this.dataset.id)" title="Editar"><i data-lucide="pencil"></i></button><button class="b-del" data-id="'+san(p.id)+'" data-name="'+san(p.designation||'')+'" onclick="delCatalog(&quot;structural_profiles_catalog&quot;, this.dataset.id, this.dataset.name, &quot;profiles&quot;)" title="Excluir"><i data-lucide="trash-2"></i></button></td></tr>').join('') : '<tr><td colspan="10"><div class="empty-st">Nenhum perfil com esses filtros.</div></td></tr>')
+    + '</tbody></table></div>';
+  _renderIcons();
+}
+function exportProfilesXLSX(){
+  if(!_profiles.length){ toast('Sem perfis','warn'); return; }
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(_profiles),'Perfis');
+  XLSX.writeFile(wb,'perfis_estruturais_'+new Date().toISOString().slice(0,10)+'.xlsx');
+  toast('Exportado','ok');
+}
+
+// === NORMAS E REFERÊNCIAS INDUSTRIAIS (Petrobras, ABNT, ASME, AWS, TCPO, SINAPI, Gerdau, Arcelor, Usiminas, CSN, Prysmian, etc.) ===
+function renderRefs(){
+  const f = _refsFilter;
+  let list = _refs;
+  if(f.discipline) list = list.filter(r=>r.discipline===f.discipline);
+  if(f.publisher) list = list.filter(r=>r.publisher===f.publisher);
+  if(f.q){ const q=f.q.toLowerCase(); list = list.filter(r=>(r.code||'').toLowerCase().includes(q) || (r.title||'').toLowerCase().includes(q) || (r.publisher||'').toLowerCase().includes(q)); }
+  const disciplines = [...new Set(_refs.map(r=>r.discipline))].sort();
+  const publishers = [...new Set(_refs.map(r=>r.publisher))].sort();
+  document.getElementById('content').innerHTML = '<div class="bc-row"><strong><i data-lucide="book-marked" style="width:14px;height:14px;display:inline-block;vertical-align:-2px"></i> Normas e Referências Industriais</strong><span style="margin-left:auto;font-size:11px;color:var(--t6)">'+list.length+' de '+_refs.length+' referências</span></div>'
+    + '<div class="fbar">'
+    + '<input id="ref-q" placeholder="Buscar N-2298, NBR 8800, TCPO..." oninput="_refsFilter.q=this.value;renderRefs()" value="'+san(f.q)+'" style="min-width:240px;padding:7px 11px;border:1px solid var(--t3);border-radius:7px;font-size:12.5px;font-family:inherit;outline:none">'
+    + '<select onchange="_refsFilter.discipline=this.value;renderRefs()" style="padding:7px 11px;border:1px solid var(--t3);border-radius:7px;font-size:12.5px;font-family:inherit"><option value="">Todas disciplinas</option>'+disciplines.map(d=>'<option value="'+d+'" '+(d===f.discipline?'selected':'')+'>'+d+'</option>').join('')+'</select>'
+    + '<select onchange="_refsFilter.publisher=this.value;renderRefs()" style="padding:7px 11px;border:1px solid var(--t3);border-radius:7px;font-size:12.5px;font-family:inherit;min-width:180px"><option value="">Todos publishers</option>'+publishers.map(p=>'<option value="'+p+'" '+(p===f.publisher?'selected':'')+'>'+p+'</option>').join('')+'</select>'
+    + '<button class="btn bg" onclick="_refsFilter={discipline:\'\',publisher:\'\',q:\'\'};renderRefs()"><i data-lucide="x"></i>Limpar</button>'
+    + '</div>'
+    + '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:12px;padding:14px 22px">'
+    + (list.length ? list.map(r=>'<div style="background:var(--t0);border:1px solid var(--t3);border-radius:12px;padding:14px 16px;box-shadow:var(--sh-sm);transition:transform .15s,box-shadow .15s" onmouseover="this.style.transform=\'translateY(-2px)\';this.style.boxShadow=\'var(--sh)\'" onmouseout="this.style.transform=\'translateY(0)\';this.style.boxShadow=\'var(--sh-sm)\'"><div style="display:flex;align-items:center;gap:6px;margin-bottom:6px"><span class="badge b-info">'+san(r.discipline||'-')+'</span>'+(r.is_default?'<span class="badge b-sim" style="font-size:9.5px">PADRÃO</span>':'')+'</div><div style="font-family:\'JetBrains Mono\',monospace;font-weight:700;color:var(--t9);font-size:13px;margin-bottom:3px">'+san(r.code||'-')+'</div><div style="font-size:13px;color:var(--t8);margin-bottom:8px;line-height:1.4">'+san(r.title||'-')+'</div><div style="font-size:11px;color:var(--t6);margin-bottom:6px"><strong>'+san(r.publisher||'-')+'</strong>'+(r.year?' &middot; '+r.year:'')+'</div>'+(r.description?'<div style="font-size:11.5px;color:var(--t6);line-height:1.5;margin-bottom:8px">'+san(r.description)+'</div>':'')+(r.url?'<a href="'+san(r.url)+'" target="_blank" style="font-size:11px;color:var(--primary-h);text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:4px"><i data-lucide="external-link" style="width:11px;height:11px"></i>Ver fonte</a>':'')+'<div style="display:flex;gap:4px;margin-top:10px;padding-top:10px;border-top:1px solid var(--t3)"><button class="b-edit" data-id="'+san(r.id)+'" onclick="editRef(this.dataset.id)" title="Editar"><i data-lucide="pencil"></i></button><button class="b-del" data-id="'+san(r.id)+'" data-name="'+san(r.code||'')+'" onclick="delCatalog(&quot;industry_references&quot;, this.dataset.id, this.dataset.name, &quot;refs&quot;)" title="Excluir"><i data-lucide="trash-2"></i></button></div></div>').join('') : '<div style="grid-column:1/-1"><div class="empty-st">Nenhuma referência com esses filtros.</div></div>')
+    + '</div>';
+  _renderIcons();
+}
+
+// === CATÁLOGO DE CABOS (Prysmian / Nexans / Conducab) ===
+function renderCableCatalog(){
+  const f = _cableCatFilter;
+  let list = _cableSpecs;
+  if(f.type) list = list.filter(x=>x.cable_type===f.type);
+  if(f.q){ const q=f.q.toLowerCase(); list = list.filter(x=>(x.cable_type||'').toLowerCase().includes(q) || (x.standard||'').toLowerCase().includes(q) || (x.product_line||'').toLowerCase().includes(q) || String(x.cross_section_mm2||'').includes(q)); }
+  const types = [...new Set(_cableSpecs.map(x=>x.cable_type))].sort();
+  document.getElementById('content').innerHTML = '<div class="bc-row"><strong><i data-lucide="cable" style="width:14px;height:14px;display:inline-block;vertical-align:-2px"></i> Catálogo de Cabos</strong><span style="margin-left:auto;font-size:11px;color:var(--t6)">'+list.length+' de '+_cableSpecs.length+' specs</span></div>'
+    + '<div class="fbar">'
+    + '<input placeholder="Buscar bitola, standard, linha..." oninput="_cableCatFilter.q=this.value;renderCableCatalog()" value="'+san(f.q)+'" style="min-width:240px;padding:7px 11px;border:1px solid var(--t3);border-radius:7px;font-size:12.5px;font-family:inherit;outline:none">'
+    + '<select onchange="_cableCatFilter.type=this.value;renderCableCatalog()" style="padding:7px 11px;border:1px solid var(--t3);border-radius:7px;font-size:12.5px;font-family:inherit"><option value="">Todos tipos</option>'+types.map(t=>'<option value="'+t+'" '+(t===f.type?'selected':'')+'>'+t+'</option>').join('')+'</select>'
+    + '<button class="btn bg" onclick="_cableCatFilter={type:\'\',q:\'\'};renderCableCatalog()"><i data-lucide="x"></i>Limpar</button>'
+    + '</div>'
+    + '<div class="tbl-wrap"><table><thead><tr><th>Tipo</th><th>Bitola (mm²)</th><th>Cond.</th><th>Tensão</th><th>Ampac. ar (A)</th><th>Ampac. solo (A)</th><th>R (Ω/km)</th><th>X (Ω/km)</th><th>Peso (kg/km)</th><th>Ø ext (mm)</th><th>Fabricante</th><th>Linha</th><th>Ações</th></tr></thead><tbody>'
+    + (list.length ? list.map(x=>'<tr><td>'+san(x.cable_type||'-')+'</td><td class="mono"><strong>'+(x.cross_section_mm2||'-')+'</strong></td><td class="mono">'+(x.conductor_count||'-')+'</td><td class="mono">'+san(x.voltage_rating||'-')+'</td><td class="mono">'+(x.ampacity_air_a||'-')+'</td><td class="mono">'+(x.ampacity_ground_a||'-')+'</td><td class="mono">'+(x.resistance_ohm_km||'-')+'</td><td class="mono">'+(x.reactance_ohm_km||'-')+'</td><td class="mono">'+(x.weight_kg_km||'-')+'</td><td class="mono">'+(x.outer_diameter_mm||'-')+'</td><td>'+san(x.manufacturer||'-')+'</td><td style="font-size:11px">'+san(x.product_line||'-')+'</td><td style="white-space:nowrap"><button class="b-edit" data-id="'+san(x.id)+'" onclick="editCableSpec(this.dataset.id)" title="Editar"><i data-lucide="pencil"></i></button><button class="b-del" data-id="'+san(x.id)+'" data-name="'+san((x.cable_type||'')+' '+(x.cross_section_mm2||''))+'" onclick="delCatalog(&quot;cable_specs_catalog&quot;, this.dataset.id, this.dataset.name, &quot;cablecat&quot;)" title="Excluir"><i data-lucide="trash-2"></i></button></td></tr>').join('') : '<tr><td colspan="13"><div class="empty-st">Nenhum cabo com esses filtros.</div></td></tr>')
+    + '</tbody></table></div>';
+  _renderIcons();
+}
+
+// === INSUMOS CIVIS SINAPI ===
+function renderCivilInsumos(){
+  const f = _civilInsFilter;
+  let list = _civilInsumos;
+  if(f.category) list = list.filter(x=>x.category===f.category);
+  if(f.q){ const q=f.q.toLowerCase(); list = list.filter(x=>(x.code||'').toLowerCase().includes(q) || (x.description||'').toLowerCase().includes(q)); }
+  const categories = [...new Set(_civilInsumos.map(x=>x.category))].sort();
+  document.getElementById('content').innerHTML = '<div class="bc-row"><strong><i data-lucide="hard-hat" style="width:14px;height:14px;display:inline-block;vertical-align:-2px"></i> Insumos Civis (SINAPI)</strong><span style="margin-left:auto;font-size:11px;color:var(--t6)">'+list.length+' de '+_civilInsumos.length+' insumos</span></div>'
+    + '<div class="fbar">'
+    + '<input placeholder="Buscar código, descrição..." oninput="_civilInsFilter.q=this.value;renderCivilInsumos()" value="'+san(f.q)+'" style="min-width:240px;padding:7px 11px;border:1px solid var(--t3);border-radius:7px;font-size:12.5px;font-family:inherit;outline:none">'
+    + '<select onchange="_civilInsFilter.category=this.value;renderCivilInsumos()" style="padding:7px 11px;border:1px solid var(--t3);border-radius:7px;font-size:12.5px;font-family:inherit"><option value="">Todas categorias</option>'+categories.map(c=>'<option value="'+c+'" '+(c===f.category?'selected':'')+'>'+c+'</option>').join('')+'</select>'
+    + '<button class="btn bg" onclick="_civilInsFilter={category:\'\',q:\'\'};renderCivilInsumos()"><i data-lucide="x"></i>Limpar</button>'
+    + '</div>'
+    + '<div class="tbl-wrap"><table><thead><tr><th>Categoria</th><th>Código</th><th>Descrição</th><th>Unid.</th><th>Hh/und</th><th>Material (R$)</th><th>Total (R$)</th><th>Equipe</th><th>Ações</th></tr></thead><tbody>'
+    + (list.length ? list.map(x=>'<tr><td><span class="badge b-info">'+san(x.category||'-')+'</span></td><td class="mono"><strong>'+san(x.code||'-')+'</strong></td><td>'+san(x.description||'-')+'</td><td class="mono">'+san(x.unit||'-')+'</td><td class="mono"><strong>'+(x.hh_per_unit||0)+'</strong></td><td class="mono">R$ '+(parseFloat(x.material_cost_brl)||0).toLocaleString('pt-BR',{minimumFractionDigits:2})+'</td><td class="mono"><strong>R$ '+(parseFloat(x.total_cost_brl)||0).toLocaleString('pt-BR',{minimumFractionDigits:2})+'</strong></td><td style="font-size:11px;color:var(--t6)">'+san(x.team_composition||'-')+'</td><td style="white-space:nowrap"><button class="b-edit" data-id="'+san(x.id)+'" onclick="editCivilInsumo(this.dataset.id)" title="Editar"><i data-lucide="pencil"></i></button><button class="b-del" data-id="'+san(x.id)+'" data-name="'+san(x.code||'')+'" onclick="delCatalog(&quot;civil_insumos_catalog&quot;, this.dataset.id, this.dataset.name, &quot;civilins&quot;)" title="Excluir"><i data-lucide="trash-2"></i></button></td></tr>').join('') : '<tr><td colspan="9"><div class="empty-st">Nenhum insumo com esses filtros.</div></td></tr>')
+    + '</tbody></table></div>';
+  _renderIcons();
+}
+
+
+// ============================================================
+// CRUD CATÁLOGOS DE REFERÊNCIA
+// ============================================================
+function editProfile(id){
+  const p = id ? _profiles.find(x=>x.id===id) : {};
+  if(id && !p){ toast('Perfil não encontrado','err'); return; }
+  openForm({title: id?'Editar perfil '+(p.designation||''):'+ Novo perfil',
+    fields:[
+      {name:'family',label:'Família',required:!id},
+      {name:'designation',label:'Designação (ex: W250x32)',required:!id},
+      {name:'weight_kg_m',label:'Peso (kg/m)',type:'number',step:'0.001',required:!id},
+      {name:'source',label:'Fonte (Gerdau/ArcelorMittal/Usiminas/CSN)'},
+      {name:'standard',label:'Norma'},
+      {name:'height_mm',label:'Altura (mm)',type:'number',step:'0.1'},
+      {name:'width_mm',label:'Largura (mm)',type:'number',step:'0.1'},
+      {name:'flange_thickness_mm',label:'Esp. mesa (mm)',type:'number',step:'0.1'},
+      {name:'web_thickness_mm',label:'Esp. alma (mm)',type:'number',step:'0.1'},
+      {name:'area_cm2',label:'Área (cm²)',type:'number',step:'0.01'},
+      {name:'inertia_x_cm4',label:'Ix (cm⁴)',type:'number',step:'0.01'},
+      {name:'inertia_y_cm4',label:'Iy (cm⁴)',type:'number',step:'0.01'},
+      {name:'modulus_x_cm3',label:'Wx (cm³)',type:'number',step:'0.01'},
+      {name:'modulus_y_cm3',label:'Wy (cm³)',type:'number',step:'0.01'},
+      {name:'notes',label:'Observações',full:true,type:'textarea'}
+    ], values:p,
+    onSave: async (data)=>{
+      const op = id ? sb.from('structural_profiles_catalog').update(data).eq('id',id) : sb.from('structural_profiles_catalog').insert(data);
+      const {error} = await op; if(error) throw error;
+      toast(id?'Atualizado':'Criado','ok');
+      await loadCoefficients(); renderProfiles();
+    }});
+}
+
+function editRef(id){
+  const r = id ? _refs.find(x=>x.id===id) : {};
+  if(id && !r){ toast('Referência não encontrada','err'); return; }
+  openForm({title: id?'Editar referência '+(r.code||''):'+ Nova norma/referência',
+    fields:[
+      {name:'code',label:'Código (ex: NBR 8800, N-2298, ASME B16.5)',required:!id},
+      {name:'title',label:'Título completo',full:true,required:!id},
+      {name:'publisher',label:'Publisher (ABNT/Petrobras/ASME/AWS/etc)',required:!id},
+      {name:'discipline',label:'Disciplina',type:'select',opts:['','mecanica','civil','eletrica','tubulacao','soldagem','estrutura','pintura','seguranca','geral']},
+      {name:'category',label:'Categoria'},
+      {name:'year',label:'Ano',type:'number'},
+      {name:'url',label:'URL (link da fonte)',full:true},
+      {name:'description',label:'Descrição',full:true,type:'textarea'},
+      {name:'is_default',label:'Padrão recomendado?',type:'checkbox'}
+    ], values:r,
+    onSave: async (data)=>{
+      const op = id ? sb.from('industry_references').update(data).eq('id',id) : sb.from('industry_references').insert(data);
+      const {error} = await op; if(error) throw error;
+      toast(id?'Atualizada':'Criada','ok');
+      await loadCoefficients(); renderRefs();
+    }});
+}
+
+function editCableSpec(id){
+  const x = id ? _cableSpecs.find(c=>c.id===id) : {};
+  if(id && !x){ toast('Cabo não encontrado','err'); return; }
+  openForm({title: id?'Editar spec de cabo':'+ Novo cabo no catálogo',
+    fields:[
+      {name:'cable_type',label:'Tipo (ex: tripolar_xlpe, unipolar_pvc, controle)',required:!id},
+      {name:'cross_section_mm2',label:'Bitola (mm²)',type:'number',step:'0.01',required:!id},
+      {name:'conductor_count',label:'N° condutores',type:'number'},
+      {name:'voltage_rating',label:'Tensão (ex: 0,6/1 kV)'},
+      {name:'ampacity_air_a',label:'Ampacidade no ar (A)',type:'number',step:'0.1'},
+      {name:'ampacity_ground_a',label:'Ampacidade no solo (A)',type:'number',step:'0.1'},
+      {name:'resistance_ohm_km',label:'Resistência (Ω/km)',type:'number',step:'0.0001'},
+      {name:'reactance_ohm_km',label:'Reatância (Ω/km)',type:'number',step:'0.0001'},
+      {name:'weight_kg_km',label:'Peso (kg/km)',type:'number',step:'0.1'},
+      {name:'outer_diameter_mm',label:'Diâmetro externo (mm)',type:'number',step:'0.1'},
+      {name:'manufacturer',label:'Fabricante (Prysmian/Nexans/Conducab)'},
+      {name:'product_line',label:'Linha do produto'},
+      {name:'standard',label:'Norma'},
+      {name:'notes',label:'Observações',full:true,type:'textarea'}
+    ], values:x,
+    onSave: async (data)=>{
+      const op = id ? sb.from('cable_specs_catalog').update(data).eq('id',id) : sb.from('cable_specs_catalog').insert(data);
+      const {error} = await op; if(error) throw error;
+      toast(id?'Atualizado':'Criado','ok');
+      await loadCoefficients(); renderCableCatalog();
+    }});
+}
+
+function editCivilInsumo(id){
+  const x = id ? _civilInsumos.find(c=>c.id===id) : {};
+  if(id && !x){ toast('Insumo não encontrado','err'); return; }
+  openForm({title: id?'Editar insumo '+(x.code||''):'+ Novo insumo civil',
+    fields:[
+      {name:'category',label:'Categoria (concreto/aco/alvenaria/forma/etc)',required:!id},
+      {name:'code',label:'Código (ex: 92479)',required:!id},
+      {name:'description',label:'Descrição',full:true,required:!id},
+      {name:'unit',label:'Unidade (m³/m²/kg/un)'},
+      {name:'hh_per_unit',label:'Hh por unidade',type:'number',step:'0.001'},
+      {name:'material_cost_brl',label:'Custo material (R$)',type:'number',step:'0.01'},
+      {name:'total_cost_brl',label:'Custo total (R$)',type:'number',step:'0.01'},
+      {name:'team_composition',label:'Composição equipe (ex: 1 pedreiro + 1 servente)'},
+      {name:'source',label:'Fonte (SINAPI-2025/TCPO/etc)'},
+      {name:'notes',label:'Observações',full:true,type:'textarea'}
+    ], values:x,
+    onSave: async (data)=>{
+      const op = id ? sb.from('civil_insumos_catalog').update(data).eq('id',id) : sb.from('civil_insumos_catalog').insert(data);
+      const {error} = await op; if(error) throw error;
+      toast(id?'Atualizado':'Criado','ok');
+      await loadCoefficients(); renderCivilInsumos();
+    }});
+}
+
+// Excluir generico de catalogos (sem soft delete — tabelas de catalogo não têm deleted_at)
+async function delCatalog(table, id, name, refreshView){
+  if(!confirm('Excluir '+(name||'item')+'? Esta ação remove do catálogo.')) return;
+  const {error} = await sb.from(table).delete().eq('id',id);
+  if(error){ toast('Erro: '+error.message,'err'); return; }
+  toast('Excluído','ok');
+  await loadCoefficients();
+  if(refreshView && VIEWS[refreshView]) VIEWS[refreshView]();
+}
+
+function exportRefsXLSX(){
+  if(!_refs.length){ toast('Sem referências','warn'); return; }
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(_refs),'Referencias');
+  XLSX.writeFile(wb,'normas_referencias_'+new Date().toISOString().slice(0,10)+'.xlsx');
+  toast('Exportado','ok');
+}
+function exportCableSpecsXLSX(){
+  if(!_cableSpecs.length){ toast('Sem cabos','warn'); return; }
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(_cableSpecs),'Cabos');
+  XLSX.writeFile(wb,'catalogo_cabos_'+new Date().toISOString().slice(0,10)+'.xlsx');
+  toast('Exportado','ok');
+}
+function exportCivilInsXLSX(){
+  if(!_civilInsumos.length){ toast('Sem insumos','warn'); return; }
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(_civilInsumos),'Insumos');
+  XLSX.writeFile(wb,'insumos_civis_sinapi_'+new Date().toISOString().slice(0,10)+'.xlsx');
+  toast('Exportado','ok');
+}
+
+// ============================================================
+// VIEWS MAP + ROTEADOR
+// ============================================================
+// ════════════════════════════════════════════════════
+// IA ISOMETRICO COM ROTEAMENTO AUTOMATICO
+// ════════════════════════════════════════════════════
+let _isoAIData = null;
+
+function openIsoAIRouter(){
+  if(!_curProject){ toast('Selecione um projeto primeiro','warn'); return; }
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay open';
+  overlay.id = 'iso-ai-overlay';
+  overlay.onclick = (e)=>{ if(e.target===overlay) overlay.remove(); };
+  overlay.innerHTML = '<div class="mbox" style="max-width:760px"><button class="mclose" onclick="document.getElementById(\'iso-ai-overlay\').remove()"><i data-lucide="x"></i></button>'
+    + '<div class="mtitle"><i data-lucide="sparkles" style="color:var(--violet)"></i>IA Isométrico — Roteamento automático</div>'
+    + '<div style="background:var(--violet-l);border-left:3px solid var(--violet);padding:11px 14px;border-radius:8px;font-size:12px;color:#5B21B6;margin-bottom:14px"><strong>Como funciona:</strong> Envie o PDF/imagem do isométrico. A IA pensa como engenheiro experiente, extrai TUDO (TAG da linha, juntas, suportes, estruturas, cabos, eletrodutos, materiais com quantidades) e ainda lista <strong>achados importantes</strong> que um engenheiro notaria. Depois grava automaticamente em cada view correspondente.</div>'
+    + '<div style="border:2px dashed var(--violet);border-radius:12px;padding:30px;text-align:center;cursor:pointer;background:var(--violet-l)" onclick="document.getElementById(\'iso-ai-file\').click()">'
+    + '<i data-lucide="upload-cloud" style="width:40px;height:40px;color:var(--violet);margin-bottom:8px"></i>'
+    + '<div style="font-size:13.5px;font-weight:600;color:var(--t9)">Clique ou arraste o isométrico</div>'
+    + '<div style="font-size:11.5px;color:var(--t6);margin-top:4px">PDF · PNG · JPG · WEBP (até 20 MB)</div>'
+    + '</div>'
+    + '<div style="margin-top:14px"><label style="font-size:11px;font-weight:600;color:var(--t7);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;display:block">Instruções extras (opcional)</label><textarea id="iso-ai-instr" placeholder="Ex: este isométrico tem numero de junta em formato XX-YY / preste atencao em hot tap / o material padrao desta unidade e A106 Gr.B" style="width:100%;padding:9px 12px;border:1px solid var(--t3);border-radius:8px;font-size:12px;font-family:inherit;min-height:50px;resize:vertical;outline:none"></textarea></div>'
+    + '<input type="file" id="iso-ai-file" accept=".pdf,image/*" style="display:none" onchange="processIsoAIRouter(this)">'
+    + '<div id="iso-ai-status" style="margin-top:14px"></div>'
+    + '<div id="iso-ai-result" style="margin-top:14px"></div>'
+    + '<div class="mfooter" id="iso-ai-footer"><button class="btn bg" onclick="document.getElementById(\'iso-ai-overlay\').remove()">Fechar</button></div>'
+    + '</div>';
+  document.body.appendChild(overlay);
+  _renderIcons();
+}
+
+async function processIsoAIRouter(input){
+  const file = input.files && input.files[0];
+  if(!file) return;
+  const statusEl = document.getElementById('iso-ai-status');
+  statusEl.innerHTML = '<div style="background:var(--primary-l);border:1px solid var(--primary);border-radius:8px;padding:11px 14px;font-size:12px;color:var(--primary-h)">⏳ Analisando isométrico com IA... (30-90s) — a IA esta pensando como engenheiro</div>';
+
+  try {
+    const b64 = await new Promise((res,rej)=>{
+      const r = new FileReader();
+      r.onload = ()=>res(r.result.split(',')[1]);
+      r.onerror = rej;
+      r.readAsDataURL(file);
+    });
+    const userInstr = (document.getElementById('iso-ai-instr')?.value || '').trim();
+
+    const {data:{session}} = await sb.auth.getSession();
+    const resp = await fetch(SUPABASE_URL+'/functions/v1/analyze-isometric', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+(session?.access_token||SUPABASE_KEY)},
+      body: JSON.stringify({
+        file: b64, mime: file.type,
+        project_id: _curProject.id,
+        custom_instructions: userInstr || null,
+        extra_fields: [
+          {key:'supports_list', type:'array', label:'Lista de suportes visiveis (tag, tipo, peso_kg, location)'},
+          {key:'structures_list', type:'array', label:'Lista de estruturas metalicas visiveis (tag, perfil, material, peso_kg, quantity)'},
+          {key:'cables_list', type:'array', label:'Lista de cabos visiveis (tag, cable_type, gauge, length_m, from, to)'},
+          {key:'eletroducts_list', type:'array', label:'Lista de eletrodutos visiveis (tag, conduit_type, size, length_m)'}
+        ]
+      })
+    });
+    const data = await resp.json();
+    if(!resp.ok || data.error){ statusEl.innerHTML = '<div style="background:var(--danger-l);color:var(--danger-h);border:1px solid var(--danger);border-radius:8px;padding:11px 14px;font-size:12px">Erro: '+(data.error||resp.status)+'</div>'; return; }
+
+    _isoAIData = data;
+    const hi = data.header_info || {};
+    const mats = data.materials || [];
+    const ex = data.extra_fields || {};
+    const supports = ex.supports_list || [];
+    const structs = ex.structures_list || [];
+    const cables = ex.cables_list || [];
+    const ducts = ex.eletroducts_list || [];
+    const findings = Array.isArray(data.engineering_findings) ? data.engineering_findings : [];
+    const warnings = Array.isArray(data.warnings) ? data.warnings : [];
+
+    statusEl.innerHTML = '<div style="background:var(--success-l);color:var(--success-h);border:1px solid var(--success);border-radius:8px;padding:11px 14px;font-size:12px">✓ Isométrico analisado em '+Math.round((data.duration_ms||0)/1000)+'s — IA encontrou '+(findings.length+warnings.length)+' achados de engenharia</div>';
+
+    let findingsHtml = '';
+    if(findings.length || warnings.length){
+      findingsHtml = '<div style="background:var(--violet-l);border:1px solid var(--violet);border-radius:10px;padding:12px 14px;margin:12px 0"><div style="font-size:12px;font-weight:700;color:#5B21B6;margin-bottom:8px"><i data-lucide="lightbulb" style="width:13px;height:13px;display:inline-block;vertical-align:-2px"></i> Achados do engenheiro (IA notou)</div>'
+        + '<ul style="margin:0;padding-left:18px;font-size:12px;color:#5B21B6;line-height:1.7">'
+        + findings.map(f=>'<li>'+san(String(f))+'</li>').join('')
+        + warnings.map(w=>'<li style="color:var(--warning-h)"><strong>⚠ Atenção:</strong> '+san(String(w))+'</li>').join('')
+        + '</ul></div>';
+    }
+
+    const result = document.getElementById('iso-ai-result');
+    result.innerHTML = '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-bottom:12px">'
+      + '<div style="background:var(--t1);border:1px solid var(--t3);border-radius:8px;padding:10px"><div style="font-size:10px;color:var(--t6);text-transform:uppercase;font-weight:700">Folha/ISO</div><div style="font-size:13px;font-weight:700;color:var(--t9);margin-top:2px;font-family:JetBrains Mono,monospace">'+san(hi.iso_number||'?')+' R'+san(hi.revision||'0')+'</div></div>'
+      + '<div style="background:var(--t1);border:1px solid var(--t3);border-radius:8px;padding:10px"><div style="font-size:10px;color:var(--t6);text-transform:uppercase;font-weight:700">TAG Linha</div><div style="font-size:13px;font-weight:700;color:var(--primary-h);margin-top:2px;font-family:JetBrains Mono,monospace">'+san(hi.line_tag||'-')+'</div></div>'
+      + '<div style="background:var(--t1);border:1px solid var(--t3);border-radius:8px;padding:10px"><div style="font-size:10px;color:var(--t6);text-transform:uppercase;font-weight:700">Materiais</div><div style="font-size:20px;font-weight:800;color:var(--primary-h)">'+mats.length+'</div></div>'
+      + '<div style="background:var(--t1);border:1px solid var(--t3);border-radius:8px;padding:10px"><div style="font-size:10px;color:var(--t6);text-transform:uppercase;font-weight:700">Juntas est.</div><div style="font-size:20px;font-weight:800;color:var(--accent)">'+(hi.visible_joints_count||0)+'</div></div>'
+      + '<div style="background:var(--t1);border:1px solid var(--t3);border-radius:8px;padding:10px"><div style="font-size:10px;color:var(--t6);text-transform:uppercase;font-weight:700">Suportes</div><div style="font-size:20px;font-weight:800;color:var(--violet)">'+supports.length+'</div></div>'
+      + '<div style="background:var(--t1);border:1px solid var(--t3);border-radius:8px;padding:10px"><div style="font-size:10px;color:var(--t6);text-transform:uppercase;font-weight:700">Estruturas</div><div style="font-size:20px;font-weight:800;color:var(--warning)">'+structs.length+'</div></div>'
+      + '<div style="background:var(--t1);border:1px solid var(--t3);border-radius:8px;padding:10px"><div style="font-size:10px;color:var(--t6);text-transform:uppercase;font-weight:700">Cabos</div><div style="font-size:20px;font-weight:800;color:var(--success)">'+cables.length+'</div></div>'
+      + '<div style="background:var(--t1);border:1px solid var(--t3);border-radius:8px;padding:10px"><div style="font-size:10px;color:var(--t6);text-transform:uppercase;font-weight:700">Eletrodutos</div><div style="font-size:20px;font-weight:800;color:var(--success)">'+ducts.length+'</div></div>'
+      + '</div>'
+      + findingsHtml
+      + '<div style="font-size:11.5px;color:var(--t6);background:var(--primary-l);padding:9px 12px;border-radius:6px;border:1px solid var(--primary)"><strong>Roteamento automático:</strong> '
+      + '1 Folha em <strong>isometric_sheets</strong> · '
+      + supports.length+' em <strong>Suportes</strong> · '
+      + structs.length+' em <strong>Estruturas Metálicas</strong> · '
+      + cables.length+' em <strong>Cabos</strong> · '
+      + ducts.length+' em <strong>Eletrodutos</strong> · '
+      + mats.length+' em <strong>Catálogo de Materiais</strong>'
+      + '</div>';
+
+    document.getElementById('iso-ai-footer').innerHTML = '<button class="btn bg" onclick="document.getElementById(\'iso-ai-overlay\').remove()">Cancelar</button>'
+      + '<button class="btn bp" onclick="confirmIsoAIRouter()"><i data-lucide="check"></i>Importar tudo</button>';
+    _renderIcons();
+  } catch(e){
+    statusEl.innerHTML = '<div style="background:var(--danger-l);color:var(--danger-h);border:1px solid var(--danger);border-radius:8px;padding:11px 14px;font-size:12px">Erro: '+(e.message||e)+'</div>';
+  }
+}
+
+async function confirmIsoAIRouter(){
+  if(!_isoAIData){ toast('Sem dados','warn'); return; }
+  const d = _isoAIData;
+  const hi = d.header_info || {};
+  const ex = d.extra_fields || {};
+  const mats = d.materials || [];
+  const supports = ex.supports_list || [];
+  const structs = ex.structures_list || [];
+  const cables = ex.cables_list || [];
+  const ducts = ex.eletroducts_list || [];
+
+  toast('Validando e roteando dados...','warn');
+  // VALIDAÇÃO RIGOROSA — só cadastra com TAG/código REAL identificado, descarta o resto
+  let report = {
+    sheet:0,
+    supports:0, supports_skip:[],
+    structs:0, structs_skip:[],
+    cables:0, cables_skip:[],
+    ducts:0, ducts_skip:[],
+    materials:0, materials_skip:[],
+    errors:[]
+  };
+
+  const validTag = (t)=>{
+    if(!t) return false;
+    const s = String(t).trim();
+    if(s.length < 2) return false;
+    // descarta placeholders genéricos
+    if(/^(n\/a|na|nd|-+|\?+|sem\s*tag|tbd|tba|auto|generic|item\s*\d+|sem\s*identif|nao\s*identif)$/i.test(s)) return false;
+    return true;
+  };
+
+  try {
+    // FOLHA — exige iso_number REAL
+    if(hi.iso_number && validTag(hi.iso_number)){
+      const isoNum = String(hi.iso_number).trim();
+      const sheetRec = {
+        org_id: _org.id, project_id: _curProject.id,
+        sheet_number: hi.sheet_number || '1',
+        iso_number: isoNum, revision: hi.revision || '0',
+        line: (hi.line_tag && validTag(hi.line_tag)) ? hi.line_tag : null,
+        area: hi.area || null,
+        iso_category: hi.iso_category || 'montagem',
+        fluid_class: hi.fluid_class || null,
+        inspection_class: hi.inspection_class || null,
+        nr13: hi.nr13_required ? 'Sim' : 'Nao'
+      };
+      // Verifica se ja existe pra fazer UPSERT
+      const {data: existing} = await sb.from('isometric_sheets').select('id').eq('project_id', _curProject.id).eq('iso_number', isoNum).is('deleted_at', null).maybeSingle();
+      let e1;
+      if(existing){
+        const r = await sb.from('isometric_sheets').update(sheetRec).eq('id', existing.id);
+        e1 = r.error;
+        if(!e1) report.sheet = 1;
+      } else {
+        const r = await sb.from('isometric_sheets').insert(sheetRec);
+        e1 = r.error;
+        if(!e1) report.sheet = 1;
+      }
+      if(e1){ report.errors.push('folha: '+e1.message); console.error('Folha falhou:', e1, sheetRec); }
+    } else {
+      report.errors.push('folha descartada: iso_number nao identificado no desenho');
+    }
+
+    // SUPORTES — exige tag REAL
+    for(const s of supports){
+      if(!validTag(s.tag)){ report.supports_skip.push((s.tag||'?')+' (tag inválida)'); continue; }
+      const {error} = await sb.from('supports').insert({org_id:_org.id, project_id:_curProject.id, tag:String(s.tag).trim(), type:s.tipo||s.type||null, line:(hi.line_tag&&validTag(hi.line_tag))?hi.line_tag:null, material:s.material||null, peso_total_kg: parseFloat(s.peso_kg||s.peso_total_kg)||null});
+      if(error) report.supports_skip.push(s.tag+' ('+error.message+')'); else report.supports++;
+    }
+
+    // ESTRUTURAS — exige tag REAL
+    for(const st of structs){
+      if(!validTag(st.tag)){ report.structs_skip.push((st.tag||'?')+' (tag inválida)'); continue; }
+      const {error} = await sb.from('structural_em_records').insert({org_id:_org.id, project_id:_curProject.id, tag:String(st.tag).trim(), profile:st.perfil||st.profile||null, material:st.material||null, quantity: parseInt(st.quantity||1), peso_kg: parseFloat(st.peso_kg||st.peso_unit)||null});
+      if(error) report.structs_skip.push(st.tag+' ('+error.message+')'); else report.structs++;
+    }
+
+    // CABOS — exige tag REAL
+    for(const cb of cables){
+      if(!validTag(cb.tag)){ report.cables_skip.push((cb.tag||'?')+' (tag inválida)'); continue; }
+      const {error} = await sb.from('electrical_cables').insert({org_id:_org.id, project_id:_curProject.id, tag:String(cb.tag).trim(), cable_type:cb.cable_type||cb.tipo||null, gauge:cb.gauge||cb.bitola||null, length_m: parseFloat(cb.length_m||cb.comprimento)||null, from_location:cb.from||cb.de||null, to_location:cb.to||cb.para||null});
+      if(error) report.cables_skip.push(cb.tag+' ('+error.message+')'); else report.cables++;
+    }
+
+    // ELETRODUTOS — exige tag REAL
+    for(const ed of ducts){
+      if(!validTag(ed.tag)){ report.ducts_skip.push((ed.tag||'?')+' (tag inválida)'); continue; }
+      const {error} = await sb.from('eletroduct_runs').insert({org_id:_org.id, project_id:_curProject.id, tag:String(ed.tag).trim(), conduit_type:ed.conduit_type||ed.tipo||null, size:ed.size||ed.bitola||null, length_m: parseFloat(ed.length_m||ed.comprimento)||null});
+      if(error) report.ducts_skip.push(ed.tag+' ('+error.message+')'); else report.ducts++;
+    }
+
+
+    // MATERIAIS — exige código REAL + descrição + quantidade (SEM AUTO-CODE)
+    for(const m of mats){
+      const rawCode = (m.codigo_eng || m.code || '').trim();
+      const descr = (m.descricao || m.description || m.spec || '').trim();
+      const qty = parseFloat(m.quantidade || m.quantity || 0);
+      const label = rawCode || descr.slice(0,40) || '?';
+      if(!validTag(rawCode)){ report.materials_skip.push(label+' (sem código real)'); continue; }
+      if(!descr){ report.materials_skip.push(rawCode+' (sem descrição)'); continue; }
+      if(!(qty > 0)){ report.materials_skip.push(rawCode+' (sem quantidade)'); continue; }
+      const code = rawCode.slice(0,60);
+      const cat = (m.categoria || m.category || 'outro').toLowerCase();
+      const dia = parseFloat(m.diametro_pol || m.diameter_in) || null;
+      const catRec = {
+        org_id: _org.id, code, description: descr.slice(0,300), category: cat,
+        material_type: m.material || null, diameter_in: dia,
+        schedule: m.schedule || null,
+        pressure_class: m.classe_pressao || m.pressure_class || null,
+        unit: (m.unidade || m.unit || 'un').toLowerCase()
+      };
+      const {data:exMat} = await sb.from('materials_catalog').select('id').eq('org_id',_org.id).eq('code',code).is('deleted_at',null).maybeSingle();
+      let mid;
+      if(exMat){ mid = exMat.id; }
+      else { const {data:ins,error:e} = await sb.from('materials_catalog').insert(catRec).select('id').single(); if(e){ report.materials_skip.push(code+' ('+e.message+')'); continue; } mid = ins.id; }
+      const {data:pmEx} = await sb.from('project_materials').select('id, qty_planned').eq('project_id',_curProject.id).eq('material_id',mid).maybeSingle();
+      if(pmEx){
+        // Se ja existe E vem do mesmo iso (mesma extracao), substitui ao inves de somar
+        // Isso evita dobro quando user re-importa o mesmo isometrico
+        const existing = parseFloat(pmEx.qty_planned)||0;
+        const newQty = Math.max(existing, qty); // pega o maior (evita duplicar mas preserva se outro iso adicionou mais)
+        await sb.from('project_materials').update({ qty_planned: newQty }).eq('id',pmEx.id);
+      }
+      else { await sb.from('project_materials').insert({ org_id:_org.id, project_id:_curProject.id, material_id:mid, qty_planned: qty }); }
+      report.materials++;
+    }
+    const totalSaved = report.sheet + report.supports + report.structs + report.cables + report.ducts + report.materials;
+    const totalSkipped = report.supports_skip.length + report.structs_skip.length + report.cables_skip.length + report.ducts_skip.length + report.materials_skip.length;
+    document.getElementById('iso-ai-overlay')?.remove();
+    toast('✓ '+totalSaved+' cadastrados • '+totalSkipped+' descartados', totalSkipped>0?'warn':'ok');
+    if(report.errors.length) console.warn('IsoAIRouter erros:', report.errors);
+    _isoAIData = null;
+    if(typeof renderSheets==='function') renderSheets();
+  } catch(e){ toast('Erro: '+(e.message||e),'err'); }
+}
+
+const VIEWS = {
+  overview: renderOverview, sheets: renderSheets, joints: renderJoints, supports: renderSupports,
+  em: renderEM, cables: renderCables, eletroduct: renderEletroduct, panels: renderPanels,
+  materials: renderMaterials, calc: renderCalc, hycontrol: renderHycontrol, coef: renderCoef,
+  profiles: renderProfiles, refs: renderRefs, cablecat: renderCableCatalog, civilins: renderCivilInsumos
+};
+function go(v){ if(VIEWS[v]) VIEWS[v](); setTimeout(_renderIcons, 50); }
+
+window.addEventListener('DOMContentLoaded', ()=>{
+  _renderIcons();
+  if(typeof init === 'function') init();
+});
+</script>
+<script src="assets/js/ia-chat.js?v=1" defer></script>
+<script src="assets/js/planner-unified-banner.js?v=1" defer></script>
+</body>
+</html>

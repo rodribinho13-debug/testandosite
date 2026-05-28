@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>PROJECT.IA — Resetar cache</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+body{font-family:-apple-system,'Segoe UI',sans-serif;background:linear-gradient(135deg,#0A1628 0%,#1E40AF 100%);min-height:100vh;margin:0;display:flex;align-items:center;justify-content:center;padding:24px;color:#fff}
+.card{background:#fff;color:#1E293B;border-radius:16px;padding:32px;max-width:480px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,.3)}
+h1{font-size:22px;margin:0 0 6px;color:#0F172A}
+p{font-size:13.5px;line-height:1.6;color:#64748B;margin:0 0 14px}
+button{background:#1E40AF;color:#fff;border:none;padding:12px 22px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;width:100%;margin-top:14px;font-family:inherit}
+button:hover{background:#2563EB}
+.log{background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:12px;font-family:'JetBrains Mono',monospace;font-size:11.5px;line-height:1.7;color:#334155;max-height:240px;overflow-y:auto;margin-top:14px}
+.log .ok{color:#065F46}
+.log .err{color:#991B1B}
+a{color:#1E40AF;text-decoration:none;font-weight:600}
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>🔧 Resetar cache do PROJECT.IA</h1>
+  <p>Esta página desregistra Service Worker, limpa caches e dados locais. Use se o sistema travou ou está com versão antiga.</p>
+  <button id="go">Limpar tudo e voltar ao login</button>
+  <div class="log" id="log"></div>
+  <p style="margin-top:14px;font-size:11.5px"><a href="hydrostec_v9.html">← Voltar sem limpar</a></p>
+</div>
+<script>
+const log = document.getElementById('log');
+function w(msg, cls){ const d=document.createElement('div'); if(cls)d.className=cls; d.textContent='› '+msg; log.appendChild(d); log.scrollTop=log.scrollHeight; }
+
+document.getElementById('go').onclick = async ()=>{
+  log.innerHTML = '';
+  w('Iniciando limpeza...');
+  // 1. Service workers
+  try {
+    if('serviceWorker' in navigator){
+      const regs = await navigator.serviceWorker.getRegistrations();
+      for(const r of regs){ await r.unregister(); w('SW desregistrado: '+(r.scope||'?'),'ok'); }
+      if(!regs.length) w('Nenhum SW registrado','ok');
+    }
+  } catch(e){ w('Erro SW: '+e.message,'err'); }
+
+  // 2. Caches API
+  try {
+    if('caches' in window){
+      const keys = await caches.keys();
+      for(const k of keys){ await caches.delete(k); w('Cache deletado: '+k,'ok'); }
+      if(!keys.length) w('Nenhum cache','ok');
+    }
+  } catch(e){ w('Erro caches: '+e.message,'err'); }
+
+  // 3. Storage
+  try { localStorage.clear(); w('localStorage limpo','ok'); }
+  catch(e){ w('Erro localStorage: '+e.message,'err'); }
+  try { sessionStorage.clear(); w('sessionStorage limpo','ok'); }
+  catch(e){ w('Erro sessionStorage: '+e.message,'err'); }
+
+  // 4. IndexedDB (Supabase pode usar)
+  try {
+    if(indexedDB.databases){
+      const dbs = await indexedDB.databases();
+      for(const db of dbs){ indexedDB.deleteDatabase(db.name); w('IDB deletado: '+db.name,'ok'); }
+    }
+  } catch(e){ w('IDB info: '+e.message); }
+
+  w('Pronto! Redirecionando em 2s...','ok');
+  setTimeout(()=>{ location.href = 'hydrostec_v9.html?fresh='+Date.now(); }, 2000);
+};
+</script>
+</body>
+</html>

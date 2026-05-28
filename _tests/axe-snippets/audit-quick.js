@@ -1,0 +1,2 @@
+// ATALHO de uma linha — cole no console:
+(async()=>{const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/axe-core/4.10.0/axe.min.js';document.head.appendChild(s);await new Promise(r=>s.onload=r);const r=await axe.run(document,{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa']}});console.table(r.violations.map(v=>({sev:v.impact,rule:v.id,nodes:v.nodes.length,help:v.help.slice(0,50)})));window.__a=r;return r.violations.length+' violação(ões)';})();

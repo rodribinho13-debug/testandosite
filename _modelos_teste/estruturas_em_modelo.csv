@@ -1,0 +1,11 @@
+tag,tipo,perfil,descricao,localizacao,ref_drawing,peso_kg,fab_status,mont_status,fab_date,mont_date,responsavel_fab,responsavel_mont,notes
+EM-P-01,Pilar,W 360x44,Pilar principal eixo A,Eixo A/Linha 1,EM-DW-001 Rev.B,420,concluido,concluido,2026-04-15,2026-05-10,João Soares,Marcos Lima,
+EM-P-02,Pilar,W 360x44,Pilar principal eixo A,Eixo A/Linha 2,EM-DW-001 Rev.B,420,concluido,concluido,2026-04-15,2026-05-10,João Soares,Marcos Lima,
+EM-P-03,Pilar,W 360x44,Pilar principal eixo A,Eixo A/Linha 3,EM-DW-001 Rev.B,420,concluido,em_andamento,2026-04-18,,João Soares,Marcos Lima,Aguardando guindaste
+EM-V-01,Viga,W 200x22,Viga transversal cota +6.0m,Eixo A-B/Linha 1,EM-DW-005 Rev.A,180,concluido,concluido,2026-04-22,2026-05-12,João Soares,Marcos Lima,
+EM-V-02,Viga,W 200x22,Viga transversal cota +6.0m,Eixo A-B/Linha 2,EM-DW-005 Rev.A,180,concluido,em_andamento,2026-04-22,,João Soares,Marcos Lima,
+EM-V-03,Viga,W 200x22,Viga transversal cota +6.0m,Eixo A-B/Linha 3,EM-DW-005 Rev.A,180,em_andamento,nao_iniciado,,,João Soares,,
+EM-T-01,Treliça,Cantoneiras L 75x75x6,Treliça cobertura módulo 1,Cobertura módulo 1,EM-DW-008 Rev.C,650,concluido,em_andamento,2026-05-01,,Pedro Henrique,Carlos Antunes,Montagem por partes
+EM-C-01,Contraventamento,Cantoneira L 50x50x5,Contraventamento horizontal cota +9.0m,Cobertura,EM-DW-010 Rev.A,85,em_andamento,nao_iniciado,,,Pedro Henrique,,Em corte/dobra
+EM-E-01,Escada,Perfil U 200x76,Escada acesso plataforma cota +6.0m,Lateral eixo D,EM-DW-012 Rev.B,320,concluido,concluido,2026-04-28,2026-05-15,João Soares,Marcos Lima,Patamares com piso xadrez
+EM-G-01,Guarda-corpo,Tubo 1.1/2 SCH 40,"Guarda-corpo plataforma cota +6.0m (perimetral)",Plataforma técnica,EM-DW-015 Rev.A,180,concluido,em_andamento,2026-05-05,,Pedro Henrique,Carlos Antunes,

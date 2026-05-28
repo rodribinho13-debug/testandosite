@@ -1,0 +1,15 @@
+cable_tag,origin,destination,function_type,service_type,voltage_v,current_a,cable_type,conductor_count,cross_section_mm2,material,insulation,length_m,installed,installation_date
+CAB-001,QGBT-01,MCC-01,Força,BT,440,80,XLPE,3,25,Cobre,XLPE 0.6/1kV,45.5,true,2026-05-10
+CAB-002,QGBT-01,MCC-02,Força,BT,440,80,XLPE,3,25,Cobre,XLPE 0.6/1kV,38.2,true,2026-05-10
+CAB-003,MCC-01,BB-101,Força,BT,440,32,EPR,3,6,Cobre,EPR 0.6/1kV,18.5,true,2026-05-12
+CAB-004,MCC-01,BB-102,Força,BT,440,32,EPR,3,6,Cobre,EPR 0.6/1kV,22.8,true,2026-05-12
+CAB-005,MCC-01,MOTOR-M01,Força motriz,BT,440,55,EPR,3,16,Cobre,EPR 0.6/1kV,28.0,true,2026-05-15
+CAB-006,MCC-02,MOTOR-M02,Força motriz,BT,440,55,EPR,3,16,Cobre,EPR 0.6/1kV,32.5,true,2026-05-15
+CAB-007,QGBT-01,Iluminação Térreo,Iluminação,BT,220,16,PVC,3,2.5,Cobre,PVC/AF 750V,85.0,true,2026-05-08
+CAB-008,QGBT-01,Iluminação 1º piso,Iluminação,BT,220,16,PVC,3,2.5,Cobre,PVC/AF 750V,95.0,false,
+CAB-009,Painel Comando,PLC-01,Controle,BT,24,1,PVC,4,1.5,Cobre,PVC 300V blindado,15.2,true,2026-05-18
+CAB-010,Painel Comando,PT-101,Sinal,BT,24,0.5,PVC,2,1.0,Cobre,PVC 300V par-trançado blindado,22.5,true,2026-05-19
+CAB-011,Painel Comando,TIC-203,Sinal,BT,24,0.5,PVC,2,1.0,Cobre,PVC 300V par-trançado blindado,28.0,true,2026-05-19
+CAB-012,Subestação,Painel MT-01,Força,MT,13800,200,EPR,3,95,Cobre,EPR 8.7/15kV,120.0,false,
+CAB-013,Malha aterramento,Painel MT-01,Aterramento,BT,0,0,Nu,1,50,Cobre,Sem isolação - cabo de cobre nu,15.0,true,2026-05-05
+CAB-014,SPDA Captor,Caixa equipotencial,Aterramento,BT,0,0,Nu,1,50,Cobre,Cobre nu 50mm² para SPDA,45.0,true,2026-05-06
