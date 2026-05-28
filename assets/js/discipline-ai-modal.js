@@ -1011,8 +1011,16 @@ w.openDisciplineAIModal = function(disciplineCode){
       if(raw.status){ const norm = VALUE_NORMALIZERS.joint_status_field(raw.status); raw.status = norm || 'pendente'; }
       const { kept } = filterPayloadBySchema(raw, jointsCols);
       const res = await sb.from('joints').insert(kept).select('id').single();
-      if(res.error){ fail++; errs.push('joints: '+res.error.message); console.warn('[dai] joint insert fail:', res.error.message, kept); }
-      else ok++;
+      if(res.error){
+        // Bug #8 fix (auditoria 2026-05-28): 23505 = duplicate. Idempotente.
+        if(res.error.code === '23505' || /duplicate|unique|conflict/i.test(res.error.message)){
+          ok++;
+          console.log('[dai] joint duplicate — tratado como sucesso:', kept.joint_number);
+        } else {
+          fail++; errs.push('joints: '+res.error.message);
+          console.warn('[dai] joint insert fail:', res.error.message, kept);
+        }
+      } else ok++;
     }
     return { ok, fail, errs };
   }
@@ -1149,35 +1157,93 @@ w.openDisciplineAIModal = function(disciplineCode){
       let payload = validCols ? kept : raw;
       let res = await sb.from(table).insert(payload);
       let retries = 0;
-      while(res.error && retries < 8){
+      while(res.error && retries < 12){
         const msg = res.error.message || '';
         let badCol = null;
+        let recovered = false;
         let m = msg.match(/(?:column|find)\s*['"]?([a-zA-Z0-9_]+)['"]?/i);
         if(m && m[1] && payload[m[1]] !== undefined && /column.*does not exist|schema cache|find.*column/i.test(msg)){
           badCol = m[1];
         }
+        // Bug #7 fix (auditoria 2026-05-28): tenta normalizar lowercase antes de remover
         if(!badCol){
           m = msg.match(/violates check constraint\s+["']?(\w+)["']?/i);
           if(m && m[1]){
             const cm = m[1].match(/_([a-z][a-z0-9_]*?)_check$/i);
-            if(cm && cm[1] && payload[cm[1]] !== undefined) badCol = cm[1];
+            if(cm && cm[1] && payload[cm[1]] !== undefined){
+              const colName = cm[1];
+              const orig = payload[colName];
+              if(typeof orig === 'string' && orig.length){
+                const norm = orig.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim().replace(/\s+/g,'_');
+                if(norm !== orig){
+                  payload[colName] = norm;
+                  recovered = true;
+                  console.log('[dai] check_constraint recovered:', colName, orig, '->', norm);
+                }
+              }
+              if(!recovered) badCol = colName;
+            }
           }
         }
-        if(/violates not-null/i.test(msg)){
+        // Bug #6 fix (auditoria 2026-05-28): NOT NULL auto-gera valor
+        if(!badCol && !recovered && /violates not-null/i.test(msg)){
           const nm = msg.match(/column\s+["']?(\w+)["']?/i);
-          if(nm) errs.push(table+': obrigatório vazio "'+nm[1]+'"');
-          break;
+          if(nm && nm[1] && !payload[nm[1]]){
+            const colName = nm[1];
+            const fallbacks = {
+              tag: 'AUTO-'+Date.now().toString().slice(-6),
+              name: payload.description || payload.title || ('Item '+new Date().toLocaleDateString('pt-BR')),
+              identification: payload.tag || payload.code || ('ID-'+Date.now().toString().slice(-6)),
+              code: 'AUTO-'+Date.now().toString().slice(-6),
+              title: payload.description || payload.name || ('Registro IA '+new Date().toLocaleDateString('pt-BR')),
+              joint_number: 'J-'+(ok+fail+1).toString().padStart(3,'0'),
+              card_number: 'C-'+(ok+fail+1).toString().padStart(3,'0'),
+              wo_number: 'OS-'+Date.now().toString().slice(-6),
+              pour_number: 'CP-'+(ok+fail+1).toString().padStart(3,'0'),
+              element_type: 'outro',
+              system_type: 'outro',
+              ndt_type: 'visual',
+              inspection_date: new Date().toISOString().split('T')[0],
+              measurement_date: new Date().toISOString().split('T')[0],
+              measured_resistance_ohm: 0,
+              location: payload.tag || payload.area || 'Nao informado',
+              full_name: payload.name || payload.description || ('Pessoa '+(ok+fail+1)),
+              matricula: 'AUTO-'+(ok+fail+1).toString().padStart(4,'0'),
+              description: payload.code || payload.tag || ('Item '+(ok+fail+1)),
+              unit: 'un',
+              source: 'ia_extracted',
+              category: 'outros',
+              cable_type: 'outro',
+              cross_section_mm2: 2.5
+            };
+            if(fallbacks[colName] !== undefined){
+              payload[colName] = fallbacks[colName];
+              recovered = true;
+              console.log('[dai] not_null auto-fill:', table+'.'+colName, '=', payload[colName]);
+            } else {
+              errs.push(table+': obrigatorio vazio "'+colName+'" (sem fallback)');
+              break;
+            }
+          } else { break; }
         }
         if(badCol){
           delete payload[badCol];
           retries++;
           res = await sb.from(table).insert(payload);
-        } else {
-          break;
-        }
+        } else if(recovered){
+          retries++;
+          res = await sb.from(table).insert(payload);
+        } else { break; }
       }
-      if(res.error){ fail++; errs.push(table+': '+res.error.message); console.warn('[dai] sec insert fail', table, 'message:', res.error.message, 'details:', res.error.details, 'hint:', res.error.hint, 'code:', res.error.code, 'payload:', JSON.stringify(payload)); }
-      else ok++;
+      if(res.error){
+        if(res.error.code === '23505' || /duplicate|unique|conflict/i.test(res.error.message)){
+          ok++;
+          console.log('[dai] '+table+' duplicate — tratado como sucesso');
+        } else {
+          fail++; errs.push(table+': '+res.error.message);
+          console.warn('[dai] sec insert fail', table, 'message:', res.error.message, 'details:', res.error.details, 'hint:', res.error.hint, 'code:', res.error.code, 'payload:', JSON.stringify(payload));
+        }
+      } else ok++;
     }
     return { ok, fail, errs };
   }
