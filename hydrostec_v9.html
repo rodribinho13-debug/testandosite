@@ -829,11 +829,11 @@ function openImportExcel(view){
   const mapInfo = VIEW_TABLE_MAP[view];
   if(!mapInfo){
     console.warn('[openImportExcel] viewkey nao mapeada:', view);
-    (window.PIAToast?.warning || toast)('Importar Excel ainda nao esta disponivel para esta tela (' + view + ')','warn');
+    (window.PIAToast && window.PIAToast.warning || toast)('Importar Excel ainda nao esta disponivel para esta tela (' + view + ')','warn');
     return;
   }
   if(mapInfo.reqProject && !curProj){
-    (window.PIAToast?.warning || toast)('Selecione um projeto antes de importar.','warn');
+    (window.PIAToast && window.PIAToast.warning || toast)('Selecione um projeto antes de importar.','warn');
     return;
   }
 
@@ -1404,13 +1404,13 @@ function cm(id){document.getElementById(id).classList.remove('open')}
 // (Fix S-1 auditoria 2026-05-28: garante padrao consistente em todas as views CRUD)
 // ═══════════════════════════════════════════════════
 function _piaBcRow(o){
-  const icon = o.icon || 'list';
-  const label = o.label || '';
-  const subtitle = o.subtitle || '';
-  const disc = o.discipline || '';
-  const onNovo = o.onNovo || '';
-  const noIA = o.noIA === true;
-  const noNovo = o.noNovo === true;
+  var icon = o.icon || 'list';
+  var label = o.label || '';
+  var subtitle = o.subtitle || '';
+  var disc = o.discipline || '';
+  var onNovo = o.onNovo || '';
+  var noIA = o.noIA === true;
+  var noNovo = o.noNovo === true;
   return '<div class="bc-row">'
     + '<i data-lucide="' + icon + '" style="width:14px;height:14px;color:var(--primary)"></i>'
     + '<span style="font-weight:600;color:var(--t9)">' + label + '</span>'
@@ -6360,7 +6360,7 @@ async function rMaint(){
   });
   
   document.getElementById('vmaint').innerHTML =
-    _piaBcRow({icon:'wrench', label:'Manutenção · Ordens de Serviço', subtitle: (open + planejada + exec + concl) + ' OS', discipline:'manutencao', onNovo:'window.oMaint ? oMaint(null) : alert(\'Função de cadastro de OS em desenvolvimento\')'})
+    _piaBcRow({icon:'wrench', label:'Manutenção · Ordens de Serviço', subtitle: (open + planejada + exec + concl) + ' OS', discipline:'manutencao', onNovo:'window.oMaint ? oMaint(null) : alert(\'Funcao de cadastro de OS em desenvolvimento\')'})
     + `
     <div class="sumbar">
       <div class="sc"><div class="slbl">Em aberto</div><div class="sval" style="color:var(--hbm)">${open}</div></div>
@@ -7550,4 +7550,75 @@ window.rInt = function(){
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
           <div style="font-size:28px">🔗</div>
           <div style="flex:1">
-            <div style="font-size
+            <div style="font-size:15px;font-weight:600;color:var(--hb)">API REST &amp; Webhook</div>
+            <div style="font-size:11px;color:var(--hmu)">Integração customizada com ERP, SAP, Maximo, etc. Disponível no plano Multi/Enterprise.</div>
+          </div>
+          <span class="badge b-pen">EM BREVE</span>
+        </div>
+      </div>
+    </div>`;
+}
+
+
+// genNR13PDF removida temporariamente (arquivo estava truncado - sera restaurada depois)
+function genNR13PDF(){alert("Funcao em manutencao - sera restaurada em breve.");}
+
+</script>
+
+<!-- ═══════════ SCRIPTS LOCAIS (religados após restauração de backup) ═══════════ -->
+<!-- ═══════════ SCRIPTS DE BOOT (core) ═══════════ -->
+<!-- Tudo que NÃO está aqui é carregado sob demanda via module-loader.js -->
+<script src="assets/js/ui-confirm.js?v=2" defer></script>
+<script src="assets/js/excel-export.js?v=7" defer></script>
+<script src="assets/js/security.js?v=1" defer></script>
+<!-- v9-fields.js e v9-app.js desativados: já estão duplicados inline acima -->
+<script src="custom_views.js?v=3" defer></script>
+<script src="assets/js/saas-modules.js?v=4" defer></script>
+<script src="assets/js/ia-chat.js?v=11" defer></script>
+<!-- analytics.js removido: Curva S + Físico-Financeiro agora vivem dentro do módulo Orçamento -->
+<!-- ai-router: wrapper único pra todas as chamadas de IA (auth+quota+audit+retry). Carrega antes do module-loader pra estar disponível pra todos os módulos lazy -->
+<script src="assets/js/ai-router.js?v=1" defer></script>
+<script src="assets/js/module-loader.js?v=19" defer></script>
+<!-- planejamento.js — módulo de planejamento (Efetivo + Parâmetros HH + Cronograma + Gantt). Legacy planning.js arquivado em _archive_legacy/ -->
+<script src="assets/js/planejamento.js?v=3" defer></script>
+<script src="assets/js/sidebar-groups.js?v=28" defer></script>
+<!-- Auto-init INLINE da sidebar (sobrevive a qualquer truncamento futuro do sidebar-groups.js) -->
+<script>
+(function(){
+  function sgInit(){
+    try {
+      if(window.PIASidebar && typeof window.PIASidebar.reorganize === 'function' && document.querySelector('aside.sidebar')){
+        window.PIASidebar.reorganize();
+        return true;
+      }
+    } catch(e){ console.warn('[sg-init inline]', e); }
+    return false;
+  }
+  function cleanOrphanText(){
+    try {
+      var body = document.body; if(!body) return;
+      var nodes = Array.prototype.slice.call(body.childNodes);
+      nodes.forEach(function(node){
+        if(node.nodeType === 3){
+          var txt = (node.nodeValue||'').trim();
+          if(txt && (txt.indexOf('sgInit') >= 0 || txt.indexOf('PIASidebar') >= 0)){
+            body.removeChild(node);
+            ;
+          }
+        }
+      });
+    } catch(e){}
+  }
+  function init(){
+    if(sgInit()) { cleanOrphanText(); return; }
+    setTimeout(init, 200);
+  }
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+</script>
+</body>
+</html>
