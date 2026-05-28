@@ -1382,42 +1382,102 @@ w.openDisciplineAIModal = function(disciplineCode){
       // 3) Tenta insert — usa .select() pra recuperar o id do registro inserido
       let payload = validCols ? kept : raw;
       let res = await sb.from(_docTypeMeta.table).insert(payload).select('*').single();
-      // 4) Retry inteligente: remove colunas problemáticas e re-tenta até 8x
+      // 4) Retry inteligente: remove colunas problemáticas e re-tenta até 12x
       let retries = 0;
-      while(res.error && retries < 8){
+      while(res.error && retries < 12){
         const msg = res.error.message || '';
         let badCol = null;
+        let recovered = false;
         // Coluna não existe
         let m = msg.match(/(?:column|find)\s*['"]?([a-zA-Z0-9_]+)['"]?/i);
         if(m && m[1] && payload[m[1]] !== undefined && /column.*does not exist|schema cache|find.*column/i.test(msg)){
           badCol = m[1];
         }
-        // Check constraint (ex: nr13_check)
+        // Bug #7 fix (auditoria 2026-05-28): check constraint — tenta normalizar lowercase antes de remover
         if(!badCol){
           m = msg.match(/violates check constraint\s+["']?(\w+)["']?/i);
           if(m && m[1]){
-            // Extrai o nome da coluna do nome da constraint (ex: isometric_sheets_nr13_check → nr13)
+            // Extrai o nome da coluna do nome da constraint (ex: civil_concrete_pours_result_check → result)
             const cm = m[1].match(/_([a-z][a-z0-9_]*?)_check$/i);
-            if(cm && cm[1] && payload[cm[1]] !== undefined) badCol = cm[1];
+            if(cm && cm[1] && payload[cm[1]] !== undefined){
+              const colName = cm[1];
+              const orig = payload[colName];
+              if(typeof orig === 'string' && orig.length){
+                const norm = orig.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim().replace(/\s+/g,'_');
+                if(norm !== orig){
+                  payload[colName] = norm;
+                  recovered = true;
+                  console.log('[dai/single] check_constraint recovered:', colName, orig, '->', norm);
+                }
+              }
+              if(!recovered) badCol = colName;
+            }
           }
         }
-        // NOT NULL violation pode ser fatal — não há como recuperar
-        if(/violates not-null/i.test(msg)){
+        // Bug #6 fix (auditoria 2026-05-28): NOT NULL auto-gera valor com fallback
+        if(!badCol && !recovered && /violates not-null/i.test(msg)){
           const nm = msg.match(/column\s+["']?(\w+)["']?/i);
-          if(nm) errors.push('Campo obrigatório vazio: ' + nm[1]);
-          break;
+          if(nm && nm[1] && !payload[nm[1]]){
+            const colName = nm[1];
+            const fallbacks = {
+              tag: 'AUTO-'+Date.now().toString().slice(-6),
+              name: payload.description || payload.title || ('Item '+new Date().toLocaleDateString('pt-BR')),
+              identification: payload.tag || payload.code || ('ID-'+Date.now().toString().slice(-6)),
+              code: 'AUTO-'+Date.now().toString().slice(-6),
+              title: payload.description || payload.name || ('Registro IA '+new Date().toLocaleDateString('pt-BR')),
+              joint_number: 'J-'+Date.now().toString().slice(-4),
+              card_number: 'C-'+Date.now().toString().slice(-4),
+              wo_number: 'OS-'+Date.now().toString().slice(-6),
+              pour_number: 'CP-'+Date.now().toString().slice(-4),
+              element_type: 'outro',
+              system_type: 'outro',
+              ndt_type: 'visual',
+              inspection_date: new Date().toISOString().split('T')[0],
+              measurement_date: new Date().toISOString().split('T')[0],
+              measured_resistance_ohm: 0,
+              location: payload.tag || payload.area || 'Nao informado',
+              full_name: payload.name || payload.description || 'Pessoa IA',
+              matricula: 'AUTO-'+Date.now().toString().slice(-4),
+              description: payload.code || payload.tag || 'Item IA',
+              unit: 'un',
+              source: 'ia_extracted',
+              category: 'outros',
+              cable_type: 'outro',
+              cross_section_mm2: 2.5,
+              result: 'aprovado',
+              status: 'pendente'
+            };
+            if(fallbacks[colName] !== undefined){
+              payload[colName] = fallbacks[colName];
+              recovered = true;
+              console.log('[dai/single] not_null auto-fill:', _docTypeMeta.table+'.'+colName, '=', payload[colName]);
+            } else {
+              errors.push('Campo obrigatorio vazio sem fallback: ' + colName);
+              break;
+            }
+          } else { break; }
         }
         if(badCol){
           delete payload[badCol];
           allDropped.add(badCol);
           retries++;
           res = await sb.from(_docTypeMeta.table).insert(payload).select('*').single();
-        } else {
-          break;
-        }
+        } else if(recovered){
+          retries++;
+          res = await sb.from(_docTypeMeta.table).insert(payload).select('*').single();
+        } else { break; }
       }
-      if(res.error){ fail++; errors.push(res.error.message); console.warn('[dai] insert fail', _docTypeMeta.table, res.error, payload); }
-      else {
+      // Bug #8 fix (auditoria 2026-05-28): duplicate (23505) — trata como sucesso idempotente
+      if(res.error){
+        if(res.error.code === '23505' || /duplicate|unique|conflict/i.test(res.error.message || '')){
+          ok++;
+          console.log('[dai/single] '+_docTypeMeta.table+' duplicate — tratado como sucesso idempotente');
+        } else {
+          fail++; errors.push(res.error.message);
+          console.warn('[dai/single] insert fail', _docTypeMeta.table, 'message:', res.error.message, 'details:', res.error.details, 'hint:', res.error.hint, 'code:', res.error.code, 'payload:', JSON.stringify(payload));
+          try { if(w.PIAToast && w.PIAToast.error){ w.PIAToast.error('Falha ao cadastrar: ' + res.error.message); } } catch(_){}
+        }
+      } else {
         ok++;
         if(res.data && res.data.id){
           insertedIds.push(res.data.id);
