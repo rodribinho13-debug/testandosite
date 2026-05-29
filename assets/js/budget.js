@@ -72,13 +72,15 @@ function open(){
   ov.innerHTML = renderShell();
   if(w.PIAShell && w.PIAShell.inlineWrap(ov, 'budget', 'tab-budget')){} else { d.body.appendChild(ov); }
 
-  d.getElementById('pia-bud-close').onclick = ()=> ov.remove();
-  d.getElementById('pia-bud-add').onclick = ()=> openAddItem();
-  d.getElementById('pia-bud-recalc').onclick = ()=> recalcABC();
-  d.getElementById('pia-bud-hh').onclick = ()=> { if(w.PIAHHParams) w.PIAHHParams.open(); else alert('Carregando módulo HH...'); };
-  d.getElementById('pia-bud-pdf').onclick = ()=> exportPDF();
-  d.getElementById('pia-bud-xlsx').onclick = ()=> exportExcel();
-  d.getElementById('pia-bud-csv').onclick = ()=> exportCSV();
+  // Guard com if(el): 'pia-bud-csv' não é renderizado no shell — sem o guard,
+  // null.onclick lançava TypeError e abortava o bind + loadAndRender().
+  var _bClose=d.getElementById('pia-bud-close'); if(_bClose) _bClose.onclick = ()=> ov.remove();
+  var _bAdd=d.getElementById('pia-bud-add'); if(_bAdd) _bAdd.onclick = ()=> openAddItem();
+  var _bRec=d.getElementById('pia-bud-recalc'); if(_bRec) _bRec.onclick = ()=> recalcABC();
+  var _bHH=d.getElementById('pia-bud-hh'); if(_bHH) _bHH.onclick = ()=> { if(w.PIAHHParams) w.PIAHHParams.open(); else alert('Carregando módulo HH...'); };
+  var _bPdf=d.getElementById('pia-bud-pdf'); if(_bPdf) _bPdf.onclick = ()=> exportPDF();
+  var _bXlsx=d.getElementById('pia-bud-xlsx'); if(_bXlsx) _bXlsx.onclick = ()=> exportExcel();
+  var _bCsv=d.getElementById('pia-bud-csv'); if(_bCsv) _bCsv.onclick = ()=> exportCSV();
 
   loadAndRender();
 }

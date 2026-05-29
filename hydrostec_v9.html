@@ -5116,7 +5116,7 @@ async function saveIso(){
   } else toast(editIso?'Folha atualizada':'Folha cadastrada','ok');
 
   cm('iso-modal');await loadAll();rIsos();
-  document.getElementById('tb-i').textContent=(curProj?pSheets(curProj):sheets).length;
+  var _tbiEl=document.getElementById('tb-i'); if(_tbiEl) _tbiEl.textContent=(curProj?pSheets(curProj):sheets).length;
 }
 
 async function delIso(id,num){
