@@ -100,4 +100,20 @@ Comparei o payload de cada função de cadastro manual com as colunas reais da t
 
 Testado end-to-end por SQL (linha + junta) + cleanup. Commit `6f8f262`. SW v9.3.21.
 
-*Atualizado em 2026-05-29 (SW v9.3.21).*
+---
+
+## FASE 4 — SUPRIMENTOS (auditoria insert × schema real)
+
+| Função / módulo | Tabela | Resultado |
+|---|---|---|
+| `suppliers.js` (cadastro fornecedor) | suppliers | ✅ batem |
+| `materials-catalog.js` | materials_catalog | ✅ batem |
+| `quotations.js` (RFQ/itens/respostas/aprovações) | quotation_requests, quotation_items, quotation_responses, purchase_approvals, supplier_certifications | ✅ batem |
+| **`ai-quotation.js`** (IA de cotação) | quotation_items | 🔴 **QUEBRADO → corrigido** |
+| **`ai-supplier.js`** (parecer IA) | supplier_advisories | 🔴 **QUEBRADO → corrigido** |
+
+**Bug `ai-quotation`:** inseria em `quotation_items` com colunas inexistentes (`org_id, quotation_id, unit_price, total_price, lead_time_days, observation, meta`) — a tabela só tem `rfq_id/description/unit/quantity/budget_unit_price/notes`. **Fix:** mapeamento correto (`quotation_id→rfq_id`, `unit_price→budget_unit_price`, total/prazo/obs → `notes`) + erro real reportado. Commit `9f0717b`.
+
+**Bug `ai-supplier`:** inseria em `supplier_advisories` que **não existia**, com erro engolido (`.catch`) + alerta falso "Parecer salvo". **Fix:** migration `018` cria a tabela (RLS org-scoped igual às irmãs) + mensagem honesta (só confirma se gravou). Commit `9f0717b`. SW v9.3.22.
+
+*Atualizado em 2026-05-29 (SW v9.3.22).*
