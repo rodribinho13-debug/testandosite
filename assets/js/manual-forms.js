@@ -44,7 +44,7 @@
         {name:'concrete_date',label:'Data concretagem',type:'date'},
         {name:'notes',label:'Observações',type:'textarea',full:true}
       ]},
-      civil_sinapi: { table:'civil_insumos_catalog', reqProject:false, title:'Insumo SINAPI', fixed:{source:'manual'}, fields:[
+      civil_sinapi: { table:'civil_insumos_catalog', reqProject:false, orgScoped:false, title:'Insumo SINAPI', fixed:{source:'manual'}, fields:[
         {name:'code',label:'Código',type:'text',required:true},
         {name:'description',label:'Descrição',type:'text',required:true,full:true},
         {name:'category',label:'Categoria',type:'text',required:true},
@@ -82,7 +82,7 @@
         {name:'responsible_engineer',label:'Engenheiro responsável',type:'text'},
         {name:'notes',label:'Observações',type:'textarea',full:true}
       ]},
-      elec_specs: { table:'cable_specs_catalog', reqProject:false, title:'Spec de cabo', fields:[
+      elec_specs: { table:'cable_specs_catalog', reqProject:false, orgScoped:false, title:'Spec de cabo', fields:[
         {name:'cable_type',label:'Tipo de cabo',type:'text',required:true},
         {name:'cross_section_mm2',label:'Seção (mm²)',type:'number',step:'0.01',required:true},
         {name:'conductor_count',label:'Nº de condutores',type:'number',step:'1'},
@@ -158,7 +158,9 @@
       var status = ov.querySelector('#mf-status');
       var btn = ov.querySelector('#mf-save');
       if(!sb){ if(status) status.innerHTML = err('Supabase indisponível. Recarregue a página.'); return; }
-      var rec = { org_id: (w._org && w._org.id) || null };
+      var rec = {};
+      // Catálogos globais (civil_insumos_catalog, cable_specs_catalog) não têm org_id.
+      if(cfg.orgScoped !== false){ rec.org_id = (w._org && w._org.id) || null; }
       if(cfg.reqProject){
         if(!w.curProj){ if(status) status.innerHTML = err('Selecione um projeto primeiro.'); return; }
         rec.project_id = w.curProj;
