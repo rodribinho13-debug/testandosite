@@ -79,4 +79,25 @@ Os 7 modais foram **validados por SQL** (insert OK nas 7 tabelas com o payload d
 
 **Pendente de teste manual (precisa do clique/upload):** import real de `import_<view>.xlsx` por aba, IA por disciplina com os PDFs, e o teste visual dos 7 modais novos.
 
-*Atualizado em 2026-05-29 (SW v9.3.20).*
+---
+
+## FASE 3 — QUALIDADE (auditoria insert × schema real — classe do bug RDO)
+
+Comparei o payload de cada função de cadastro manual com as colunas reais da tabela:
+
+| Função | Tabela | Resultado |
+|---|---|---|
+| `oPend` | pendings | ✅ colunas batem |
+| `oSold` | welders | ✅ batem |
+| `oCom` | test_systems | ✅ batem |
+| `oNdt` | ndt_inspections | ✅ batem |
+| `oCal` | instruments + instrument_calibrations | ✅ batem |
+| `oJoint` (Mapa de Juntas) | joints | 🔴 **QUEBRADO → corrigido** |
+
+**Bug do `oJoint` (Mapa de Juntas "+ Novo")** — dois problemas:
+1. Inseria `iso_number`/`revision`/`material` que **não existiam** em `joints` (o app usa essas colunas em ~16 pontos: tabela, filtro, export, dropdown) → `column does not exist`. **Fix:** migration `017` adiciona as 3 colunas (text). Corrige também o **import** desses campos.
+2. `joints.line_id` é **NOT NULL** e o `oJoint` não fornecia → `oJoint` agora **cria/reusa uma linha** (a partir do iso_number) antes de inserir, como o caminho da IA faz.
+
+Testado end-to-end por SQL (linha + junta) + cleanup. Commit `6f8f262`. SW v9.3.21.
+
+*Atualizado em 2026-05-29 (SW v9.3.21).*
