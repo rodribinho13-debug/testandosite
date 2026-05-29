@@ -1,4 +1,4 @@
-// analyze-discipline-multi v2 — IA visual + contagem ainda que nao haja BM
+// analyze-discipline-multi v3 — IA visual + contagem ainda que nao haja BM + instrucoes extras do usuario
 // Versionado localmente em 2026-05-27 via mcp__supabase__get_edge_function
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -62,10 +62,12 @@ Deno.serve(async(req)=>{
     const body=await req.json();
     const disciplina=body.disciplina||"tubulacao";
     const images=body.images||[];
-    const prompt=PROMPTS[disciplina];
-    if(!prompt)throw new Error(`Disciplina nao suportada: ${disciplina}`);
+    const basePrompt=PROMPTS[disciplina];
+    if(!basePrompt)throw new Error(`Disciplina nao suportada: ${disciplina}`);
     if(!images.length)throw new Error("Envie pelo menos uma imagem ou PDF");
     if(images.length>8)throw new Error("Maximo 8 paginas");
+    const instructions=(body.instructions||"").toString().trim();
+    const prompt=instructions?`${basePrompt}\n\n=== INSTRUCOES ADICIONAIS DO USUARIO (PRIORIDADE) ===\n${instructions}\n=== FIM ===\n`:basePrompt;
     const parts=[{text:prompt}];
     for(const img of images){const mime=img.mime||"image/jpeg";if(!/^(image\/(jpe?g|png|webp|gif|heic|heif)|application\/pdf)$/i.test(mime))throw new Error(`MIME nao suportado: ${mime}`);parts.push({inline_data:{mime_type:mime,data:img.b64}});}
     const model="gemini-2.5-flash";

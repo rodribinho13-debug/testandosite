@@ -308,23 +308,27 @@ async function openAIWizard(){
   ov.onclick = (e)=>{ if(e.target===ov) ov.remove(); };
   ov.innerHTML = `
     <div style="background:#fff;border-radius:12px;width:100%;max-width:760px;max-height:92vh;display:flex;flex-direction:column;box-shadow:0 24px 60px rgba(15,23,42,.25);overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif">
-      <div style="padding:14px 22px;border-bottom:1px solid #E5E7EB;display:flex;align-items:center;gap:12px;background:linear-gradient(135deg,#7C3AED,#5B21B6);color:#fff">
-        <div style="width:38px;height:38px;border-radius:9px;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;font-size:20px">🤖</div>
+      <div style="padding:18px 22px;border-bottom:1px solid #E5E7EB;background:#FAFBFC;display:flex;align-items:center;gap:12px">
+        <div style="width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,#7C3AED,#5B21B6);display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px">✨</div>
         <div style="flex:1">
-          <div style="font-size:15px;font-weight:800">Cadastrar Desenho via IA — ${esc(schema.label)}</div>
-          <div style="font-size:11.5px;opacity:.85">Envie a prancha (PDF ou imagem). A IA extrai código, título, escala e campos específicos da disciplina.</div>
+          <div style="font-size:15px;font-weight:800;color:#0F172A">Cadastro via IA — DESENHO TÉCNICO (${esc(schema.label)})</div>
+          <div style="font-size:11.5px;color:#64748B">Fase 1 de 3 · Upload do documento</div>
         </div>
-        <button id="tdraw-ai-close" style="background:rgba(255,255,255,.18);border:none;color:#fff;width:32px;height:32px;border-radius:7px;cursor:pointer;font-size:18px">×</button>
+        <button id="tdraw-ai-close" style="background:transparent;border:1px solid #E5E7EB;color:#475569;width:32px;height:32px;border-radius:7px;cursor:pointer;font-size:18px">×</button>
       </div>
-      <div id="tdraw-ai-body" style="flex:1;overflow:auto;padding:18px 22px">
-        <div style="background:#F5F3FF;border:1px dashed #C4B5FD;border-radius:10px;padding:30px;text-align:center;margin-bottom:14px">
-          <div style="font-size:42px">📐</div>
-          <div style="font-weight:700;color:#5B21B6;margin-top:6px;font-size:14px">Envie até 6 páginas/pranchas</div>
-          <div style="font-size:11.5px;color:#7C3AED;margin-top:4px">PDF ou imagem (jpg, png, webp)</div>
+      <div id="tdraw-ai-body" style="flex:1;overflow:auto;padding:20px 22px">
+        <div id="tdraw-ai-drop" style="border:2px dashed #C4B5FD;border-radius:12px;padding:36px;text-align:center;cursor:pointer;background:#F5F3FF;transition:background .15s">
+          <div style="font-size:42px;margin-bottom:8px">📐</div>
+          <div style="font-size:14px;font-weight:700;color:#5B21B6">Clique ou arraste as pranchas</div>
+          <div style="font-size:11.5px;color:#7C3AED;margin-top:4px">PDF · PNG · JPG · WEBP — até 6 páginas</div>
           <input type="file" id="tdraw-ai-file" accept="image/*,application/pdf" multiple style="display:none">
-          <button id="tdraw-ai-pick" style="margin-top:14px;background:#7C3AED;color:#fff;border:none;padding:10px 22px;border-radius:8px;cursor:pointer;font-weight:700;font-size:13px;font-family:inherit">Selecionar arquivos</button>
         </div>
-        <div id="tdraw-ai-preview" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;margin-bottom:14px"></div>
+
+        <label style="font-size:11px;font-weight:700;color:#475569;text-transform:uppercase;display:block;margin:16px 0 6px;letter-spacing:.5px">Instruções extras (opcional)</label>
+        <textarea id="tdraw-ai-instr" rows="2" placeholder="ex: conte apenas válvulas acima de 2 polegadas, ignore a legenda do carimbo, use o código da prancha como referência..." style="width:100%;padding:9px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:12.5px;font-family:inherit;resize:vertical;outline:none"></textarea>
+        <div style="font-size:10.5px;color:#94A3B8;margin-top:4px">A IA seguirá estas instruções além do prompt padrão da disciplina.</div>
+
+        <div id="tdraw-ai-preview" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;margin:14px 0"></div>
         <div id="tdraw-ai-result"></div>
       </div>
       <div style="padding:14px 22px;border-top:1px solid #F1F5F9;display:flex;gap:10px;background:#FAFBFC">
@@ -338,7 +342,11 @@ async function openAIWizard(){
   d.getElementById('tdraw-ai-close').onclick = ()=> ov.remove();
   d.getElementById('tdraw-ai-cancel').onclick = ()=> ov.remove();
   const fileInput = d.getElementById('tdraw-ai-file');
-  d.getElementById('tdraw-ai-pick').onclick = ()=> fileInput.click();
+  const dropZone = d.getElementById('tdraw-ai-drop');
+  dropZone.onclick = ()=> fileInput.click();
+  dropZone.ondragover = (e)=>{ e.preventDefault(); dropZone.style.background = '#EDE9FE'; };
+  dropZone.ondragleave = ()=>{ dropZone.style.background = '#F5F3FF'; };
+  dropZone.ondrop = (e)=>{ e.preventDefault(); dropZone.style.background = '#F5F3FF'; if(e.dataTransfer.files && e.dataTransfer.files.length){ fileInput.files = e.dataTransfer.files; fileInput.onchange(); } };
 
   let imgs = [];
   fileInput.onchange = async ()=>{
@@ -381,7 +389,8 @@ async function openAIWizard(){
         headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
         body: JSON.stringify({
           disciplina: _curDisciplina,
-          images: imgs.map(i => ({ mime: i.mime, b64: i.b64 }))
+          images: imgs.map(i => ({ mime: i.mime, b64: i.b64 })),
+          instructions: ((d.getElementById('tdraw-ai-instr')||{}).value || '').trim()
         })
       });
       const data = await resp.json();
