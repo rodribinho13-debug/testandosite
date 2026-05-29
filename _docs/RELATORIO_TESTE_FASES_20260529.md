@@ -138,4 +138,21 @@ Auditorias globais finais: **botões mortos = `{}`** (zero), HTML íntegro (`</h
 
 Ferramentas versionadas em `tools/`: `_audit_ids.cjs`, `_audit_onclick.cjs`, `_audit_import.cjs`.
 
-*Atualizado em 2026-05-29 (SW v9.3.22).*
+---
+
+## BUG TRANSVERSAL — "Cadastrar via IA" abria disciplina errada (achado em teste de tela)
+
+Reportado pelo usuário: NR-13 → "Disciplina não reconhecida: eq_estatico"; Andaime → abria modal de **Pintura**.
+
+**Causa:** o botão "Cadastrar via IA" (gerado por `_piaBcRow` e por bc-rows inline) chamava `openDisciplineAIModal(disc)` com disciplinas que **não existem na constante frontend `DOC_TYPES`** (só tem 6: tubulacao/civil/eletrica/hidraulica/pintura/caldeiraria). As views Equipamentos NR-13, Relatórios END, Pendências, RDO, Comissionamento, Manutenção, Calibração e Andaime usavam disciplinas fora dessa lista (eq_estatico, qualidade, documentacao, comissionamento, manutencao, instrumentacao_cal) ou erradas (Andaime→pintura).
+
+**Importante:** o **backend** (`discipline_ai_prompts`) **tem prompts para todas** essas disciplinas — o elo quebrado era só o roteamento no frontend.
+
+**Fix (roteamento central em `_piaBcRow` + bc-row inline do Andaime):**
+- `equip` → `openEquipAIModal()` (IA NR-13 dedicada, analyze-equipment)
+- disciplina válida em DOC_TYPES → `openDisciplineAIModal(disc)`
+- demais → `openAIImport(view)` — IA genérica que usa `VIEW_AI_PROMPT[view]` → `discipline_ai_prompts` (prompts confirmados existentes).
+
+Resultado: as 8 views passam a abrir a IA correta e **extraem de fato** (mapeamento `VIEW_AI_PROMPT` + prompts no banco conferidos). Commit `2c12a53`. SW v9.3.23.
+
+*Atualizado em 2026-05-29 (SW v9.3.23).*
