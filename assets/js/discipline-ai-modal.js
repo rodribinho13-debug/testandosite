@@ -1282,6 +1282,7 @@ w.openDisciplineAIModal = function(disciplineCode){
   async function doSave(){
     const status = ov.querySelector('#dai-status2');
     const btn = ov.querySelector('#dai-save');
+    try {
     const checked = Array.from(ov.querySelectorAll('.dai-row-chk:checked')).map(c => +c.dataset.i);
     if(checked.length === 0){
       status.innerHTML = '<div style="background:#FEF2F2;color:#991B1B;border:1px solid #FCA5A5;border-radius:8px;padding:10px 14px;font-size:12.5px">Selecione ao menos 1 registro pra cadastrar.</div>';
@@ -1623,6 +1624,15 @@ w.openDisciplineAIModal = function(disciplineCode){
     } else {
       status.innerHTML = '<div style="background:#FEF3C7;color:#92400E;border:1px solid #FDE68A;border-radius:8px;padding:12px 14px;font-size:12.5px"><strong>⚠ '+ok+' cadastrado(s) · '+fail+' falha(s)</strong><div style="font-size:11.5px;margin-top:6px">Os '+ok+' foram cadastrados. As '+fail+' linhas com falha podem ter constraints (campos obrigatórios faltando, valores inválidos, etc.).</div>'+secondaryHtml+pdfHtml+droppedNote+'</div>';
       btn.style.display = 'none';
+    }
+    } catch(_doSaveErr){
+      // Rede de segurança: qualquer exceção antes/durante o cadastro reabilita o botão
+      // e mostra o erro, em vez de deixar o modal congelado (0 INSERTs, 0 erro no Postgres).
+      console.error('[dai/doSave] exceção não tratada:', _doSaveErr);
+      const _m = (_doSaveErr && _doSaveErr.message) ? _doSaveErr.message : String(_doSaveErr);
+      try { if(status){ status.innerHTML = '<div style="background:#FEF2F2;color:#991B1B;border:1px solid #FCA5A5;border-radius:8px;padding:12px 14px;font-size:12.5px"><strong>❌ Erro inesperado ao cadastrar</strong><div style="font-size:11.5px;margin-top:6px">' + esc(_m) + '</div></div>'; } } catch(_){}
+      try { if(w.PIAToast && w.PIAToast.error){ w.PIAToast.error('Erro ao cadastrar: ' + _m); } } catch(_){}
+      try { if(btn){ btn.disabled = false; btn.style.opacity = '1'; btn.style.cursor = 'pointer'; } } catch(_){}
     }
   }
 

@@ -145,43 +145,77 @@ async function confirmAndSave(){
   try {
     const ex = _state.extracted || {}; const r = ex.rdo || {};
     const orgId = (w._org && w._org.id) || null;
+    const userId = (w._user && w._user.id) || null;
+    // Campos extraídos pela IA que NÃO têm coluna própria em daily_reports
+    // são preservados em notes pra não perder informação.
+    const extraNotes = [];
+    if(r.turno) extraNotes.push('Turno: ' + r.turno);
+    if(r.frente_servico) extraNotes.push('Frente: ' + r.frente_servico);
+    if(r.encarregado_nome) extraNotes.push('Encarregado: ' + r.encarregado_nome);
+    if(n(r.horas_paralisacao) > 0) extraNotes.push('Paralisação: ' + r.horas_paralisacao + 'h' + (r.motivo_paralisacao ? ' (' + r.motivo_paralisacao + ')' : ''));
+    extraNotes.push('[Cadastrado via IA — foto manuscrita, confiança OCR ' + Math.round((ex.confianca_ocr||0)*100) + '%]');
     const payload = {
       org_id: orgId, project_id: _state.projectId,
       report_date: r.data_relatorio || new Date().toISOString().slice(0,10),
-      shift: r.turno || 'integral', work_front: r.frente_servico || null,
-      discipline: r.disciplina || null,
-      weather_morning: r.clima_manha || null, weather_afternoon: r.clima_tarde || null,
-      foreman_name: r.encarregado_nome || null,
-      stop_hours: n(r.horas_paralisacao), stop_reason: r.motivo_paralisacao || null,
-      source: 'ai-rdo-handwritten',
-      meta: { ocr_confidence: ex.confianca_ocr || null, source_kind: 'handwritten_photo' }
+      morning_status: r.clima_manha || null,
+      afternoon_status: r.clima_tarde || null,
+      responsible_engineer: r.encarregado_nome || null,
+      disciplina: r.disciplina || null,
+      notes: extraNotes.join(' · '),
+      status: 'draft',
+      created_by: userId
     };
-    let dr; let ins = await sb.from('daily_reports').insert(payload).select('id').single();
-    if(ins.error && /column .* meta does not exist/i.test(ins.error.message||'')){ delete payload.meta; ins = await sb.from('daily_reports').insert(payload).select('id').single(); }
+    const ins = await sb.from('daily_reports').insert(payload).select('id').single();
     if(ins.error) throw ins.error;
-    dr = ins.data;
-    // efetivo
-    for(const e of (ex.efetivo||[])){
-      if(!e.nome) continue;
-      await sb.from('daily_report_team').insert({ daily_report_id: dr.id, org_id: orgId, name: e.nome, role: e.funcao || null, hours_worked: n(e.horas_trabalhadas)||8, hours_overtime: n(e.horas_extras)||0 }).then(()=>{}).catch(()=>{});
-    }
-    // atividades
+    const savedId = ins.data.id;
+    // efetivo -> daily_report_workforce (workforce_type é NOT NULL)
+    const wfRows = (ex.efetivo||[]).filter(e => e && (e.funcao || e.nome)).map(e => ({
+      daily_report_id: savedId,
+      workforce_type: 'direta',
+      role: e.funcao || e.nome || 'Não informado',
+      people_count: 1,
+      hh_worked: (n(e.horas_trabalhadas)||8) + (n(e.horas_extras)||0),
+      notes: e.nome ? ('Nome: ' + e.nome + (n(e.horas_extras) ? ' · HE: ' + e.horas_extras + 'h' : '')) : null
+    }));
+    if(wfRows.length){ const wr = await sb.from('daily_report_workforce').insert(wfRows); if(wr.error) console.warn('[ai-rdo] workforce falhou:', wr.error.message); }
+    // atividades -> daily_report_activities
+    const acRows = (ex.atividades||[]).filter(a => a && (a.descricao||'').trim()).map(a => {
+      const acNotes = [];
+      if(a.qty_executada != null) acNotes.push('Qtd: ' + a.qty_executada + (a.unidade ? ' ' + a.unidade : ''));
+      if(a.codigo_pacote_pcp) acNotes.push('PCP: ' + a.codigo_pacote_pcp);
+      if(a.observacao) acNotes.push(a.observacao);
+      return {
+        daily_report_id: savedId,
+        discipline: r.disciplina || null,
+        description: a.descricao,
+        location: a.frente_localizacao || null,
+        progress_pct: a.percentual_avanco != null ? n(a.percentual_avanco) : null,
+        notes: acNotes.length ? acNotes.join(' · ') : null
+      };
+    });
+    if(acRows.length){ const ar = await sb.from('daily_report_activities').insert(acRows); if(ar.error) console.warn('[ai-rdo] atividades falhou:', ar.error.message); }
+    // ocorrências -> daily_report_events (event_type e description são NOT NULL)
+    const evRows = (ex.ocorrencias||[]).filter(o => o && (o.descricao||'').trim()).map(o => ({
+      daily_report_id: savedId,
+      event_type: o.tipo || 'outros',
+      severity: o.gravidade || null,
+      description: o.descricao
+    }));
+    if(evRows.length){ const er = await sb.from('daily_report_events').insert(evRows); if(er.error) console.warn('[ai-rdo] ocorrências falhou:', er.error.message); }
+    // Vincular pacote PCP quando a IA detectou código + avanço
     for(const a of (ex.atividades||[])){
-      if(!a.descricao) continue;
-      const arow = { daily_report_id: dr.id, org_id: orgId, description: a.descricao, location: a.frente_localizacao || null, qty_executed: n(a.qty_executada)||null, unit: a.unidade || null, progress_pct: n(a.percentual_avanco)||null, observation: a.observacao || null };
-      await sb.from('daily_report_activities').insert(arow).then(()=>{}).catch(()=>{});
-      // Vincular pacote PCP se bater
-      if(a.codigo_pacote_pcp){
+      if(a.codigo_pacote_pcp && a.percentual_avanco != null){
         try {
           const { data: pcp } = await sb.from('pcp_packages').select('id, progress_pct').eq('project_id', _state.projectId).eq('package_code', a.codigo_pacote_pcp).maybeSingle();
-          if(pcp && a.percentual_avanco != null){
+          if(pcp){
             await sb.from('pcp_packages').update({ progress_pct: Math.max(n(pcp.progress_pct), n(a.percentual_avanco)) }).eq('id', pcp.id);
           }
         } catch(_){}
       }
     }
     btn.textContent = '✓ Gravado';
-    setTimeout(() => { d.getElementById('pia-iardo-ov').remove(); if(w.PIARDODiario && w.PIARDODiario.open) w.PIARDODiario.open(); }, 700);
+    try { if(w.toast) w.toast('RDO cadastrado via IA com sucesso','success'); } catch(_){}
+    setTimeout(() => { const ov2 = d.getElementById('pia-iardo-ov'); if(ov2) ov2.remove(); if(w.PIARDODiario && w.PIARDODiario.open) w.PIARDODiario.open(); }, 700);
   } catch(e){ alert('Erro: ' + (e.message||e)); btn.disabled = false; btn.textContent = 'Gravar RDO'; }
   finally { _state.busy = false; }
 }
