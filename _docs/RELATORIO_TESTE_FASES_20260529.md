@@ -63,4 +63,20 @@ Após os fixes, `_audit_onclick.cjs` retorna **`{}`** (zero botões mortos).
 
 Os 7 modais foram **validados por SQL** (insert OK nas 7 tabelas com o payload do modal + cleanup). Descobertas de schema tratadas: `civil_insumos_catalog` e `cable_specs_catalog` são **catálogos globais** (sem `org_id`) → flag `orgScoped:false`.
 
+---
+
+## FASE 2 — ENGENHARIA (auditoria estática + runtime)
+
+| Verificação | Ferramenta | Resultado |
+|---|---|---|
+| Toda função de render (`renderers` do goV) existe | grep cruzado | ✅ 28/28 definidas — nenhuma view abre em branco |
+| Botões mortos nas abas de Engenharia | `_audit_onclick.cjs` | ✅ resolvidos (Civil/Elétrica/Hidráulica `+Novo` + NR-13 IA) |
+| Import/Export consistente | `_audit_import.cjs` | ✅ toda view com botão tem FIELD_SCHEMA + VIEW_TABLE_MAP (0 quebrados) |
+| IA por disciplina | grep × DOC_TYPES | ✅ civil/eletrica/hidraulica/pintura/tubulacao todas em DOC_TYPES |
+| Null-deref de ids | `_audit_ids.cjs` | ✅ só dinâmicos (seguros) |
+
+**Conclusão Fase 2:** sem novos bugs de código nas abas de Engenharia (os principais — botões mortos de Civil/Elétrica/Hidráulica — foram corrigidos). A "inconsistência" de Importar/Exportar relatada era provavelmente o **XLSX não carregado a tempo**, já resolvido pelo carregamento sob demanda (cada export/import garante a lib antes de usar).
+
+**Pendente de teste manual (precisa do clique/upload):** import real de `import_<view>.xlsx` por aba, IA por disciplina com os PDFs, e o teste visual dos 7 modais novos.
+
 *Atualizado em 2026-05-29 (SW v9.3.20).*
