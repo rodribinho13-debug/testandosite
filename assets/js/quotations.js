@@ -651,4 +651,11 @@ async function openApprovalRules(){
       + '<button class="btn bg" id="par-close">Fechar</button>'
     + '</div>'
   + '</div>';
-  d.body.app
+  d.body.appendChild(ov);
+  d.getElementById('par-close').onclick = function(){ ov.remove(); };
+}
+
+w.PIAQuotations = { open };
+
+} catch(e){ console.error('[quotations] init falhou:', e); }
+})(window, document);

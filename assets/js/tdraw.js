@@ -1328,4 +1328,10 @@ function hookGoVForTdraw(){
 }
 if(!hookGoVForTdraw()){
   if(d.readyState === 'loading'){
-    d.addEventListener
+    d.addEventListener('DOMContentLoaded', ()=>{ setTimeout(hookGoVForTdraw, 500); setTimeout(hookGoVForTdraw, 2000); });
+  } else {
+    setTimeout(hookGoVForTdraw, 500); setTimeout(hookGoVForTdraw, 2000);
+  }
+}
+
+})();

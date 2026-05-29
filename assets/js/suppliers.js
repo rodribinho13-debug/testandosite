@@ -364,4 +364,8 @@ function sel(id, label, value, opts){
 }
 
 
-w.openSupplierAI = function(supplierId){ if(!supplierId){alert('Selecione fornecedor.');return;} if(w.PIALazy) w.PIALazy.run('ai-supplier','generateAdvisory
+w.openSupplierAI = function(supplierId){ if(!supplierId){alert('Selecione fornecedor.');return;} if(w.PIALazy) w.PIALazy.run('ai-supplier','generateAdvisory',supplierId); else if(w.PIAIASupplier) w.PIAIASupplier.generateAdvisory(supplierId); };
+w.PIASuppliers = { open };
+
+} catch(e){ console.error('[suppliers] init falhou:', e); }
+})(window, document);

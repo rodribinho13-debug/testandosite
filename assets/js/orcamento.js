@@ -1247,4 +1247,10 @@ async function renderComparativo(el){
       + '<table style="width:100%;border-collapse:collapse;font-size:11.5px">' + tableHead + '<tbody>' + rowsHtml + '</tbody></table>'
       + '</div>'
       + legenda;
-  } catch(e){ console.error('[orcamento.comparativo]', e); el.innerH
+  } catch(e){ console.error('[orcamento.comparativo]', e); el.innerHTML = '<div style="padding:20px;color:#DC2626">Erro: ' + (e.message||e) + '</div>'; }
+}
+
+w.PIAOrcamento = { open };
+
+} catch(e){ console.error('[orcamento] init falhou:', e); }
+})(window, document);

@@ -364,4 +364,10 @@ function tryMount(){
   setInterval(syncButtonVisibility, 1000);
 }
 if(document.readyState === 'loading'){
-  
+  document.addEventListener('DOMContentLoaded', function(){ setTimeout(tryMount, 500); });
+} else {
+  setTimeout(tryMount, 500);
+}
+
+} catch(e){ console.warn('[PIAChat] init falhou:', e); }
+})(window);

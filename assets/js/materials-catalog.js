@@ -523,4 +523,12 @@ async function bulkInsert(rows){
         await sb.from('materials_catalog').insert(payload);
       }
       ok++;
-    } catch(e){ con
+    } catch(e){ console.warn('[mat-import] falhou:', payload.code, e); }
+  }
+  return ok;
+}
+
+w.PIAMaterialsCatalog = { open };
+
+} catch(e){ console.error('[materials-catalog] init falhou:', e); }
+})(window, document);

@@ -585,4 +585,10 @@ function hookGoVForEng(){
 }
 if(!hookGoVForEng()){
   if(d.readyState === 'loading'){
-    d.addEvent
+    d.addEventListener('DOMContentLoaded', ()=>{ setTimeout(hookGoVForEng, 500); setTimeout(hookGoVForEng, 2000); });
+  } else {
+    setTimeout(hookGoVForEng, 500); setTimeout(hookGoVForEng, 2000);
+  }
+}
+
+})();

@@ -595,4 +595,11 @@ w.PIAPCP = {
     }
     if(parentRdoId) upd.parent_rdo_id = parentRdoId;
     if(hhReal != null) upd.hh_real = +hhReal || 0;
-    const r
+    const r = await sb.from('pcp_packages').update(upd).eq('id', pkgId);
+    if(r.error){ console.error('[PCP] setStatus', r.error); return false; }
+    return true;
+  },
+  STATUS, CNC, DISCIPLINAS
+};
+
+})();
