@@ -10,13 +10,13 @@ const w = window, d = document;
 const REGISTRY = {
   // ============== Dependências base (carregadas sob demanda)
   'pia-shell':       { src: 'assets/js/pia-shell.js?v=2',       expose: 'PIAShell' },
-  'excel-export':    { src: 'assets/js/excel-export.js?v=8',    expose: 'PIAExcel' },
+  'excel-export':    { src: 'assets/js/excel-export.js?v=9',    expose: 'PIAExcel' },
   'ai-router':       { src: 'assets/js/ai-router.js?v=1',       expose: 'PIAAIRouter' },
 
   // ============== Módulos UI (todos lazy)
   'compositions':    { src: 'assets/js/compositions.js?v=8',    expose: 'PIACompositions' },
-  'budget':          { src: 'assets/js/budget.js?v=5',          deps: ['excel-export'], expose: 'PIABudget' },
-  'orcamento':       { src: 'assets/js/orcamento.js?v=19',        deps: ['excel-export'], expose: 'PIAOrcamento' },
+  'budget':          { src: 'assets/js/budget.js?v=5',          deps: ['excel-export'], libs: ['xlsx','chart','jspdf'], expose: 'PIABudget' },
+  'orcamento':       { src: 'assets/js/orcamento.js?v=19',        deps: ['excel-export'], libs: ['xlsx','chart','jspdf'], expose: 'PIAOrcamento' },
   'ai-orcamento':    { src: 'assets/js/ai-orcamento.js?v=3',     deps: ['ai-router'], expose: 'PIAIAOrcamento' },
   'ai-rdo':          { src: 'assets/js/ai-rdo.js?v=3',          deps: ['ai-router'], expose: 'PIAIARdo' },
   'ai-quotation':    { src: 'assets/js/ai-quotation.js?v=1',    deps: ['ai-router'], expose: 'PIAIAQuotation' },
@@ -27,21 +27,21 @@ const REGISTRY = {
   'ai-quality':      { src: 'assets/js/ai-quality.js?v=1',      deps: ['ai-router'], expose: 'PIAIAQuality' },
   'ai-equipment':    { src: 'assets/js/ai-equipment.js?v=1',    deps: ['ai-router'], expose: 'PIAIAEquipment' },
   'ai-maintenance':  { src: 'assets/js/ai-maintenance.js?v=1',  deps: ['ai-router'], expose: 'PIAIAMaintenance' },
-  'budget-extras':   { src: 'assets/js/budget-extras.js?v=1',   deps: ['budget'] },
+  'budget-extras':   { src: 'assets/js/budget-extras.js?v=1',   deps: ['budget'], libs: ['xlsx'] },
   'hh-params':       { src: 'assets/js/hh-params.js?v=4',       expose: 'PIAHHParams' },
   'electrical-base': { src: 'assets/js/electrical-base.js?v=4', expose: 'PIAElecBase' },
-  'rdo':             { src: 'assets/js/rdo.js?v=9',             deps: ['excel-export','pia-shell'], expose: 'PIARDO' },
+  'rdo':             { src: 'assets/js/rdo.js?v=9',             deps: ['excel-export','pia-shell'], libs: ['jspdf'], expose: 'PIARDO' },
   'quotations':      { src: 'assets/js/quotations.js?v=13',      deps: ['excel-export'], expose: 'PIAQuotations' },
   'suppliers':       { src: 'assets/js/suppliers.js?v=7',       expose: 'PIASuppliers' },
-  'materials-catalog':{ src: 'assets/js/materials-catalog.js?v=9', expose: 'PIAMaterialsCatalog' },
-  'discipline-ai':   { src: 'assets/js/discipline-ai-modal.js?v=26' },
-  'pcp':             { src: 'assets/js/pcp.js?v=8',             deps: ['pia-shell','excel-export'], expose: 'PIAPCP' },
+  'materials-catalog':{ src: 'assets/js/materials-catalog.js?v=9', libs: ['xlsx'], expose: 'PIAMaterialsCatalog' },
+  'discipline-ai':   { src: 'assets/js/discipline-ai-modal.js?v=26', libs: ['xlsx'] },
+  'pcp':             { src: 'assets/js/pcp.js?v=8',             deps: ['pia-shell','excel-export'], libs: ['chart'], expose: 'PIAPCP' },
   'planner-hub':     { src: 'assets/js/planner-hub.js?v=2',     deps: ['pia-shell'], expose: 'PIAPlannerHub' },
-  'tdraw':           { src: 'assets/js/tdraw.js?v=15',           deps: ['pia-shell','excel-export'], expose: 'PIATDraw' },
-  'eng-modules':     { src: 'assets/js/eng-modules.js?v=5',     deps: ['pia-shell','excel-export'], expose: 'PIAEngModule' },
+  'tdraw':           { src: 'assets/js/tdraw.js?v=15',           deps: ['pia-shell','excel-export'], libs: ['xlsx'], expose: 'PIATDraw' },
+  'eng-modules':     { src: 'assets/js/eng-modules.js?v=5',     deps: ['pia-shell','excel-export'], libs: ['xlsx'], expose: 'PIAEngModule' },
   'hub-unified':     { src: 'assets/js/hub-unified.js?v=19',    deps: ['pia-shell','planner-hub','tdraw','eng-modules'], expose: 'PIAHubUnified' },
-  'planning':        { src: 'assets/js/planejamento.js?v=3',     expose: 'PIAPlanning' },
-  'rdo-diario':      { src: 'assets/js/rdo-diario.js?v=8',        expose: 'PIARDODiario' }
+  'planning':        { src: 'assets/js/planejamento.js?v=4',     expose: 'PIAPlanning' },
+  'rdo-diario':      { src: 'assets/js/rdo-diario.js?v=8',        libs: ['jspdf'], expose: 'PIARDODiario' }
 };
 
 const _loading = {}; // name -> promise
@@ -80,6 +80,11 @@ async function ensure(name){
       // Resolve deps primeiro
       if(def.deps && def.deps.length){
         await Promise.all(def.deps.map(dep => ensure(dep)));
+      }
+      // Carrega libs pesadas (XLSX/Chart/jsPDF) sob demanda ANTES do módulo rodar.
+      // Assim o código do módulo encontra a lib pronta sem editar cada call site.
+      if(def.libs && def.libs.length && w.PIALibs){
+        await Promise.all(def.libs.map(l => w.PIALibs.ensure(l).catch(e => console.warn('[lazy] lib', l, 'falhou:', e))));
       }
       // Carrega o script
       await loadScript(def.src);

@@ -118,7 +118,8 @@ function tableToData(table){
   return { headers, rows };
 }
 
-function exportData(data, opts){
+async function exportData(data, opts){
+  if(window.PIALibs){ try{ await window.PIALibs.ensure('xlsx'); }catch(_){} }
   if(!ensureXLSX()){ alert('Biblioteca XLSX não carregada.'); return; }
   opts = opts || {};
   const fname = sanitizeFilename(opts.filename || 'export') + '_' + ts() + '.xlsx';

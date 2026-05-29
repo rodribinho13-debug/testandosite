@@ -1134,6 +1134,7 @@ async function processImportFile(){
 }
 
 async function parseExcelLocal(file){
+  if(!w.XLSX && window.PIALibs){ try{ await window.PIALibs.ensure('xlsx'); }catch(_){} }
   if(!w.XLSX){ throw new Error('Biblioteca XLSX não carregada. Recarregue a página.'); }
   const buf = await file.arrayBuffer();
   const wb = w.XLSX.read(buf,{type:'array'});
@@ -1164,6 +1165,7 @@ async function parseAIFile(file){
   let b64;
   if(/\.(xlsx|xls|csv)$/i.test(file.name)){
     // Converte planilha pra CSV e manda como texto
+    if(!w.XLSX && window.PIALibs){ try{ await window.PIALibs.ensure('xlsx'); }catch(_){} }
     if(!w.XLSX) throw new Error('Biblioteca XLSX não carregada.');
     const buf = await file.arrayBuffer();
     const wb = w.XLSX.read(buf,{type:'array'});

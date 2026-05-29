@@ -22,12 +22,48 @@
 <meta name="robots" content="noindex,nofollow"/>
 <title>PROJECT.IA</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<!-- Libs pesadas usadas só sob demanda (export/import/dashboard/PDF): defer pra não bloquear o primeiro paint -->
-<script defer src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script defer src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
-<script defer src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-<script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-<script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<!-- Libs pesadas (XLSX/PDF/Chart) NÃO carregam no boot. São carregadas 100% sob demanda
+     via window.PIALibs.ensure(nome) no primeiro uso (export/import/dashboard/PDF). -->
+<script>
+window.PIALibs = (function(){
+  var cache = {};
+  var URLS = {
+    xlsx:  ['https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js',
+            'https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js'],
+    chart: ['https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js'],
+    jspdf: ['https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'],
+    pdfjs: ['https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js']
+  };
+  var READY = {
+    xlsx:  function(){ return typeof window.XLSX !== 'undefined' && !!window.XLSX.utils; },
+    chart: function(){ return typeof window.Chart !== 'undefined'; },
+    jspdf: function(){ return !!(window.jspdf || window.jsPDF); },
+    pdfjs: function(){ return typeof window.pdfjsLib !== 'undefined'; }
+  };
+  function loadOne(url){
+    return new Promise(function(resolve, reject){
+      var ex = document.querySelector('script[data-pialib="'+url+'"]');
+      if(ex){ if(ex.dataset.ok==='1') return resolve(); ex.addEventListener('load', function(){resolve();}); ex.addEventListener('error', reject); return; }
+      var s = document.createElement('script');
+      s.src = url; s.async = false; s.dataset.pialib = url;
+      s.onload = function(){ s.dataset.ok = '1'; resolve(); };
+      s.onerror = function(){ reject(new Error('Falha ao carregar ' + url)); };
+      document.head.appendChild(s);
+    });
+  }
+  function ensure(name){
+    if(cache[name]) return cache[name];
+    var urls = URLS[name];
+    if(!urls) return Promise.reject(new Error('Lib desconhecida: ' + name));
+    if(READY[name] && READY[name]()){ cache[name] = Promise.resolve(); return cache[name]; }
+    // Carrega as URLs em ordem (xlsx precisa do core antes do style bundle)
+    cache[name] = urls.reduce(function(p, u){ return p.then(function(){ return loadOne(u); }); }, Promise.resolve())
+      .catch(function(e){ delete cache[name]; throw e; });
+    return cache[name];
+  }
+  return { ensure: ensure };
+})();
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -874,10 +910,11 @@ function openImportExcel(view){
 
 let _impXlData = null;
 let _impXlView = null;
-function processImportExcel(input, view){
+async function processImportExcel(input, view){
   const file = input.files && input.files[0];
   if(!file) return;
   _impXlView = view;
+  try{ await window.PIALibs.ensure('xlsx'); }catch(_){ toast('Não foi possível carregar a biblioteca de planilhas. Verifique a conexão.','err'); return; }
   const reader = new FileReader();
   reader.onload = function(e){
     try {
@@ -1021,6 +1058,7 @@ async function processAIImport(input, view){
                   || file.type === 'application/vnd.ms-excel'
                   || /\.xlsx?$/i.test(file.name);
     if(isExcel){
+      try{ await window.PIALibs.ensure('xlsx'); }catch(_){ toast('Não foi possível carregar a biblioteca de planilhas.','err'); return; }
       // Le XLSX e converte cada sheet pra CSV
       const buf = await file.arrayBuffer();
       const wb = XLSX.read(new Uint8Array(buf), {type:'array'});
@@ -3226,9 +3264,10 @@ async function dJoint(id, name){
   rQualityJoints();
 }
 
-function exportQualityJointsXLSX(){
+async function exportQualityJointsXLSX(){
   const list = _qualityJoints;
   if(!list.length){toast('Sem juntas para exportar','warn');return;}
+  try{ await window.PIALibs.ensure('xlsx'); }catch(_){ toast('Não foi possível carregar a biblioteca de planilhas.','err'); return; }
   const rows = list.map(j=>({
     'Iso': j.iso_number, 'Rev': j.revision, 'Spool': j.spool_id_ref, 'Junta': j.joint_number||j.junta,
     'Diametro': j.diameter_in, 'Schedule': j.schedule, 'Material': j.material,
@@ -3813,9 +3852,10 @@ function _mtGetFilteredRows(){
   });
 }
 
-function mtExportXLSX(){
+async function mtExportXLSX(){
   const rows = _mtGetFilteredRows();
   if(!rows.length){toast('Nenhum material no filtro pra exportar','warn');return;}
+  try{ await window.PIALibs.ensure('xlsx'); }catch(_){ toast('Não foi possível carregar a biblioteca de planilhas.','err'); return; }
   const ws = XLSX.utils.json_to_sheet(rows);
   // Larguras das colunas
   ws['!cols'] = [
@@ -4094,10 +4134,11 @@ function exportP6(){
   toast(`Primavera XML exportado · ${list.length*2} atividades`,'ok');
 }
 
-function exportProject(){
+async function exportProject(){
   const list=curProj?pSheets(curProj):sheets;
   const proj=projects.find(p=>p.id===curProj);
   if(!list.length){toast('Nenhuma folha pra exportar','warn');return;}
+  try{ await window.PIALibs.ensure('xlsx'); }catch(_){ toast('Não foi possível carregar a biblioteca de planilhas.','err'); return; }
   const tasks=[];
   let id=1;
   // Tarefa-mãe do projeto
@@ -4403,6 +4444,7 @@ async function delProd(id){
 // ═══════════════════════════════════════════════════
 let _dashTab='exec';
 async function rDash(){
+  try{ await window.PIALibs.ensure('chart'); }catch(_){}
   document.getElementById('vdash').innerHTML=`
     <div class="bc-row">
       <span style="font-weight:500">📊 Dashboards Operacionais — Preview do Power BI</span>
@@ -5110,6 +5152,7 @@ async function procPdf(file){
   if(_extMode==='ai'){await procPdfAI(file);return;}
   showExt('Lendo PDF e extraindo campos…','load');
   try{
+    if(typeof pdfjsLib==='undefined'){ try{ await window.PIALibs.ensure('pdfjs'); }catch(_){} }
     if(typeof pdfjsLib==='undefined'){showExt('PDF.js não disponível. Preencha manualmente.','err');return}
     pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
     const ab=await file.arrayBuffer();
@@ -5240,7 +5283,7 @@ function exFields(raw,filename,numPages){
 // EXPORT
 // ═══════════════════════════════════════════════════
 function selExp(fmt){expFmt=fmt;document.querySelectorAll('.exp-card').forEach(c=>c.classList.remove('sel'));document.getElementById('ec-'+fmt).classList.add('sel')}
-function doExport(){
+async function doExport(){
   const list=curProj?pSheets(curProj):sheets;
   const pm={};projects.forEach(p=>pm[p.id]=p);
   const data=list.map(e=>{
@@ -5250,7 +5293,7 @@ function doExport(){
   if(!data.length){toast('Nenhum dado para exportar','warn');return}
   const proj=projects.find(p=>p.id===curProj);
   if(expFmt==='csv'){const h=Object.keys(data[0]);dlB(new Blob(['﻿'+[h.join(';'),...data.map(r=>h.map(k=>'"'+(r[k]??'')+'"').join(';'))].join('\n')],{type:'text/csv;charset=utf-8'}),'project_ia.csv')}
-  else if(expFmt==='xlsx'){const ws=XLSX.utils.json_to_sheet(data);const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Folhas');XLSX.writeFile(wb,'project_ia_relatorio.xlsx')}
+  else if(expFmt==='xlsx'){try{await window.PIALibs.ensure('xlsx');}catch(_){toast('Não foi possível carregar a biblioteca de planilhas.','err');return}const ws=XLSX.utils.json_to_sheet(data);const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Folhas');XLSX.writeFile(wb,'project_ia_relatorio.xlsx')}
   else{const now=new Date().toLocaleDateString('pt-BR');const html=`<!DOCTYPE html><html><head><meta charset="utf-8"><title>HYDROSTEC</title><style>body{font-family:Arial;font-size:9px;margin:16px}h1{font-size:13px;color:#0B3D91}h2{font-size:9px;color:#5a6a85;font-weight:normal;margin-bottom:10px}table{width:100%;border-collapse:collapse}th{background:#0B3D91;color:#fff;padding:4px 5px;font-size:8px;text-align:left}td{padding:3px 5px;border-bottom:0.5px solid #d0d8e8;font-size:8px}tr:nth-child(even){background:#f4f6f9}</style></head><body><h1>HYDROSTEC</h1><h2>${proj?proj.name+' ('+proj.code+') — ':''}Gerado em ${now}</h2><table><thead><tr>${Object.keys(data[0]).map(k=>`<th>${k}</th>`).join('')}</tr></thead><tbody>${data.map(r=>`<tr>${Object.values(r).map(v=>`<td>${v??''}</td>`).join('')}</tr>`).join('')}</tbody></table><\/body><\/html>`;const w=window.open(URL.createObjectURL(new Blob([html],{type:'text/html'})),'_blank');if(w)setTimeout(()=>w.print(),700)}
   cm('exp-modal');toast('Exportado','ok');
 }
@@ -7594,7 +7637,7 @@ function genNR13PDF(){alert("Funcao em manutencao - sera restaurada em breve.");
 <!-- ═══════════ SCRIPTS DE BOOT (core) ═══════════ -->
 <!-- Tudo que NÃO está aqui é carregado sob demanda via module-loader.js -->
 <script src="assets/js/ui-confirm.js?v=2" defer></script>
-<script src="assets/js/excel-export.js?v=8" defer></script>
+<script src="assets/js/excel-export.js?v=9" defer></script>
 <script src="assets/js/security.js?v=1" defer></script>
 <!-- v9-fields.js e v9-app.js desativados: já estão duplicados inline acima -->
 <script src="custom_views.js?v=4" defer></script>
@@ -7603,9 +7646,9 @@ function genNR13PDF(){alert("Funcao em manutencao - sera restaurada em breve.");
 <!-- analytics.js removido: Curva S + Físico-Financeiro agora vivem dentro do módulo Orçamento -->
 <!-- ai-router: wrapper único pra todas as chamadas de IA (auth+quota+audit+retry). Carrega antes do module-loader pra estar disponível pra todos os módulos lazy -->
 <script src="assets/js/ai-router.js?v=1" defer></script>
-<script src="assets/js/module-loader.js?v=20" defer></script>
+<script src="assets/js/module-loader.js?v=21" defer></script>
 <!-- planejamento.js — módulo de planejamento (Efetivo + Parâmetros HH + Cronograma + Gantt). Legacy planning.js arquivado em _archive_legacy/ -->
-<script src="assets/js/planejamento.js?v=3" defer></script>
+<script src="assets/js/planejamento.js?v=4" defer></script>
 <script src="assets/js/sidebar-groups.js?v=28" defer></script>
 <!-- Auto-init INLINE da sidebar (sobrevive a qualquer truncamento futuro do sidebar-groups.js) -->
 <script>
