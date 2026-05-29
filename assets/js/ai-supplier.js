@@ -42,9 +42,10 @@ async function go(){
 async function savePar(){
   const sb=getSb();if(!sb||!_state.result)return;
   const orgId=(w._org&&w._org.id)||null;
-  await sb.from('supplier_advisories').insert({org_id:orgId,supplier_id:_state.supplierId,kind:'ai_homologation',content:_state.result,generated_at:new Date().toISOString()}).then(()=>{}).catch(e=>console.warn('[ai-supplier] save:',e));
+  const _r=await sb.from('supplier_advisories').insert({org_id:orgId,supplier_id:_state.supplierId,kind:'ai_homologation',content:_state.result,generated_at:new Date().toISOString()});
+  if(_r.error){ console.warn('[ai-supplier] save:',_r.error); alert('Não foi possível salvar o parecer: '+_r.error.message); return; }
   d.getElementById('pia-iasup-ov').remove();
-  alert('Parecer salvo. Veja em "Pareceres" do fornecedor.');
+  alert('Parecer salvo.');
 }
 w.PIAIASupplier={generateAdvisory};
 }catch(e){console.error('[ai-supplier]',e);}})(window,document);

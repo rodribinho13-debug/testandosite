@@ -63,11 +63,26 @@ async function save(){
   try{
     const ex=_state.extracted||{};const itens=ex.itens||[];
     const orgId=(w._org&&w._org.id)||null;
+    var _fail=0, _lastErr='';
     for(const it of itens){
-      const payload={org_id:orgId,quotation_id:_state.rfqId,description:String(it.descricao||'Item').slice(0,500),quantity:n(it.quantidade)||1,unit:String(it.unidade||'un').slice(0,20),unit_price:n(it.preco_unitario),total_price:n(it.preco_total)||(n(it.quantidade)*n(it.preco_unitario)),lead_time_days:n(it.prazo_item_dias)||null,observation:it.observacao||null,meta:{source:'ai-quotation',inconsistencies:ex.inconsistencias||[]}};
-      let r=await sb.from('quotation_items').insert(payload);
-      if(r.error&&/column .* does not exist/i.test(r.error.message||'')){delete payload.meta;await sb.from('quotation_items').insert(payload);}
+      // quotation_items só tem: rfq_id, description, unit, quantity, budget_unit_price, notes.
+      // total/prazo/observação preservados em notes (não há colunas próprias).
+      const _extra=[];
+      if(it.preco_total) _extra.push('Total: '+it.preco_total);
+      if(it.prazo_item_dias) _extra.push('Prazo: '+it.prazo_item_dias+'d');
+      if(it.observacao) _extra.push(String(it.observacao));
+      const payload={
+        rfq_id:_state.rfqId,
+        description:String(it.descricao||'Item').slice(0,500),
+        quantity:n(it.quantidade)||1,
+        unit:String(it.unidade||'un').slice(0,20),
+        budget_unit_price:n(it.preco_unitario)||null,
+        notes:_extra.length?_extra.join(' · '):null
+      };
+      const r=await sb.from('quotation_items').insert(payload);
+      if(r.error){ _fail++; _lastErr=r.error.message; console.warn('[ai-quotation] item falhou:', r.error.message); }
     }
+    if(_fail){ alert('Alguns itens não foram gravados ('+_fail+'). '+_lastErr); }
     b.textContent='✓ Gravado';setTimeout(()=>{d.getElementById('pia-iaq-ov').remove();if(w.PIAQuotations&&w.PIAQuotations.open)w.PIAQuotations.open();},700);
   }catch(e){alert('Erro: '+e.message);b.disabled=false;b.textContent='Gravar no mapa';}finally{_state.busy=false;}
 }
