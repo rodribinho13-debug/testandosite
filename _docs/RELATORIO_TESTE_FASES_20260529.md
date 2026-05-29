@@ -45,4 +45,22 @@ teste manual. Tudo que é verificável por código/SQL foi feito e corrigido.
 3. **Gantt:** importar/exportar P6 e MS Project.
 4. **RDO Diário:** lista deve carregar (400 corrigido) + IA Foto → Gravar.
 
-*Atualizado em 2026-05-29.*
+---
+
+## Auditoria de BOTÕES MORTOS (onclick → função inexistente) — app inteiro
+
+`tools/_audit_onclick.cjs` cruzou `onclick="FN()"` × funções definidas. Achou **10 botões mortos** (davam `ReferenceError`). Confirmado em runtime (`typeof === "undefined"`). **Todos resolvidos:**
+
+| Botão morto | View | Decisão / Fix | Commit |
+|---|---|---|---|
+| `openEquipAIModal` | NR-13 "Cadastrar via IA" | wrapper lazy → `PIAIAEquipment.openImport` (módulo já existia) | `3939226` |
+| `toggleNotifPanel`, `markAllNotifRead` | sino de notificações | **removido** (recurso não implementado) | `8946f67` |
+| `oCivilPour`, `oCivilElem`, `oCivilSinapi` | Civil: Concretagens/Estruturas/Insumos | **modal implementado** (`manual-forms.js`) | `c5091d0`/`209c649` |
+| `oElecPanel`, `oElecSpda`, `oElecSpec` | Elétrica: Quadros/SPDA/Specs | **modal implementado** | `c5091d0`/`209c649` |
+| `oHydraulic` | Sistemas Hidráulicos | **modal implementado** | `c5091d0`/`209c649` |
+
+Após os fixes, `_audit_onclick.cjs` retorna **`{}`** (zero botões mortos).
+
+Os 7 modais foram **validados por SQL** (insert OK nas 7 tabelas com o payload do modal + cleanup). Descobertas de schema tratadas: `civil_insumos_catalog` e `cable_specs_catalog` são **catálogos globais** (sem `org_id`) → flag `orgScoped:false`.
+
+*Atualizado em 2026-05-29 (SW v9.3.20).*
