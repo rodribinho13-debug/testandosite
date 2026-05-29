@@ -1,6 +1,6 @@
 /* PROJECT.IA Service Worker - stale-while-revalidate optimized */
-const V='projectia-v9.3.18',N=`projectia-cache-${V}`;
-const A=['./','./index.html','./hydrostec_v9.html','./custom_views.js','./assets/css/v9.min.css','./assets/js/security.js','./assets/js/saas-modules.js','./assets/js/ia-chat.js','./assets/js/ui-confirm.js','./assets/js/excel-export.js','./assets/js/ai-router.js','./assets/js/module-loader.js','./assets/js/sidebar-groups.js','./assets/js/planejamento.js','./manifest.json'];
+const V='projectia-v9.3.19',N=`projectia-cache-${V}`;
+const A=['./','./index.html','./hydrostec_v9.html','./custom_views.js','./assets/css/v9.min.css','./assets/js/security.js','./assets/js/saas-modules.js','./assets/js/ia-chat.js','./assets/js/ui-confirm.js','./assets/js/excel-export.js','./assets/js/ai-router.js','./assets/js/module-loader.js','./assets/js/sidebar-groups.js','./assets/js/planejamento.js','./assets/js/manual-forms.js','./manifest.json'];
 const P=[/cdn\.jsdelivr\.net/,/cdnjs\.cloudflare\.com/,/fonts\.googleapis\.com/,/fonts\.gstatic\.com/,/unpkg\.com/];
 
 self.addEventListener('install', e => {
