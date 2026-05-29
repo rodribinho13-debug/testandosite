@@ -3233,6 +3233,20 @@ async function saveJoint(id){
     payload.org_id = _org.id;
     payload.junta_ativa = true;
     payload.project_id = proj_id || curProj;
+    if(!payload.project_id){ toast('Selecione um projeto antes de cadastrar a junta','warn'); return; }
+    // joints.line_id é NOT NULL — cria/reusa uma linha (a partir do iso_number) como a IA faz
+    if(!payload.line_id){
+      const _lineTag = (payload.iso_number && String(payload.iso_number).trim()) || ('AVULSA-' + (payload.joint_number || Date.now()));
+      try {
+        const _lf = await sb.from('lines').select('id').eq('org_id', _org.id).eq('project_id', payload.project_id).eq('tag', _lineTag).maybeSingle();
+        if(_lf.data && _lf.data.id){ payload.line_id = _lf.data.id; }
+        else {
+          const _ln = await sb.from('lines').insert({ org_id: _org.id, project_id: payload.project_id, tag: _lineTag }).select('id').single();
+          if(_ln.error){ toast('Erro ao criar linha: ' + _ln.error.message, 'err'); return; }
+          payload.line_id = _ln.data.id;
+        }
+      } catch(e){ toast('Erro ao vincular linha: ' + (e.message||e), 'err'); return; }
+    }
     op = sb.from('joints').insert(payload);
   }
   const {error} = await op;
