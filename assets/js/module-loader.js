@@ -164,6 +164,25 @@ function makeStub(moduleName, globalFnName){
 // Funções inline chamadas pelos onclicks do HTML
 makeStub('discipline-ai', 'openDisciplineAIModal');
 
+// Botão "Cadastrar via IA" de Equipamentos NR-13 chamava openEquipAIModal(), que
+// nunca foi definido (botão morto). A IA existe em ai-equipment.js (PIAIAEquipment.openImport).
+// Este wrapper carrega o módulo sob demanda e abre — mesmo padrão de openPlanning.
+if(typeof w.openEquipAIModal !== 'function'){
+  w.openEquipAIModal = async function(){
+    try {
+      await ensure('ai-equipment');
+      if(w.PIAIAEquipment && typeof w.PIAIAEquipment.openImport === 'function'){
+        const pid = (w._curProject && w._curProject.id) || w.curProj || null;
+        return w.PIAIAEquipment.openImport(pid);
+      }
+      alert('Módulo de IA de equipamentos indisponível. Recarregue a página.');
+    } catch(e){
+      console.error('[openEquipAIModal] falhou:', e);
+      alert('Não foi possível carregar a IA de equipamentos. Recarregue a página.');
+    }
+  };
+}
+
 // Wrapper que carrega módulo planning e chama .open()
 w.openPlanning = async function(projectId){
   try {
