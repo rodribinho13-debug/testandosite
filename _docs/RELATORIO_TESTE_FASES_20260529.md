@@ -116,4 +116,26 @@ Testado end-to-end por SQL (linha + junta) + cleanup. Commit `6f8f262`. SW v9.3.
 
 **Bug `ai-supplier`:** inseria em `supplier_advisories` que **não existia**, com erro engolido (`.catch`) + alerta falso "Parecer salvo". **Fix:** migration `018` cria a tabela (RLS org-scoped igual às irmãs) + mensagem honesta (só confirma se gravou). Commit `9f0717b`. SW v9.3.22.
 
+---
+
+## FASE 6 — GERAL / SISTEMA (auditoria; sem alterar permissões)
+
+| Item | Resultado |
+|---|---|
+| **Projetos** (`saveProj`) | ✅ payload bate com `projects` |
+| **Dashboard** (`rDash`) | ✅ render existe; Chart sob demanda |
+| **Integrações** (`rInt`) | ✅ render existe; sem botões mortos |
+| **Equipe & Acessos** (`rTeam`/`sendInvite`/`changeRole`) | ✅ RPCs `hyd_invite_user` e `hyd_apply_default_permissions` existem — **auditoria só leitura, nenhuma permissão alterada** |
+| **Meu Plano** (`rPlan`) | ✅ render existe |
+
+**Conclusão Fase 6:** sem bugs de código. (Equipe & Acessos auditado em modo leitura por segurança — não executei convites nem mudanças de papel/permissão.)
+
+---
+
+## Estado final das auditorias (Fases 1–6)
+
+Auditorias globais finais: **botões mortos = `{}`** (zero), HTML íntegro (`</html>`=1), todos os `.js` passam em `node --check`. SW final **v9.3.22**.
+
+Ferramentas versionadas em `tools/`: `_audit_ids.cjs`, `_audit_onclick.cjs`, `_audit_import.cjs`.
+
 *Atualizado em 2026-05-29 (SW v9.3.22).*
