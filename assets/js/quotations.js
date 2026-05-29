@@ -10,7 +10,8 @@ const SB_KEY = w.SUPABASE_KEY || 'sb_publishable_qVVBatpB_ppDLR6QcG8QgQ_hVYW0h8Q
 function getSb(){
   if(w.sb) return w.sb;
   if(w.supabase && typeof w.supabase.createClient === 'function'){
-    try { w.sb = w.supabase.createClient(SB_URL, SB_KEY); return w.sb; } catch(_){}
+    if(w.__pia_sb){ w.sb = w.__pia_sb; return w.sb; }
+    try { w.sb = w.__pia_sb = w.supabase.createClient(SB_URL, SB_KEY, { auth: { storageKey:'sb-toapdhfouuedaexgqlsv-auth-token', persistSession:true, autoRefreshToken:true, detectSessionInUrl:true } }); return w.sb; } catch(_){}
   }
   return null;
 }
@@ -650,11 +651,4 @@ async function openApprovalRules(){
       + '<button class="btn bg" id="par-close">Fechar</button>'
     + '</div>'
   + '</div>';
-  d.body.appendChild(ov);
-  d.getElementById('par-close').onclick = function(){ ov.remove(); };
-}
-
-w.PIAQuotations = { open };
-
-} catch(e){ console.error('[quotations] init falhou:', e); }
-})(window, document);
+  d.body.app

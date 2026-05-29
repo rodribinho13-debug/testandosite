@@ -43,7 +43,7 @@ const STATUS = {
 };
 
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
-function getSb(){ if(w.sb) return w.sb; try { if(w.supabase && w.SUPABASE_URL && w.SUPABASE_KEY) return w.supabase.createClient(w.SUPABASE_URL, w.SUPABASE_KEY); } catch(_){} return null; }
+function getSb(){ if(w.sb) return w.sb; if(w.__pia_sb) return (w.sb = w.__pia_sb); try { if(w.supabase && w.SUPABASE_URL && w.SUPABASE_KEY) return (w.sb = w.__pia_sb = w.supabase.createClient(w.SUPABASE_URL, w.SUPABASE_KEY, { auth: { storageKey:'sb-toapdhfouuedaexgqlsv-auth-token', persistSession:true, autoRefreshToken:true, detectSessionInUrl:true } })); } catch(_){} return null; }
 function getProjectId(){ if(w._curProject && w._curProject.id) return w._curProject.id; if(w.curProj) return w.curProj; try { return localStorage.getItem('pia.curProj'); } catch(_){ return null; } }
 function getOrgId(){ return w._org && w._org.id; }
 function getUserId(){ return w._user && w._user.id; }
@@ -595,11 +595,4 @@ w.PIAPCP = {
     }
     if(parentRdoId) upd.parent_rdo_id = parentRdoId;
     if(hhReal != null) upd.hh_real = +hhReal || 0;
-    const r = await sb.from('pcp_packages').update(upd).eq('id', pkgId);
-    if(r.error){ console.error('[PCP] setStatus', r.error); return false; }
-    return true;
-  },
-  STATUS, CNC, DISCIPLINAS
-};
-
-})();
+    const r

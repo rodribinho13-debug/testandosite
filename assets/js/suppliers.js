@@ -10,7 +10,8 @@ const SB_KEY = w.SUPABASE_KEY || 'sb_publishable_qVVBatpB_ppDLR6QcG8QgQ_hVYW0h8Q
 function getSb(){
   if(w.sb) return w.sb;
   if(w.supabase && typeof w.supabase.createClient === 'function'){
-    try { w.sb = w.supabase.createClient(SB_URL, SB_KEY); return w.sb; } catch(_){}
+    if(w.__pia_sb){ w.sb = w.__pia_sb; return w.sb; }
+    try { w.sb = w.__pia_sb = w.supabase.createClient(SB_URL, SB_KEY, { auth: { storageKey:'sb-toapdhfouuedaexgqlsv-auth-token', persistSession:true, autoRefreshToken:true, detectSessionInUrl:true } }); return w.sb; } catch(_){}
   }
   return null;
 }
@@ -363,8 +364,4 @@ function sel(id, label, value, opts){
 }
 
 
-w.openSupplierAI = function(supplierId){ if(!supplierId){alert('Selecione fornecedor.');return;} if(w.PIALazy) w.PIALazy.run('ai-supplier','generateAdvisory',supplierId); else if(w.PIAIASupplier) w.PIAIASupplier.generateAdvisory(supplierId); };
-w.PIASuppliers = { open };
-
-} catch(e){ console.error('[suppliers] init falhou:', e); }
-})(window, document);
+w.openSupplierAI = function(supplierId){ if(!supplierId){alert('Selecione fornecedor.');return;} if(w.PIALazy) w.PIALazy.run('ai-supplier','generateAdvisory

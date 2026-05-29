@@ -10,7 +10,8 @@ const SB_KEY = w.SUPABASE_KEY || 'sb_publishable_qVVBatpB_ppDLR6QcG8QgQ_hVYW0h8Q
 function getSb(){
   if(w.sb) return w.sb;
   if(w.supabase && typeof w.supabase.createClient === 'function'){
-    try { w.sb = w.supabase.createClient(SB_URL, SB_KEY); return w.sb; } catch(_){}
+    if(w.__pia_sb){ w.sb = w.__pia_sb; return w.sb; }
+    try { w.sb = w.__pia_sb = w.supabase.createClient(SB_URL, SB_KEY, { auth: { storageKey:'sb-toapdhfouuedaexgqlsv-auth-token', persistSession:true, autoRefreshToken:true, detectSessionInUrl:true } }); return w.sb; } catch(_){}
   }
   return null;
 }
@@ -522,12 +523,4 @@ async function bulkInsert(rows){
         await sb.from('materials_catalog').insert(payload);
       }
       ok++;
-    } catch(e){ console.warn('[mat-import] falhou:', payload.code, e); }
-  }
-  return ok;
-}
-
-w.PIAMaterialsCatalog = { open };
-
-} catch(e){ console.error('[materials-catalog] init falhou:', e); }
-})(window, document);
+    } catch(e){ con

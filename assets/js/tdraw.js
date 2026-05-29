@@ -7,7 +7,7 @@
 const w = window, d = document;
 
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
-function getSb(){ if(w.sb) return w.sb; try { if(w.supabase && w.SUPABASE_URL && w.SUPABASE_KEY) return w.supabase.createClient(w.SUPABASE_URL, w.SUPABASE_KEY); } catch(_){} return null; }
+function getSb(){ if(w.sb) return w.sb; if(w.__pia_sb) return (w.sb = w.__pia_sb); try { if(w.supabase && w.SUPABASE_URL && w.SUPABASE_KEY) return (w.sb = w.__pia_sb = w.supabase.createClient(w.SUPABASE_URL, w.SUPABASE_KEY, { auth: { storageKey:'sb-toapdhfouuedaexgqlsv-auth-token', persistSession:true, autoRefreshToken:true, detectSessionInUrl:true } })); } catch(_){} return null; }
 function getProjectId(){ if(w._curProject && w._curProject.id) return w._curProject.id; if(w.curProj) return w.curProj; try { return localStorage.getItem('pia.curProj'); } catch(_){ return null; } }
 function getProjectName(){ try { if(w._curProject && w._curProject.name) return w._curProject.name; const ps = w.projects || []; const id = getProjectId(); const p = ps.find(x => String(x.id)===String(id)); return p ? p.name : ''; } catch(_){ return ''; } }
 function getOrgId(){ return w._org && w._org.id; }
@@ -1328,10 +1328,4 @@ function hookGoVForTdraw(){
 }
 if(!hookGoVForTdraw()){
   if(d.readyState === 'loading'){
-    d.addEventListener('DOMContentLoaded', ()=>{ setTimeout(hookGoVForTdraw, 500); setTimeout(hookGoVForTdraw, 2000); });
-  } else {
-    setTimeout(hookGoVForTdraw, 500); setTimeout(hookGoVForTdraw, 2000);
-  }
-}
-
-})();
+    d.addEventListener

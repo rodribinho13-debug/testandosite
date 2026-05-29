@@ -14,7 +14,8 @@ const SB_KEY = w.SUPABASE_KEY || 'sb_publishable_qVVBatpB_ppDLR6QcG8QgQ_hVYW0h8Q
 function _getSb(){
   if(w.sb) return w.sb;
   if(w.supabase && typeof w.supabase.createClient === 'function'){
-    try { w.sb = w.supabase.createClient(SB_URL, SB_KEY); return w.sb; } catch(e){ console.warn('[ia-chat] createClient falhou:', e); }
+    if(w.__pia_sb){ w.sb = w.__pia_sb; return w.sb; }
+    try { w.sb = w.__pia_sb = w.supabase.createClient(SB_URL, SB_KEY, { auth: { storageKey:'sb-toapdhfouuedaexgqlsv-auth-token', persistSession:true, autoRefreshToken:true, detectSessionInUrl:true } }); return w.sb; } catch(e){ console.warn('[ia-chat] createClient falhou:', e); }
   }
   return null;
 }
@@ -363,10 +364,4 @@ function tryMount(){
   setInterval(syncButtonVisibility, 1000);
 }
 if(document.readyState === 'loading'){
-  document.addEventListener('DOMContentLoaded', function(){ setTimeout(tryMount, 500); });
-} else {
-  setTimeout(tryMount, 500);
-}
-
-} catch(e){ console.warn('[PIAChat] init falhou:', e); }
-})(window);
+  

@@ -11,7 +11,8 @@ const SB_KEY = w.SUPABASE_KEY || 'sb_publishable_qVVBatpB_ppDLR6QcG8QgQ_hVYW0h8Q
 function getSb(){
   if(w.sb) return w.sb;
   if(w.supabase && typeof w.supabase.createClient === 'function'){
-    try { w.sb = w.supabase.createClient(SB_URL, SB_KEY); return w.sb; } catch(_){}
+    if(w.__pia_sb){ w.sb = w.__pia_sb; return w.sb; }
+    try { w.sb = w.__pia_sb = w.supabase.createClient(SB_URL, SB_KEY, { auth: { storageKey:'sb-toapdhfouuedaexgqlsv-auth-token', persistSession:true, autoRefreshToken:true, detectSessionInUrl:true } }); return w.sb; } catch(_){}
   }
   return null;
 }
@@ -1246,10 +1247,4 @@ async function renderComparativo(el){
       + '<table style="width:100%;border-collapse:collapse;font-size:11.5px">' + tableHead + '<tbody>' + rowsHtml + '</tbody></table>'
       + '</div>'
       + legenda;
-  } catch(e){ console.error('[orcamento.comparativo]', e); el.innerHTML = '<div style="padding:20px;color:#DC2626">Erro: ' + (e.message||e) + '</div>'; }
-}
-
-w.PIAOrcamento = { open };
-
-} catch(e){ console.error('[orcamento] init falhou:', e); }
-})(window, document);
+  } catch(e){ console.error('[orcamento.comparativo]', e); el.innerH

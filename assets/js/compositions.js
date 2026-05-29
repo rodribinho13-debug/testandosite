@@ -35,7 +35,8 @@ function getSb(){
   if(w.sb) return w.sb;
   // Fallback: cria cliente local se v9-app ainda não expôs o sb global
   if(w.supabase && typeof w.supabase.createClient === 'function'){
-    try { w.sb = w.supabase.createClient(SB_URL, SB_KEY); return w.sb; } catch(e){ console.warn('[compositions] createClient falhou:', e); }
+    if(w.__pia_sb){ w.sb = w.__pia_sb; return w.sb; }
+    try { w.sb = w.__pia_sb = w.supabase.createClient(SB_URL, SB_KEY, { auth: { storageKey:'sb-toapdhfouuedaexgqlsv-auth-token', persistSession:true, autoRefreshToken:true, detectSessionInUrl:true } }); return w.sb; } catch(e){ console.warn('[compositions] createClient falhou:', e); }
   }
   return null;
 }
@@ -477,11 +478,4 @@ w.PIACompositionsExtra = {
           return '<tr><td><strong>' + r[1] + ' (' + r[0] + ')</strong></td><td style="text-align:right;font-family:ui-monospace,monospace">' + f.toFixed(3) + '</td><td style="text-align:right;font-family:ui-monospace,monospace;font-weight:600">' + brl(basePrice * f) + '</td></tr>';
         }).join('')
       + '</tbody></table>'
-      + '<div style="margin-top:14px;padding:10px 14px;background:var(--t1,#F8FAFC);border-left:3px solid var(--accent,#1D4ED8);border-radius:6px;font-size:11.5px">Variantes regionais aplicam multiplicador no preço base. Valores padrão SINAPI: NE 1.00 · SE 1.08 · S 1.05 · N 1.12 · CO 1.06.</div>';
-  }
-};
-
-w.PIACompositions = { open, openNewModal };
-
-} catch(e){ console.error('[compositions] init falhou:', e); }
-})(window, document);
+      + '<div style="margin-top:14px;padding:10px 14px;background:var(--t1,#F8FAFC);border-left:3px solid var(--accent,#1D4ED8);border-radius:6px;font-size:11.5px">Variantes regionais aplicam multiplicador no preço base. Valores padrão SINAPI
