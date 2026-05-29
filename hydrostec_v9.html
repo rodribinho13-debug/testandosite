@@ -152,7 +152,6 @@ window.PIALibs = (function(){
     <div class="hdr-acts" id="hdr-acts" style="margin-left:auto;display:flex;align-items:center;gap:8px"></div>
     <div style="display:flex;align-items:center;gap:8px;padding-left:14px;border-left:1px solid var(--t3)">
       <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="Alternar tema"><i data-lucide="sun" id="ico-theme" style="width:18px;height:18px"></i></button>
-      <button id="notif-bell" onclick="toggleNotifPanel(event)" class="theme-toggle" style="position:relative" title="Notificações"><i data-lucide="bell" style="width:18px;height:18px"></i><span id="notif-count" style="position:absolute;top:-4px;right:-4px;background:var(--danger);color:#fff;font-size:9px;border-radius:50%;min-width:16px;height:16px;display:none;align-items:center;justify-content:center;font-weight:700;padding:0 4px">0</span></button>
       <span class="hdr-user"><i data-lucide="circle-user-round" style="width:16px;height:16px"></i><span id="user-email">…</span> · <span id="org-name" style="color:var(--t7);font-weight:600">…</span></span>
       <button onclick="doLogout()">Sair</button>
     </div>
@@ -503,19 +502,6 @@ window.PIALibs = (function(){
 </div></div>
 
 <div class="toast-wrap" id="toasts"></div>
-<div id="notif-panel" style="display:none;position:fixed;top:64px;right:14px;background:var(--t0);border-radius:14px;width:420px;max-height:580px;border:1px solid var(--t3);box-shadow:var(--sh-3);z-index:200;overflow:hidden">
-  <div style="padding:14px 16px;border-bottom:1px solid var(--t3);display:flex;justify-content:space-between;align-items:center;background:var(--t1)">
-    <div style="display:flex;align-items:center;gap:8px">
-      <i data-lucide="bell" style="width:16px;height:16px;color:var(--primary)"></i>
-      <strong style="color:var(--t9);font-size:14px;letter-spacing:-.2px">Avisos &amp; Notificações</strong>
-    </div>
-    <div style="display:flex;gap:6px">
-      <button class="sm-e" onclick="markAllNotifRead()"><i data-lucide="check-check"></i>Marcar tudo</button>
-      <button class="sm-e" onclick="document.getElementById('notif-panel').style.display='none'" title="Fechar"><i data-lucide="x"></i></button>
-    </div>
-  </div>
-  <div id="notif-list" style="max-height:520px;overflow-y:auto"></div>
-</div>
 
 <script>
 // ═══════════════════════════════════════════════════
@@ -1428,7 +1414,7 @@ async function reRenderViewWithLabels(view){
 // HELPER GLOBAL: remove modais dinâmicos residuais
 // ═══════════════════════════════════════════════════
 function closeAllDynamicOverlays(){
-  const ids = ['invite-overlay','perms-overlay','equip-overlay','insp-overlay','ut-overlay','mos-overlay','paint-overlay','scaf-overlay','cal-overlay','eqai-overlay','p6-overlay','pdf-iso-overlay','notif-panel'];
+  const ids = ['invite-overlay','perms-overlay','equip-overlay','insp-overlay','ut-overlay','mos-overlay','paint-overlay','scaf-overlay','cal-overlay','eqai-overlay','p6-overlay','pdf-iso-overlay'];
   document.querySelectorAll('.overlay').forEach(o=>{
     if(o.id && ids.includes(o.id)) o.remove();
   });
