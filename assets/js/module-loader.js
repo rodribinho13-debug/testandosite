@@ -16,7 +16,7 @@ const REGISTRY = {
   // ============== Módulos UI (todos lazy)
   'compositions':    { src: 'assets/js/compositions.js?v=8',    expose: 'PIACompositions' },
   'budget':          { src: 'assets/js/budget.js?v=5',          deps: ['excel-export'], libs: ['xlsx','chart','jspdf'], expose: 'PIABudget' },
-  'orcamento':       { src: 'assets/js/orcamento.js?v=19',        deps: ['excel-export'], libs: ['xlsx','chart','jspdf'], expose: 'PIAOrcamento' },
+  'orcamento':       { src: 'assets/js/orcamento.js?v=20',        deps: ['excel-export'], libs: ['xlsx','chart','jspdf'], expose: 'PIAOrcamento' },
   'ai-orcamento':    { src: 'assets/js/ai-orcamento.js?v=3',     deps: ['ai-router'], expose: 'PIAIAOrcamento' },
   'ai-rdo':          { src: 'assets/js/ai-rdo.js?v=3',          deps: ['ai-router'], expose: 'PIAIARdo' },
   'ai-quotation':    { src: 'assets/js/ai-quotation.js?v=1',    deps: ['ai-router'], expose: 'PIAIAQuotation' },

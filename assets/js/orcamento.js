@@ -254,10 +254,13 @@ function renderShell(){
     + '</div>'
     + '<div id="orc-body" style="flex:1;overflow:auto;padding:18px 22px;background:var(--t1,#F8FAFC)"></div>';
   ov.querySelectorAll('.orc-tab').forEach(b => b.onclick = ()=>{ _state.view = b.dataset.view; renderShell(); });
-  d.getElementById('orc-export-xlsx').onclick = exportXLSX;
-  d.getElementById('orc-export-csv').onclick = exportCSV;
-  d.getElementById('orc-export-pdf').onclick = exportPDF;
-  d.getElementById('orc-import-ia').onclick = openImportIA;
+  // Guard com if(el): o shell renderiza só Excel/PDF/IA Import (não há botão CSV).
+  // Sem o guard, getElementById('orc-export-csv') === null e o .onclick lançava
+  // TypeError, quebrando o bind do resto da toolbar (inclusive o IA Import).
+  var _eX = d.getElementById('orc-export-xlsx'); if(_eX) _eX.onclick = exportXLSX;
+  var _eC = d.getElementById('orc-export-csv'); if(_eC) _eC.onclick = exportCSV;
+  var _eP = d.getElementById('orc-export-pdf'); if(_eP) _eP.onclick = exportPDF;
+  var _eI = d.getElementById('orc-import-ia'); if(_eI) _eI.onclick = openImportIA;
   const body = d.getElementById('orc-body');
   if(v === 'bom') renderBOM(body);
   else if(v === 'insumos') renderInsumos(body);
