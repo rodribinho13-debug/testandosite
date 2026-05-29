@@ -119,7 +119,7 @@ function tableToData(table){
 }
 
 function exportData(data, opts){
-  if(!ensureXLSX()){ alert('Biblioteca XLSX nao carregada.'); return; }
+  if(!ensureXLSX()){ alert('Biblioteca XLSX não carregada.'); return; }
   opts = opts || {};
   const fname = sanitizeFilename(opts.filename || 'export') + '_' + ts() + '.xlsx';
 

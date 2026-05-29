@@ -10,19 +10,19 @@ const w = window, d = document;
 const REGISTRY = {
   // ============== Dependências base (carregadas sob demanda)
   'pia-shell':       { src: 'assets/js/pia-shell.js?v=2',       expose: 'PIAShell' },
-  'excel-export':    { src: 'assets/js/excel-export.js?v=6',    expose: 'PIAExcel' },
+  'excel-export':    { src: 'assets/js/excel-export.js?v=8',    expose: 'PIAExcel' },
   'ai-router':       { src: 'assets/js/ai-router.js?v=1',       expose: 'PIAAIRouter' },
 
   // ============== Módulos UI (todos lazy)
   'compositions':    { src: 'assets/js/compositions.js?v=8',    expose: 'PIACompositions' },
   'budget':          { src: 'assets/js/budget.js?v=5',          deps: ['excel-export'], expose: 'PIABudget' },
-  'orcamento':       { src: 'assets/js/orcamento.js?v=18',        deps: ['excel-export'], expose: 'PIAOrcamento' },
-  'ai-orcamento':    { src: 'assets/js/ai-orcamento.js?v=2',     deps: ['ai-router'], expose: 'PIAIAOrcamento' },
+  'orcamento':       { src: 'assets/js/orcamento.js?v=19',        deps: ['excel-export'], expose: 'PIAOrcamento' },
+  'ai-orcamento':    { src: 'assets/js/ai-orcamento.js?v=3',     deps: ['ai-router'], expose: 'PIAIAOrcamento' },
   'ai-rdo':          { src: 'assets/js/ai-rdo.js?v=2',          deps: ['ai-router'], expose: 'PIAIARdo' },
   'ai-quotation':    { src: 'assets/js/ai-quotation.js?v=1',    deps: ['ai-router'], expose: 'PIAIAQuotation' },
   'ai-supplier':     { src: 'assets/js/ai-supplier.js?v=1',     deps: ['ai-router'], expose: 'PIAIASupplier' },
-  'ai-catalog':      { src: 'assets/js/ai-catalog.js?v=1',      deps: ['ai-router'], expose: 'PIAIACatalog' },
-  'ai-composition':  { src: 'assets/js/ai-composition.js?v=2',  deps: ['ai-router'], expose: 'PIAIAComposition' },
+  'ai-catalog':      { src: 'assets/js/ai-catalog.js?v=2',      deps: ['ai-router'], expose: 'PIAIACatalog' },
+  'ai-composition':  { src: 'assets/js/ai-composition.js?v=3',  deps: ['ai-router'], expose: 'PIAIAComposition' },
   'ai-pcp':          { src: 'assets/js/ai-pcp.js?v=1',          deps: ['ai-router'], expose: 'PIAIAPcp' },
   'ai-quality':      { src: 'assets/js/ai-quality.js?v=1',      deps: ['ai-router'], expose: 'PIAIAQuality' },
   'ai-equipment':    { src: 'assets/js/ai-equipment.js?v=1',    deps: ['ai-router'], expose: 'PIAIAEquipment' },
@@ -31,9 +31,9 @@ const REGISTRY = {
   'hh-params':       { src: 'assets/js/hh-params.js?v=4',       expose: 'PIAHHParams' },
   'electrical-base': { src: 'assets/js/electrical-base.js?v=4', expose: 'PIAElecBase' },
   'rdo':             { src: 'assets/js/rdo.js?v=9',             deps: ['excel-export','pia-shell'], expose: 'PIARDO' },
-  'quotations':      { src: 'assets/js/quotations.js?v=12',      deps: ['excel-export'], expose: 'PIAQuotations' },
-  'suppliers':       { src: 'assets/js/suppliers.js?v=6',       expose: 'PIASuppliers' },
-  'materials-catalog':{ src: 'assets/js/materials-catalog.js?v=8', expose: 'PIAMaterialsCatalog' },
+  'quotations':      { src: 'assets/js/quotations.js?v=13',      deps: ['excel-export'], expose: 'PIAQuotations' },
+  'suppliers':       { src: 'assets/js/suppliers.js?v=7',       expose: 'PIASuppliers' },
+  'materials-catalog':{ src: 'assets/js/materials-catalog.js?v=9', expose: 'PIAMaterialsCatalog' },
   'discipline-ai':   { src: 'assets/js/discipline-ai-modal.js?v=25' },
   'pcp':             { src: 'assets/js/pcp.js?v=8',             deps: ['pia-shell','excel-export'], expose: 'PIAPCP' },
   'planner-hub':     { src: 'assets/js/planner-hub.js?v=2',     deps: ['pia-shell'], expose: 'PIAPlannerHub' },
@@ -41,7 +41,7 @@ const REGISTRY = {
   'eng-modules':     { src: 'assets/js/eng-modules.js?v=5',     deps: ['pia-shell','excel-export'], expose: 'PIAEngModule' },
   'hub-unified':     { src: 'assets/js/hub-unified.js?v=19',    deps: ['pia-shell','planner-hub','tdraw','eng-modules'], expose: 'PIAHubUnified' },
   'planning':        { src: 'assets/js/planejamento.js?v=3',     expose: 'PIAPlanning' },
-  'rdo-diario':      { src: 'assets/js/rdo-diario.js?v=7',        expose: 'PIARDODiario' }
+  'rdo-diario':      { src: 'assets/js/rdo-diario.js?v=8',        expose: 'PIARDODiario' }
 };
 
 const _loading = {}; // name -> promise

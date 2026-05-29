@@ -36,8 +36,8 @@ function renderInput(){
   ov.innerHTML='<div style="background:var(--t0,#fff);border-radius:10px;max-width:560px;width:100%;border:1px solid var(--t3,#E5E7EB)"><div style="padding:18px 22px;border-bottom:1px solid var(--t3,#E5E7EB)"><div style="font-size:15px;font-weight:600;color:var(--t9,#0F172A)">Gerar composição via IA</div><div style="font-size:11.5px;color:var(--t6,#64748B);margin-top:3px;line-height:1.5">Descreva o serviço em texto livre. Ex: "soldagem topo a topo aço carbono Sch 40 6 polegadas com PQR ASME IX". A IA estrutura mão de obra + materiais + equipamentos.</div></div><div style="padding:18px 22px"><textarea id="iac-q" placeholder="Descreva o serviço..." style="width:100%;min-height:120px;padding:10px;border:1px solid var(--t3,#E5E7EB);border-radius:6px;font-size:13px;font-family:inherit;resize:vertical"></textarea></div><div style="padding:14px 22px;border-top:1px solid var(--t3,#E5E7EB);display:flex;justify-content:flex-end;gap:8px"><button class="btn bg" id="iac-x">Cancelar</button><button class="btn bp" id="iac-go">Gerar</button></div></div>';
   d.getElementById('iac-x').onclick=()=>ov.remove();
   d.getElementById('iac-go').onclick=async()=>{
-    const q=d.getElementById('iac-q').value.trim();if(!q){alert('Descreva o servico.');return;}
-    if(!w.PIAAIRouter)return alert('IA indisponivel.');
+    const q=d.getElementById('iac-q').value.trim();if(!q){alert('Descreva o serviço.');return;}
+    if(!w.PIAAIRouter)return alert('IA indisponível.');
     _state.busy=true;const b=d.getElementById('iac-go');b.disabled=true;b.textContent='Gerando...';
     try{
       _state.prompt=q;

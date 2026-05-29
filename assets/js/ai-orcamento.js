@@ -139,7 +139,7 @@ async function loadContext(projectId){
 // Modal: upload e configuração
 // ============================================================
 async function open(budgetId, projectId){
-  if(!budgetId){ alert('Salve o orcamento antes de usar a IA.'); return; }
+  if(!budgetId){ alert('Salve o orçamento antes de usar a IA.'); return; }
   _state.budgetId = budgetId;
   _state.projectId = projectId;
   _state.files = [];

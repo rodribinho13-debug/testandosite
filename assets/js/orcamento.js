@@ -75,8 +75,8 @@ async function open(){
     try {
       const r = await sb.from('projects').select('id,name,code').is('deleted_at',null).order('created_at',{ascending:false});
       if(r.data && r.data.length){ await openProjectPicker(r.data); return; }
-      alert('Nenhum projeto encontrado nessa organizacao. Crie um projeto primeiro.'); return;
-    } catch(e){ alert('Nao foi possivel carregar projetos: ' + (e.message||e)); return; }
+      alert('Nenhum projeto encontrado nessa organização. Crie um projeto primeiro.'); return;
+    } catch(e){ alert('Não foi possível carregar projetos: ' + (e.message||e)); return; }
   }
   _state.project = { id: pid, name: getProjectName() };
   const prev = d.getElementById('pia-orc-overlay');
@@ -127,13 +127,13 @@ async function loadAll(){
     const ins = await sb.from('budgets').insert({
       org_id: orgId, project_id: pid,
       budget_number: 'ORC-' + ymd + '-' + rnd,
-      title: 'Orcamento principal - ' + _state.project.name,
+      title: 'Orçamento principal - ' + _state.project.name,
       issue_date: today.toISOString().slice(0,10),
       status: 'rascunho',
       bdi: BDI_DEFAULT
     }).select().single();
     if(ins.error){
-      budget = { id: null, org_id: orgId, project_id: pid, title: 'Orcamento (nao salvo)', bdi: { ...BDI_DEFAULT }, status: 'rascunho', total_amount: 0, final_amount: 0 };
+      budget = { id: null, org_id: orgId, project_id: pid, title: 'Orçamento (não salvo)', bdi: { ...BDI_DEFAULT }, status: 'rascunho', total_amount: 0, final_amount: 0 };
     } else { budget = ins.data; }
   }
   _state.budget = budget;
@@ -287,7 +287,7 @@ function renderBOM(el){
     + '<button id="orc-tpl" class="btn bg" title="Aplicar template">Templates</button>'
     + '<button id="orc-add-cap" class="btn bp">+ Novo capitulo</button>'
     + '<button id="orc-add-comp" class="btn bg">Adicionar da Base</button>'
-    + '<button id="orc-toggle-mode" class="btn bg" title="Alternar entre arvore e lista plana">' + (_state.mode==='tree'?'Lista':'Arvore') + '</button>'
+    + '<button id="orc-toggle-mode" class="btn bg" title="Alternar entre árvore e lista plana">' + (_state.mode==='tree'?'Lista':'Árvore') + '</button>'
     + '</div></div>';
 
   // Container da arvore
@@ -561,7 +561,7 @@ async function openLineEditor(existingNode, parentId){
     const sb = getSb();
     const b = _state.budget;
     const desc = d.getElementById('le-desc').value.trim();
-    if(!desc){ alert('Descricao obrigatoria.'); return; }
+    if(!desc){ alert('Descrição obrigatória.'); return; }
     const payload = {
       description: desc.slice(0,500),
       qty: n(d.getElementById('le-qty').value) || 0,
@@ -662,13 +662,13 @@ async function moveNode(draggedId, targetId){
   const target = items.find(x => x.id === targetId);
   if(!dragged || !target) return;
   // Nao pode mover dentro de si mesmo (loop)
-  if(isDescendant(target, draggedId)) { alert('Nao da pra mover um item pra dentro dele mesmo.'); return; }
+  if(isDescendant(target, draggedId)) { alert('Não dá pra mover um item pra dentro dele mesmo.'); return; }
   // Define novo parent: se target eh container (capitulo/grupo/subgrupo) -> vira filho dele
   // Se target eh linha -> vira irmao (mesmo parent)
   const newParent = (target.item_type === 'linha') ? target.parent_id : target.id;
   // Validacao de tipos (linha so dentro de grupo/subgrupo, grupo so dentro de capitulo, etc)
   if(!canBeChildOf(dragged.item_type, newParent ? items.find(x=>x.id===newParent).item_type : null)){
-    alert('Hierarquia invalida: ' + dragged.item_type + ' nao pode ficar dentro de ' + (newParent?items.find(x=>x.id===newParent).item_type:'raiz') + '.');
+    alert('Hierarquia inválida: ' + dragged.item_type + ' não pode ficar dentro de ' + (newParent?items.find(x=>x.id===newParent).item_type:'raiz') + '.');
     return;
   }
   const sb = getSb();
@@ -787,7 +787,7 @@ function treeToStructure(nodes){
 // ============================================================
 async function openAddFromBase(){
   const comps = _state.compositions || [];
-  if(comps.length === 0){ alert('Nenhuma composicao na base. Va em Suprimentos > Base de Composicoes pra cadastrar.'); return; }
+  if(comps.length === 0){ alert('Nenhuma composição na base. Vá em Suprimentos > Base de Composições pra cadastrar.'); return; }
   // Pergunta destino na arvore primeiro
   const container = await pickContainer();
   if(!container) return;
@@ -970,7 +970,7 @@ function openImportIA(){
   if(w.PIALazy){
     w.PIALazy.run('ai-orcamento', 'open', b.id, projectId).catch(function(e){
       console.error('[orcamento] ai-orcamento falhou:', e);
-      alert('Nao foi possivel carregar IA do Orcamento. Recarregue a pagina (Ctrl+Shift+R).');
+      alert('Não foi possível carregar IA do Orçamento. Recarregue a página (Ctrl+Shift+R).');
     });
   } else if(w.PIAIAOrcamento){
     w.PIAIAOrcamento.open(b.id, projectId);
@@ -982,7 +982,7 @@ function openImportIA(){
 // EXPORTACOES (Excel, CSV, PDF) - restauradas do backup
 // ============================================================
 async function exportXLSX(){
-  if(typeof w.XLSX === 'undefined'){ alert('Biblioteca XLSX nao carregada'); return; }
+  if(typeof w.XLSX === 'undefined'){ alert('Biblioteca XLSX não carregada'); return; }
   const items = _state.items || [];
   const totals = calcTotals();
   const bdi = _state.budget.bdi || BDI_DEFAULT;

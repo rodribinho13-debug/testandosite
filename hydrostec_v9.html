@@ -842,7 +842,7 @@ function openImportExcel(view){
   const mapInfo = VIEW_TABLE_MAP[view];
   if(!mapInfo){
     console.warn('[openImportExcel] viewkey nao mapeada:', view);
-    (window.PIAToast && window.PIAToast.warning || toast)('Importar Excel ainda nao esta disponivel para esta tela (' + view + ')','warn');
+    (window.PIAToast && window.PIAToast.warning || toast)('Importar Excel ainda não está disponível para esta tela (' + view + ')','warn');
     return;
   }
   if(mapInfo.reqProject && !curProj){
@@ -850,18 +850,18 @@ function openImportExcel(view){
     return;
   }
 
-  const viewNames = {quality_joints:'Mapa de Juntas',quality_reports:'Relatorios END',com:'Sistemas TH',mat:'Materiais',equip:'Equipamentos',maint:'Manutencao',sold:'Soldadores',cal:'Instrumentos',pend:'Pendencias',rdo:'RDO',paint:'Pintura',scaf:'Andaime',prod:'Produtividade HH',isos:'Folhas / Isos',civil_concr:'Concretagens',civil_elem:'Elementos Estruturais',civil_sinapi:'Insumos SINAPI',elec_panels:'Quadros Elétricos',elec_spda:'SPDA / Aterramento',elec_specs:'Specs Elétricas',hydraulic:'Hidráulica'};
+  const viewNames = {quality_joints:'Mapa de Juntas',quality_reports:'Relatórios END',com:'Sistemas TH',mat:'Materiais',equip:'Equipamentos',maint:'Manutenção',sold:'Soldadores',cal:'Instrumentos',pend:'Pendências',rdo:'RDO',paint:'Pintura',scaf:'Andaime',prod:'Produtividade HH',isos:'Folhas / Isos',civil_concr:'Concretagens',civil_elem:'Elementos Estruturais',civil_sinapi:'Insumos SINAPI',elec_panels:'Quadros Elétricos',elec_spda:'SPDA / Aterramento',elec_specs:'Specs Elétricas',hydraulic:'Hidráulica'};
   const overlay = document.createElement('div');
   overlay.className = 'overlay open';
   overlay.id = 'import-excel-overlay';
   overlay.onclick = (e)=>{ if(e.target===overlay) overlay.remove(); };
   overlay.innerHTML = '<div class="mbox" style="max-width:820px"><button class="mclose" onclick="document.getElementById(\'import-excel-overlay\').remove()"><i data-lucide="x"></i></button>'
     + '<div class="mtitle"><i data-lucide="file-spreadsheet" style="color:var(--success)"></i>Importar Excel - '+(viewNames[view]||view)+'</div>'
-    + '<div style="background:var(--success-l);border-left:3px solid var(--success);padding:10px 14px;border-radius:6px;font-size:12px;color:var(--success-h);margin-bottom:14px"><strong>Como funciona:</strong> selecione um arquivo .xlsx/.xls/.csv com a primeira linha contendo os cabecalhos das colunas. O sistema vai sugerir o mapeamento de cada coluna do Excel para um campo do sistema. Voce ajusta o que quiser e clica Importar para cadastrar tudo de uma vez.</div>'
+    + '<div style="background:var(--success-l);border-left:3px solid var(--success);padding:10px 14px;border-radius:6px;font-size:12px;color:var(--success-h);margin-bottom:14px"><strong>Como funciona:</strong> selecione um arquivo .xlsx/.xls/.csv com a primeira linha contendo os cabeçalhos das colunas. O sistema vai sugerir o mapeamento de cada coluna do Excel para um campo do sistema. Você ajusta o que quiser e clica Importar para cadastrar tudo de uma vez.</div>'
     + '<div style="border:2px dashed var(--t3);border-radius:12px;padding:30px;text-align:center;cursor:pointer;background:var(--t1)" onclick="document.getElementById(\'imp-xl-file\').click()">'
     + '<i data-lucide="upload-cloud" style="width:36px;height:36px;color:var(--primary);margin-bottom:8px"></i>'
     + '<div style="font-size:13.5px;font-weight:600;color:var(--t9)">Clique ou arraste o arquivo Excel/CSV aqui</div>'
-    + '<div style="font-size:11.5px;color:var(--t6);margin-top:4px">.xlsx &middot; .xls &middot; .csv (ate ~5000 linhas)</div>'
+    + '<div style="font-size:11.5px;color:var(--t6);margin-top:4px">.xlsx &middot; .xls &middot; .csv (até ~5000 linhas)</div>'
     + '</div>'
     + '<input type="file" id="imp-xl-file" accept=".xlsx,.xls,.csv" style="display:none" onchange="processImportExcel(this,\''+view+'\')">'
     + '<div id="imp-xl-content" style="margin-top:16px"></div>'
@@ -919,7 +919,7 @@ function processImportExcel(input, view){
 async function confirmImportExcel(view){
   if(!_impXlData || !_impXlData.length){ toast('Sem dados pra importar','warn'); return; }
   const mapInfo = VIEW_TABLE_MAP[view];
-  if(!mapInfo){ toast('View nao mapeada','err'); return; }
+  if(!mapInfo){ toast('View não mapeada','err'); return; }
 
   // Lê mapeamento de colunas
   const selects = document.querySelectorAll('#imp-xl-content select[data-excel-col]');
@@ -978,10 +978,10 @@ async function confirmImportExcel(view){
 // ──────────────── IMPORTAR VIA IA ────────────────
 function openAIImport(view){
   const mapInfo = VIEW_TABLE_MAP[view];
-  if(!mapInfo){ toast('Esta view nao suporta IA','warn'); return; }
+  if(!mapInfo){ toast('Esta view não suporta IA','warn'); return; }
   if(mapInfo.reqProject && !curProj){ toast('Selecione um projeto primeiro','warn'); return; }
 
-  const viewNames = {quality_joints:'Mapa de Juntas',quality_reports:'Relatorios END',com:'Sistemas TH',mat:'Materiais',equip:'Equipamentos',maint:'Manutencao',sold:'Soldadores',cal:'Instrumentos',pend:'Pendencias',rdo:'RDO',paint:'Pintura',scaf:'Andaime',prod:'Produtividade HH',isos:'Folhas / Isos',civil_concr:'Concretagens',civil_elem:'Elementos Estruturais',civil_sinapi:'Insumos SINAPI',elec_panels:'Quadros Elétricos',elec_spda:'SPDA / Aterramento',elec_specs:'Specs Elétricas',hydraulic:'Hidráulica'};
+  const viewNames = {quality_joints:'Mapa de Juntas',quality_reports:'Relatórios END',com:'Sistemas TH',mat:'Materiais',equip:'Equipamentos',maint:'Manutenção',sold:'Soldadores',cal:'Instrumentos',pend:'Pendências',rdo:'RDO',paint:'Pintura',scaf:'Andaime',prod:'Produtividade HH',isos:'Folhas / Isos',civil_concr:'Concretagens',civil_elem:'Elementos Estruturais',civil_sinapi:'Insumos SINAPI',elec_panels:'Quadros Elétricos',elec_spda:'SPDA / Aterramento',elec_specs:'Specs Elétricas',hydraulic:'Hidráulica'};
 
   const overlay = document.createElement('div');
   overlay.className = 'overlay open';
@@ -989,13 +989,13 @@ function openAIImport(view){
   overlay.onclick = (e)=>{ if(e.target===overlay) overlay.remove(); };
   overlay.innerHTML = '<div class="mbox" style="max-width:680px"><button class="mclose" onclick="document.getElementById(\'ai-import-overlay\').remove()"><i data-lucide="x"></i></button>'
     + '<div class="mtitle"><i data-lucide="sparkles" style="color:var(--violet)"></i>Importar via IA - '+(viewNames[view]||view)+'</div>'
-    + '<div style="background:var(--violet-l);border-left:3px solid var(--violet);padding:10px 14px;border-radius:6px;font-size:12px;color:#5B21B6;margin-bottom:14px"><strong>Como funciona:</strong> envie um PDF, imagem ou planilha. A IA le o documento, extrai os dados estruturados e mostra uma previa antes de cadastrar. Funciona com fotos de fichas em papel, prints de planilha, lista impressa, etc.</div>'
+    + '<div style="background:var(--violet-l);border-left:3px solid var(--violet);padding:10px 14px;border-radius:6px;font-size:12px;color:#5B21B6;margin-bottom:14px"><strong>Como funciona:</strong> envie um PDF, imagem ou planilha. A IA lê o documento, extrai os dados estruturados e mostra uma prévia antes de cadastrar. Funciona com fotos de fichas em papel, prints de planilha, lista impressa, etc.</div>'
     + '<div style="border:2px dashed var(--violet);border-radius:12px;padding:30px;text-align:center;cursor:pointer;background:var(--violet-l)" onclick="document.getElementById(\'ai-imp-file\').click()">'
     + '<i data-lucide="sparkles" style="width:36px;height:36px;color:var(--violet);margin-bottom:8px"></i>'
     + '<div style="font-size:13.5px;font-weight:600;color:var(--t9)">Clique ou arraste o documento</div>'
-    + '<div style="font-size:11.5px;color:var(--t6);margin-top:4px">PDF &middot; PNG &middot; JPG &middot; XLSX (ate 20 MB)</div>'
+    + '<div style="font-size:11.5px;color:var(--t6);margin-top:4px">PDF &middot; PNG &middot; JPG &middot; XLSX (até 20 MB)</div>'
     + '</div>'
-    + '<div style="margin-top:14px"><label style="font-size:11px;font-weight:600;color:var(--t7);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;display:block"><i data-lucide="message-square-plus" style="width:11px;height:11px;display:inline-block;vertical-align:-1px"></i> Instrucoes extras para a IA (opcional)</label><textarea id="ai-imp-instructions" placeholder="Ex: ignore linhas com diametro menor que 1 polegada / so importe juntas soldadas em 2026 / use o codigo da coluna B como matricula..." style="width:100%;padding:9px 12px;border:1px solid var(--t3);border-radius:8px;font-size:12px;font-family:inherit;background:var(--t0);color:var(--t9);min-height:60px;resize:vertical;outline:none"></textarea><div style="font-size:10.5px;color:var(--t5);margin-top:4px">A IA seguira estas instrucoes alem do prompt padrao. Util para ajustar conforme a particularidade da sua empresa.</div></div>'
+    + '<div style="margin-top:14px"><label style="font-size:11px;font-weight:600;color:var(--t7);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;display:block"><i data-lucide="message-square-plus" style="width:11px;height:11px;display:inline-block;vertical-align:-1px"></i> Instruções extras para a IA (opcional)</label><textarea id="ai-imp-instructions" placeholder="Ex: ignore linhas com diâmetro menor que 1 polegada / só importe juntas soldadas em 2026 / use o código da coluna B como matrícula..." style="width:100%;padding:9px 12px;border:1px solid var(--t3);border-radius:8px;font-size:12px;font-family:inherit;background:var(--t0);color:var(--t9);min-height:60px;resize:vertical;outline:none"></textarea><div style="font-size:10.5px;color:var(--t5);margin-top:4px">A IA seguirá estas instruções além do prompt padrão. Útil para ajustar conforme a particularidade da sua empresa.</div></div>'
     + '<input type="file" id="ai-imp-file" accept=".pdf,image/*,.xlsx,.xls" style="display:none" onchange="processAIImport(this,\''+view+'\')">'
     + '<div id="ai-imp-status" style="margin-top:14px"></div>'
     + '<div id="ai-imp-result" style="margin-top:14px;display:none"></div>'
@@ -1257,7 +1257,7 @@ function applyFieldLabels(view, container){
 
 function openFieldsCustomization(view){
   const schema = FIELD_SCHEMA[view];
-  if(!schema){ toast('View nao suporta customizacao ainda','warn'); return; }
+  if(!schema){ toast('View não suporta customização ainda','warn'); return; }
   const fields = getOrderedFields(view);
   const viewNames = {
     quality_joints:'Mapa de Juntas',
@@ -7590,16 +7590,16 @@ function genNR13PDF(){alert("Funcao em manutencao - sera restaurada em breve.");
 <!-- ═══════════ SCRIPTS DE BOOT (core) ═══════════ -->
 <!-- Tudo que NÃO está aqui é carregado sob demanda via module-loader.js -->
 <script src="assets/js/ui-confirm.js?v=2" defer></script>
-<script src="assets/js/excel-export.js?v=7" defer></script>
+<script src="assets/js/excel-export.js?v=8" defer></script>
 <script src="assets/js/security.js?v=1" defer></script>
 <!-- v9-fields.js e v9-app.js desativados: já estão duplicados inline acima -->
-<script src="custom_views.js?v=3" defer></script>
+<script src="custom_views.js?v=4" defer></script>
 <script src="assets/js/saas-modules.js?v=4" defer></script>
-<script src="assets/js/ia-chat.js?v=13" defer></script>
+<script src="assets/js/ia-chat.js?v=14" defer></script>
 <!-- analytics.js removido: Curva S + Físico-Financeiro agora vivem dentro do módulo Orçamento -->
 <!-- ai-router: wrapper único pra todas as chamadas de IA (auth+quota+audit+retry). Carrega antes do module-loader pra estar disponível pra todos os módulos lazy -->
 <script src="assets/js/ai-router.js?v=1" defer></script>
-<script src="assets/js/module-loader.js?v=19" defer></script>
+<script src="assets/js/module-loader.js?v=20" defer></script>
 <!-- planejamento.js — módulo de planejamento (Efetivo + Parâmetros HH + Cronograma + Gantt). Legacy planning.js arquivado em _archive_legacy/ -->
 <script src="assets/js/planejamento.js?v=3" defer></script>
 <script src="assets/js/sidebar-groups.js?v=28" defer></script>

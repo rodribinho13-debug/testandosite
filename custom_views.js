@@ -19,7 +19,7 @@ const FIELD_TYPES = [
   {v:'time',l:'Hora'},
   {v:'datetime-local',l:'Data e hora'},
   {v:'select',l:'Lista (select)'},
-  {v:'boolean',l:'Sim/Nao'},
+  {v:'boolean',l:'Sim/Não'},
   {v:'tag',l:'TAG (texto mono)'},
   {v:'currency',l:'Moeda BRL'}
 ];

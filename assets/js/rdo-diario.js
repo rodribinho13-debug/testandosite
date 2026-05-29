@@ -28,14 +28,14 @@ const ROLES_COMUNS = [
 
 const WEATHER = [
   ['bom','Bom'],['nublado','Nublado'],['chuvoso','Chuvoso'],
-  ['instavel','Instavel'],['impraticavel','Impraticavel']
+  ['instavel','Instável'],['impraticavel','Impraticável']
 ];
 
 const EVENT_TYPES = [
-  ['atraso','Atraso'],['interferencia','Interferencia'],
-  ['mudanca_projeto','Mudanca de projeto'],['acidente','Acidente / Incidente'],
-  ['visita','Visita tecnica'],['paralisacao','Paralisacao'],
-  ['nao_conformidade','Nao conformidade'],['outro','Outro']
+  ['atraso','Atraso'],['interferencia','Interferência'],
+  ['mudanca_projeto','Mudança de projeto'],['acidente','Acidente / Incidente'],
+  ['visita','Visita técnica'],['paralisacao','Paralisação'],
+  ['nao_conformidade','Não conformidade'],['outro','Outro']
 ];
 
 function labelOf(arr, val){ const r = arr.find(x => x[0] === val); return r ? r[1] : val; }

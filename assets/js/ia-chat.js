@@ -186,7 +186,7 @@ IA.open = function(){
     const files = Array.from(fileIn.files || []);
     for(const f of files){
       if(f.size > 6 * 1024 * 1024){ alert('Arquivo "'+f.name+'" tem mais de 6MB. Limite por arquivo: 6MB.'); continue; }
-      if(_pendingAttachments.length >= 5){ alert('Maximo 5 arquivos por mensagem.'); break; }
+      if(_pendingAttachments.length >= 5){ alert('Máximo 5 arquivos por mensagem.'); break; }
       try {
         const b64 = await new Promise((res, rej)=>{
           const r = new FileReader();

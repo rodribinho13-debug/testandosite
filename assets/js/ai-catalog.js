@@ -5,7 +5,7 @@ let _busy=false;
 
 async function smartClassifyABC(){
   if(_busy)return;_busy=true;
-  const sb=getSb();if(!sb){alert('Sem conexao.');return;}
+  const sb=getSb();if(!sb){alert('Sem conexão.');return;}
   const orgId=(w._org&&w._org.id)||null;if(!orgId){alert('Sem org.');_busy=false;return;}
   try{
     // 1. Pega uso real (PO history)

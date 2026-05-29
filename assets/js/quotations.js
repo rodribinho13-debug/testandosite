@@ -39,7 +39,7 @@ let _state = {
 
 async function open(){
   const sb = getSb();
-  if(!sb){ alert('Sistema ainda nao inicializado.'); return; }
+  if(!sb){ alert('Sistema ainda não inicializado.'); return; }
   const prev = d.getElementById('pia-compras-ov'); if(prev) prev.remove();
   const ov = d.createElement('div');
   ov.id = 'pia-compras-ov';
