@@ -155,4 +155,22 @@ Reportado pelo usuário: NR-13 → "Disciplina não reconhecida: eq_estatico"; A
 
 Resultado: as 8 views passam a abrir a IA correta e **extraem de fato** (mapeamento `VIEW_AI_PROMPT` + prompts no banco conferidos). Commit `2c12a53`. SW v9.3.23.
 
-*Atualizado em 2026-05-29 (SW v9.3.23).*
+---
+
+## FASE EXTRA — Auditoria insert×schema dos módulos restantes (limpa)
+
+Auditados os payloads de INSERT vs schema real dos módulos ainda não cobertos:
+
+| Módulo | Tabela(s) | Resultado |
+|---|---|---|
+| electrical-base.js (Base Elétrica) | electrical_cables | ✅ batem |
+| pcp.js | pcp_packages | ✅ batem |
+| hh-params.js | productivity_params | ✅ batem |
+| planejamento.js | crew_capacity, service_productivity, schedule_tasks | ✅ batem |
+| compositions.js | project_composition_lines, composition_org_overrides, org_custom_compositions | ✅ batem |
+| tdraw.js | technical_drawings (usa whitelist validKeys) | ✅ batem |
+| **rdo.js** (RDO principal) | daily_reports + workforce/activities/events/photos | ✅ **batem** (esse módulo já estava correto; o bug era no ai-rdo) |
+
+**Conclusão:** nenhum bug novo de insert×schema. O código está bem alinhado ao banco; os 4 bugs desta classe eram exatamente os já corrigidos (ai-rdo, Mapa de Juntas, IA de cotação, parecer de fornecedor).
+
+*Atualizado em 2026-05-29 (SW v9.3.28).*
