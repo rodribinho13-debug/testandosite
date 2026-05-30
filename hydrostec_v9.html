@@ -12,7 +12,7 @@
   if(location.protocol === 'https:' && !/localhost|127\.0\.0\.1/.test(location.hostname)){
     var meta = document.createElement('meta');
     meta.httpEquiv = 'Content-Security-Policy';
-    meta.content = "default-src 'self' https://*.supabase.co https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com https://fonts.googleapis.com https://fonts.gstatic.com data: blob:; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net; img-src 'self' data: blob: https:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://generativelanguage.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; frame-ancestors 'none'; object-src 'none'; base-uri 'self'";
+    meta.content = "default-src 'self' https://*.supabase.co https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com https://fonts.googleapis.com https://fonts.gstatic.com data: blob:; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net; img-src 'self' data: blob: https:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://generativelanguage.googleapis.com https://unpkg.com; font-src 'self' https://fonts.gstatic.com data:; object-src 'none'; base-uri 'self'";
     document.head.appendChild(meta);
   }
 })();
@@ -112,6 +112,7 @@ window.PIALibs = (function(){
 <script>if(location.protocol==="file:"){/* manifest CORS bloqueia em file:// */}else{document.write('<link rel="manifest" href="manifest.json">');}</script>
 <meta name="theme-color" content="#0A1628"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="default"/>
 <meta name="apple-mobile-web-app-title" content="PROJECT.IA"/>
 <link rel="apple-touch-icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><defs><linearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' stop-color='%2306B6D4'/><stop offset='100%25' stop-color='%237C3AED'/></linearGradient></defs><rect width='192' height='192' rx='40' fill='%230A1628'/><path d='M96 32 L160 70 L96 108 L32 70 Z' fill='%23fff'/><path d='M32 70 L96 108 L96 172 L32 134 Z' fill='%23ffffff88'/><path d='M160 70 L96 108 L96 172 L160 134 Z' fill='%23ffffff55'/><circle cx='96' cy='108' r='14' fill='url(%23g)'/></svg>"/>
