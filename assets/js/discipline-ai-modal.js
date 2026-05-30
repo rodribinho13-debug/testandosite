@@ -827,6 +827,15 @@ w.openDisciplineAIModal = function(disciplineCode){
       if(/mig|mag|gmaw/.test(s)) return 'mig_mag';
       if(/arame|fcaw/.test(s)) return 'arame_tubular';
       return 'outro';
+    },
+    // Enum result (electrical_grounding + painting_inspections): aprovado/reprovado/aprovado_com_ressalva
+    result: (v) => {
+      const s = _strip(v);
+      if(!s) return null;
+      if(/ressalva|condicional|restri|reserva/.test(s)) return 'aprovado_com_ressalva';
+      if(/reprov|rejeit|fail|nok|nao.?conforme|inconforme/.test(s)) return 'reprovado';
+      if(/aprov|^ok$|conforme|pass|liberad|atende/.test(s)) return 'aprovado';
+      return null;
     }
   };
   function normalizeValue(col, val){
@@ -1184,9 +1193,10 @@ w.openDisciplineAIModal = function(disciplineCode){
         if(!badCol){
           m = msg.match(/violates check constraint\s+["']?(\w+)["']?/i);
           if(m && m[1]){
-            const cm = m[1].match(/_([a-z][a-z0-9_]*?)_check$/i);
-            if(cm && cm[1] && payload[cm[1]] !== undefined){
-              const colName = cm[1];
+            // Resolve a coluna casando com as chaves do payload (robusto a tabelas com '_' no nome)
+            let colName = Object.keys(payload).filter(k => m[1].endsWith('_'+k+'_check') || m[1].endsWith(k+'_check')).sort((a,b)=>b.length-a.length)[0] || null;
+            if(!colName){ const cm = m[1].match(/_([a-z][a-z0-9_]*?)_check$/i); if(cm && cm[1] && payload[cm[1]] !== undefined) colName = cm[1]; }
+            if(colName && payload[colName] !== undefined){
               const orig = payload[colName];
               if(typeof orig === 'string' && orig.length){
                 const norm = orig.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim().replace(/\s+/g,'_');
@@ -1419,9 +1429,9 @@ w.openDisciplineAIModal = function(disciplineCode){
           m = msg.match(/violates check constraint\s+["']?(\w+)["']?/i);
           if(m && m[1]){
             // Extrai o nome da coluna do nome da constraint (ex: civil_concrete_pours_result_check → result)
-            const cm = m[1].match(/_([a-z][a-z0-9_]*?)_check$/i);
-            if(cm && cm[1] && payload[cm[1]] !== undefined){
-              const colName = cm[1];
+            let colName = Object.keys(payload).filter(k => m[1].endsWith('_'+k+'_check') || m[1].endsWith(k+'_check')).sort((a,b)=>b.length-a.length)[0] || null;
+            if(!colName){ const cm = m[1].match(/_([a-z][a-z0-9_]*?)_check$/i); if(cm && cm[1] && payload[cm[1]] !== undefined) colName = cm[1]; }
+            if(colName && payload[colName] !== undefined){
               const orig = payload[colName];
               if(typeof orig === 'string' && orig.length){
                 const norm = orig.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim().replace(/\s+/g,'_');
