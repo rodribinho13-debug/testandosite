@@ -4,7 +4,7 @@
  * pagina presa em "loading". Para garantir confiabilidade, este SW NAO intercepta
  * mais nenhuma requisicao (o navegador trata tudo nativamente, com seu HTTP cache)
  * e LIMPA todos os caches antigos ao ativar. */
-const V = 'projectia-v9.3.30';
+const V = 'projectia-v9.3.31';
 
 self.addEventListener('install', e => {
   self.skipWaiting();

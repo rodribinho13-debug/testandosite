@@ -837,6 +837,21 @@ w.openDisciplineAIModal = function(disciplineCode){
     return out; // pode ser null se não conseguiu normalizar — daí o filtro abaixo descarta
   }
 
+  // Enum element_type da civil_concrete_pours (CHECK: fundacao/pilar/viga/laje/radier/muro/outros).
+  // A IA costuma retornar 'sapata', 'bloco', 'baldrame' etc. — mapeia pro conjunto válido.
+  // Escopado a essa tabela pra NÃO afetar civil_concrete_elements (que tem taxonomia própria).
+  function _normPourElementType(v){
+    const s = _strip(v);
+    if(!s) return 'outros';
+    if(/sapat|bloco|baldram|estaca|tubul[ãa]?o|funda|coroament|alicerce|broca|fust/.test(s)) return 'fundacao';
+    if(/pilar|coluna|column|pillar/.test(s)) return 'pilar';
+    if(/viga|beam|cinta|verga|baldra/.test(s)) return 'viga';
+    if(/laje|slab|piso|forro/.test(s)) return 'laje';
+    if(/radier|raft/.test(s)) return 'radier';
+    if(/muro|arrimo|conten|parede|wall/.test(s)) return 'muro';
+    return 'outros';
+  }
+
   function normalizeKey(k){
     return String(k||'').toLowerCase().trim()
       .normalize('NFD').replace(/[̀-ͯ]/g,'')   // remove acentos
@@ -1360,6 +1375,11 @@ w.openDisciplineAIModal = function(disciplineCode){
         } else {
           kept[col] = norm;
         }
+      }
+
+      // 2.0b) Enum element_type da civil_concrete_pours: garante valor válido (sapata→fundacao, etc.)
+      if(_docTypeMeta.table === 'civil_concrete_pours' && validCols && validCols.has('element_type')){
+        kept.element_type = _normPourElementType(kept.element_type);
       }
 
       // 2.1) PRESERVA campos descartados em meta/notes (se a tabela suporta)
