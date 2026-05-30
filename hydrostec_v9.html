@@ -22,6 +22,31 @@
 <meta name="robots" content="noindex,nofollow"/>
 <title>PROJECT.IA</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+/* AUTO-REPARO: se o supabase-js nao carregou (ex.: Service Worker servindo cache
+   corrompido -> "Cannot access 'sb' before initialization" / pagina presa em loading),
+   desregistra o SW, limpa caches e recarrega UMA vez (trava em sessionStorage). */
+(function(){
+  try {
+    if (typeof supabase === 'undefined' || !supabase || !supabase.createClient) {
+      if (!sessionStorage.getItem('pia_sw_recover')) {
+        sessionStorage.setItem('pia_sw_recover','1');
+        var done = function(){ try{ location.reload(); }catch(_){ } };
+        var p = [];
+        if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) {
+          p.push(navigator.serviceWorker.getRegistrations().then(function(rs){ return Promise.all(rs.map(function(r){ return r.unregister(); })); }).catch(function(){}));
+        }
+        if (window.caches && caches.keys) {
+          p.push(caches.keys().then(function(ks){ return Promise.all(ks.map(function(k){ return caches.delete(k); })); }).catch(function(){}));
+        }
+        (p.length ? Promise.all(p) : Promise.resolve()).then(done, done);
+      }
+    } else {
+      try { sessionStorage.removeItem('pia_sw_recover'); } catch(_){}
+    }
+  } catch(_){}
+})();
+</script>
 <!-- Libs pesadas (XLSX/PDF/Chart) NÃO carregam no boot. São carregadas 100% sob demanda
      via window.PIALibs.ensure(nome) no primeiro uso (export/import/dashboard/PDF). -->
 <script>
